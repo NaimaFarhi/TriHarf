@@ -9,10 +9,13 @@ public class TestDAO {
         CategorieDAO catDAO = new CategorieDAO();
         ValidationService validator = new ValidationService();
 
-        // Test Categorie
-        Categorie cat = new Categorie("Animal");
-        catDAO.save(cat);
-        System.out.println("✅ Catégorie sauvegardée: " + cat.getId());
+        // Check if exists, else create
+        Categorie cat = catDAO.findByNom("Animal");
+        if (cat == null) {
+            cat = new Categorie("Animal");
+            cat = catDAO.save(cat);
+        }
+        System.out.println("✅ Catégorie: " + cat.getId());
 
         // Test Validation
         var result = validator.validateMot("Apple", cat, 'A');
