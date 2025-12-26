@@ -19,12 +19,12 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </Button>
-            <Label text="⚙ Configuration de la Partie" textFill="WHITE">
+            <Label alignment="CENTER" contentDisplay="CENTER" text="⚙ Paramètres" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="24.0" />
                </font>
                <HBox.margin>
-                  <Insets left="50.0" />
+                  <Insets left="140.0" />
                </HBox.margin>
             </Label>
          </children>
@@ -50,27 +50,70 @@
       </VBox>
       <VBox prefHeight="68.0" prefWidth="560.0" style="-fx-background-color: white;">
          <children>
-            <Label text=" Niveau:">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-            </Label>
-            <Slider majorTickUnit="1.0" max="2.0" minorTickCount="0" prefHeight="37.0" prefWidth="560.0" showTickLabels="true" showTickMarks="true" value="1.0" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="👤">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+                  <Label text="Pseudo:">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <TextField promptText="Entrez votre pseudo...">
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+            </TextField>
          </children>
       </VBox>
-      <VBox prefHeight="84.0" prefWidth="560.0" style="-fx-background-color: white;">
+      <VBox prefHeight="84.0" prefWidth="560.0" style="-fx-background-color: white;" spacing="10.0">
          <children>
-            <Label style="-fx-font-weight: bold;" text="Catégories sélectionnées:">
-               <font>
-                  <Font size="24.0" />
-               </font>
-            </Label>
-            <FlowPane prefHeight="85.0" prefWidth="560.0">
-               <opaqueInsets>
-                  <Insets bottom="10.0" top="10.0" />
-               </opaqueInsets>
-            </FlowPane>
-         </children></VBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="🔊">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+                  <Label style="-fx-font-weight: bold;" text="Son:">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="15.0" prefHeight="40.0">
+               <children>
+                  <CheckBox text="Activer le son" selected="true">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </CheckBox>
+                  <Slider min="0" max="100" value="70" showTickLabels="false" showTickMarks="false" prefWidth="250">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Slider>
+                  <Label text="70%">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets left="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
       <Button mnemonicParsing="false" style="-fx-background-color: #27ae60; -fx-font-weight: bold;" text="▶ JOUER" textFill="WHITE">
          <VBox.margin>
             <Insets />
