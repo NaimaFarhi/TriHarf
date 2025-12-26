@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="500.0" spacing="0.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <!-- En-tête violet -->
+        <HBox alignment="CENTER" prefHeight="70.0" prefWidth="500.0" spacing="80.0" style="-fx-background-color: linear-gradient(to right, #9b59b6, #8e44ad); -fx-padding: 15;">
+            <children>
+                <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                    <children>
+                        <Label text="⏱">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                        <Label style="-fx-text-fill: #8e44ad; -fx-font-weight: bold;" text="02:45">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+
+                <Label style="-fx-background-color: white; -fx-background-radius: 50; -fx-padding: 10;" text="👤">
+                    <font>
+                        <Font size="32.0" />
+                    </font>
+                </Label>
+
+                <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.3); -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                    <children>
+                        <Label text="🏆">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                        <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="650 pts">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <!-- Corps avec les catégories -->
+        <VBox spacing="12.0" style="-fx-background-color: #f5f5f5; -fx-padding: 20;">
+            <children>
+                <!-- Pays -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Pays">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez un pays..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+                <!-- Animal -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Animal">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez un animal..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+                <!-- Fruit -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Fruit">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez un fruit..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+                <!-- Métier -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Métier">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez un métier..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+                <!-- Film -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Film">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez un film..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+                <!-- Prénom -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Prénom">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez un prénom..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+                <!-- Ville -->
+                <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.3, 0, 2);">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label>
+                                    <font>
+                                        <Font size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label style="-fx-font-weight: bold;" text="Ville">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField prefWidth="300.0" promptText="Entrez une ville..." style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </TextField>
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+
+        <!-- Bouton Terminer -->
+        <Button mnemonicParsing="false" prefHeight="50.0" prefWidth="460.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 10;" text="📋 TERMINER">
+            <VBox.margin>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="15.0" />
+            </VBox.margin>
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+        </Button>
+    </children>
+</VBox>
