@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="5.0" style="-fx-background-color: #80808047; -fx-padding: 20;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+         <children>
+            <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="←" textFill="WHITE">
+               <font>
+                  <Font name="System Bold Italic" size="24.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
+            <Label alignment="CENTER" contentDisplay="CENTER" text="⚙ Paramètres" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="140.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+      </HBox>
+      <VBox prefHeight="69.0" prefWidth="560.0" style="-fx-background-color: white;">
+         <children>
+            <Label text=" Langue:">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="33.0" prefWidth="560.0" spacing="130.0">
+               <children>
+                  <RadioButton mnemonicParsing="false" text="Français">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="langueGroup" />
+                     </toggleGroup></RadioButton>
+                  <RadioButton mnemonicParsing="false" text=" العربية" toggleGroup="$langueGroup" />
+                  <RadioButton mnemonicParsing="false" text="English" toggleGroup="$langueGroup" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <VBox prefHeight="68.0" prefWidth="560.0" style="-fx-background-color: white;">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="👤">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+                  <Label text="Pseudo:">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <TextField promptText="Entrez votre pseudo...">
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+            </TextField>
+         </children>
+      </VBox>
+      <VBox prefHeight="84.0" prefWidth="560.0" style="-fx-background-color: white;" spacing="10.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="🔊">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+                  <Label style="-fx-font-weight: bold;" text="Son:">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="15.0" prefHeight="40.0">
+               <children>
+                  <CheckBox text="Activer le son" selected="true">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </CheckBox>
+                  <Slider min="0" max="100" value="70" showTickLabels="false" showTickMarks="false" prefWidth="250">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Slider>
+                  <Label text="70%">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets left="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+      <Button mnemonicParsing="false" style="-fx-background-color: #27ae60; -fx-font-weight: bold;" text="▶ JOUER" textFill="WHITE">
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </Button>
+   </children>
+</VBox>
