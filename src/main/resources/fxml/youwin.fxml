@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="600.0" prefWidth="600.0" spacing="0.0" style="-fx-background-color: #34495e;"
+      xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <VBox alignment="TOP_CENTER" prefHeight="450.0" prefWidth="500.0" spacing="15.0" style="-fx-background-color: #2c3e50;">
+            <children>
+                <!-- En-tête orange "VICTOIRE" -->
+                <HBox alignment="CENTER" prefHeight="70.0" prefWidth="500.0" style="-fx-background-color: #e67e22; -fx-padding: 15;">
+                    <children>
+                        <Label style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 28px;" text="VICTOIRE" />
+                    </children>
+                </HBox>
+
+                <!-- Section score -->
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="500.0" spacing="0.0">
+                    <children>
+                        <VBox alignment="CENTER" prefWidth="500.0" spacing="5.0" style="-fx-background-color: #27ae60; -fx-padding: 20;">
+                            <children>
+                                <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="TOI" />
+                                <Label style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 48px;" text="850" />
+                                <Label style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 13px;" text="points" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <!-- Détails du score -->
+                <VBox spacing="0.0" style="-fx-background-color: #34495e; -fx-padding: 25 30 25 30;">
+                    <children>
+                        <Label style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-padding: 0 0 15 0;" text="Detail de ton score" />
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 3 0 3 0;">
+                            <children>
+                                <Label style="-fx-text-fill: #f39c12; -fx-font-size: 16px;" text="•" />
+                                <Label style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 13px;" text="Mots valides: 4/5" />
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 3 0 3 0;">
+                            <children>
+                                <Label style="-fx-text-fill: #f39c12; -fx-font-size: 16px;" text="•" />
+                                <Label style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 13px;" text="Bonus originalite: +150" />
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 3 0 3 0;">
+                            <children>
+                                <Label style="-fx-text-fill: #f39c12; -fx-font-size: 16px;" text="•" />
+                                <Label style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 13px;" text="Bonus rapidite: +100" />
+                            </children>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 3 0 3 0;">
+                            <children>
+                                <Label style="-fx-text-fill: #f39c12; -fx-font-size: 16px;" text="•" />
+                                <Label style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 13px;" text="Bonus variete: +50" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- Boutons en bas -->
+                <HBox alignment="CENTER" prefHeight="90.0" spacing="15.0" style="-fx-background-color: #2c3e50; -fx-padding: 20;">
+                    <children>
+                        <Button fx:id="btnRejouer" onAction="#handleRejouer" mnemonicParsing="false" prefHeight="42.0" prefWidth="130.0"
+                                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 5; -fx-cursor: hand;"
+                                text="REJOUER">
+                            <cursor>
+                                <Cursor fx:constant="HAND" />
+                            </cursor>
+                        </Button>
+
+                        <Button fx:id="btnMenu" onAction="#handleMenu" mnemonicParsing="false" prefHeight="42.0" prefWidth="130.0"
+                                style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 5; -fx-cursor: hand;"
+                                text="MENU">
+                            <cursor>
+                                <Cursor fx:constant="HAND" />
+                            </cursor>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>

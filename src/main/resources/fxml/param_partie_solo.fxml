@@ -7,11 +7,26 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" spacing="5.0" style="-fx-background-color: #80808047; -fx-padding: 20;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+      minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="500.0" prefWidth="600.0"
+      spacing="5.0"
+      style="-fx-background-color: #80808047; -fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1">
+
     <children>
-        <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+
+        <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0"
+              style="-fx-background-color: #2c3e50; -fx-padding: 15;">
             <children>
-                <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="←" textFill="WHITE">
+
+                <!-- bouton retour -->
+                <Button mnemonicParsing="false"
+                        fx:id="btnRetour"
+                        onAction="#handleRetour"
+                        style="-fx-background-color: transparent;"
+                        text="←" textFill="WHITE">
                     <font>
                         <Font name="System Bold Italic" size="24.0" />
                     </font>
@@ -19,7 +34,9 @@
                         <Cursor fx:constant="HAND" />
                     </cursor>
                 </Button>
-                <Label alignment="CENTER" contentDisplay="CENTER" text="⚙ Configuration de la partie" textFill="WHITE">
+
+                <Label alignment="CENTER" contentDisplay="CENTER"
+                       text="⚙ Configuration de la partie" textFill="WHITE">
                     <font>
                         <Font name="System Bold" size="24.0" />
                     </font>
@@ -27,51 +44,49 @@
                         <Insets left="80.0" />
                     </HBox.margin>
                 </Label>
+
             </children>
         </HBox>
 
         <!-- VBox Niveau de difficulté -->
-        <VBox prefHeight="120.0" prefWidth="560.0" style="-fx-background-color: white;" spacing="10.0">
+        <VBox prefHeight="120.0" prefWidth="560.0"
+              style="-fx-background-color: white;"
+              spacing="10.0">
             <padding>
                 <Insets top="10.0" bottom="10.0" left="15.0" right="15.0" />
             </padding>
+
             <children>
+
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
                         <Label text="🎯">
-                            <font>
-                                <Font size="22.0" />
-                            </font>
+                            <font><Font size="22.0" /></font>
                         </Label>
                         <Label text="Niveau de difficulté:">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
+                            <font><Font name="System Bold" size="18.0" /></font>
                         </Label>
                     </children>
                 </HBox>
 
                 <VBox spacing="8.0">
                     <children>
+
                         <HBox alignment="CENTER_LEFT" spacing="20.0">
                             <children>
                                 <Label text="Facile" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
+                                    <font><Font size="14.0" /></font>
                                 </Label>
+
                                 <Label text="Moyen" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
+                                    <font><Font size="14.0" /></font>
                                     <HBox.margin>
                                         <Insets left="140.0" />
                                     </HBox.margin>
                                 </Label>
+
                                 <Label text="Difficile" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
+                                    <font><Font size="14.0" /></font>
                                     <HBox.margin>
                                         <Insets left="110.0" />
                                     </HBox.margin>
@@ -79,33 +94,45 @@
                             </children>
                         </HBox>
 
-                        <Slider min="0" max="2" value="1" showTickLabels="false" showTickMarks="true" majorTickUnit="1" minorTickCount="0" snapToTicks="true" blockIncrement="1" prefWidth="530.0">
+                        <!-- slider -->
+                        <Slider min="0" max="2" value="1"
+                                fx:id="sliderDifficulte"
+                                showTickLabels="false"
+                                showTickMarks="true"
+                                majorTickUnit="1"
+                                minorTickCount="0"
+                                snapToTicks="true"
+                                blockIncrement="1"
+                                prefWidth="530.0"
+                                onMouseReleased="#handleDifficulte">
                             <cursor>
                                 <Cursor fx:constant="HAND" />
                             </cursor>
                         </Slider>
+
                     </children>
                 </VBox>
+
             </children>
         </VBox>
 
         <!-- VBox Catégories -->
-        <VBox prefHeight="200.0" prefWidth="560.0" style="-fx-background-color: white;" spacing="10.0">
+        <VBox prefHeight="200.0" prefWidth="560.0"
+              style="-fx-background-color: white;"
+              spacing="10.0">
             <padding>
                 <Insets top="10.0" bottom="10.0" left="15.0" right="15.0" />
             </padding>
+
             <children>
+
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
                         <Label text="📚">
-                            <font>
-                                <Font size="22.0" />
-                            </font>
+                            <font><Font size="22.0" /></font>
                         </Label>
                         <Label text="Catégories:">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
+                            <font><Font name="System Bold" size="18.0" /></font>
                         </Label>
                     </children>
                 </HBox>
@@ -114,75 +141,28 @@
                     <VBox.margin>
                         <Insets left="10.0" />
                     </VBox.margin>
+
                     <children>
-                        <CheckBox text="Prénoms" selected="true">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
-
-                        <CheckBox text="Pays" selected="true">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
-
-                        <CheckBox text="Animaux" selected="true">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
-
-                        <CheckBox text="Métiers" selected="false">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
-
-                        <CheckBox text="Fruits et légumes" selected="false">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
-
-                        <CheckBox text="Villes" selected="false">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
-
-                        <CheckBox text="Marques" selected="false">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </CheckBox>
+                        <CheckBox fx:id="cbPrenoms" text="Prénoms" selected="true"/>
+                        <CheckBox fx:id="cbPays" text="Pays" selected="true"/>
+                        <CheckBox fx:id="cbAnimaux" text="Animaux" selected="true"/>
+                        <CheckBox fx:id="cbMetiers" text="Métiers"/>
+                        <CheckBox fx:id="cbFruits" text="Fruits et légumes"/>
+                        <CheckBox fx:id="cbVilles" text="Villes"/>
+                        <CheckBox fx:id="cbMarques" text="Marques"/>
                     </children>
                 </VBox>
+
             </children>
         </VBox>
 
-        <Button mnemonicParsing="false" style="-fx-background-color: #27ae60; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12;" text="▶ COMMENCER LA PARTIE" textFill="WHITE">
+        <!-- bouton commencer -->
+        <Button mnemonicParsing="false"
+                fx:id="btnCommencer"
+                onAction="#handleCommencer"
+                style="-fx-background-color: #27ae60; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12;"
+                text="▶ COMMENCER LA PARTIE"
+                textFill="WHITE">
             <VBox.margin>
                 <Insets top="10.0" />
             </VBox.margin>
@@ -190,5 +170,6 @@
                 <Cursor fx:constant="HAND" />
             </cursor>
         </Button>
+
     </children>
 </VBox>
