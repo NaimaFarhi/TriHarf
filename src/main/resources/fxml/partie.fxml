@@ -26,7 +26,7 @@
                     </children>
                 </HBox>
 
-                <Label style="-fx-background-color: white; -fx-background-radius: 50; -fx-padding: 10;" text="👤">
+                <Label style="-fx-background-color: white; -fx-background-radius: 50; -fx-padding: 10 20 10 20; -fx-text-fill: #8e44ad; -fx-font-weight: bold;" text="A">
                     <font>
                         <Font size="32.0" />
                     </font>
