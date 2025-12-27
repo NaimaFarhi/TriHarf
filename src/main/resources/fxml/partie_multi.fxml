@@ -13,51 +13,66 @@
 
     <!-- En-tête violet -->
     <top>
-        <HBox alignment="CENTER" prefHeight="70.0" style="-fx-background-color: linear-gradient(to right, #9b59b6, #8e44ad); -fx-padding: 15;" spacing="60.0">
+        <VBox spacing="0">
             <children>
-                <Button style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" text="←">
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </Button>
-
-                <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                <HBox alignment="CENTER" prefHeight="70.0" style="-fx-background-color: linear-gradient(to right, #9b59b6, #8e44ad); -fx-padding: 15;" spacing="60.0">
                     <children>
-                        <Label text="⏱">
+                        <Button style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" text="←">
+                            <cursor>
+                                <Cursor fx:constant="HAND" />
+                            </cursor>
+                        </Button>
+
+                        <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                            <children>
+                                <Label text="Temps:" style="-fx-text-fill: #8e44ad; -fx-font-weight: bold;">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label text="00:56" style="-fx-text-fill: #8e44ad; -fx-font-weight: bold;">
+                                    <font>
+                                        <Font size="18.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
+
+                        <Label text="PARTIE MULTIJOUEURS" style="-fx-text-fill: white; -fx-font-weight: bold;">
                             <font>
-                                <Font size="18.0" />
+                                <Font size="22.0" />
                             </font>
                         </Label>
-                        <Label text="00:56" style="-fx-text-fill: #8e44ad; -fx-font-weight: bold;">
-                            <font>
-                                <Font size="18.0" />
-                            </font>
-                        </Label>
+
+                        <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.3); -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                            <children>
+                                <Label text="4 joueurs" style="-fx-text-fill: white; -fx-font-weight: bold;">
+                                    <font>
+                                        <Font size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </HBox>
                     </children>
                 </HBox>
 
-                <Label text="🎮 PARTIE MULTIJOUEURS" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                    <font>
-                        <Font size="22.0" />
-                    </font>
-                </Label>
-
-                <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.3); -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                <!-- Bande avec la lettre -->
+                <HBox alignment="CENTER" prefHeight="80.0" style="-fx-background-color: linear-gradient(to right, #8e44ad, #9b59b6); -fx-padding: 15;">
                     <children>
-                        <Label text="👥">
-                            <font>
-                                <Font size="18.0" />
-                            </font>
-                        </Label>
-                        <Label text="4 joueurs" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                            <font>
-                                <Font size="16.0" />
-                            </font>
-                        </Label>
+                        <VBox alignment="CENTER" spacing="5">
+                            <children>
+                                <Label text="Lettre à trouver" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px;" />
+                                <Label text="A" style="-fx-background-color: white; -fx-background-radius: 50; -fx-padding: 15 25 15 25; -fx-text-fill: #8e44ad; -fx-font-weight: bold;">
+                                    <font>
+                                        <Font size="42.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
             </children>
-        </HBox>
+        </VBox>
     </top>
 
     <!-- Contenu principal -->
@@ -70,7 +85,7 @@
                         <!-- En-tête du tableau -->
                         <HBox spacing="0.0" style="-fx-background-color: #34495e; -fx-padding: 10;" alignment="CENTER_LEFT">
                             <children>
-                                <Label text="🏅" prefWidth="50.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
+                                <Label text="RANG" prefWidth="50.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
@@ -80,41 +95,13 @@
                                         <Font size="14.0" />
                                     </font>
                                 </Label>
-                                <Label text="🌍" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label text="🐾" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label text="🍎" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label text="👔" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label text="🎬" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label text="👶" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
-                                <Label text="🏙️" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                                    <font>
-                                        <Font size="14.0" />
-                                    </font>
-                                </Label>
+                                <Label text="Pays" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+                                <Label text="Animal" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+                                <Label text="Fruit" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+                                <Label text="Métier" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+                                <Label text="Film" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+                                <Label text="Prénom" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+                                <Label text="Ville" prefWidth="60.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
                                 <Label text="Score" prefWidth="80.0" alignment="CENTER" style="-fx-text-fill: white; -fx-font-weight: bold;">
                                     <font>
                                         <Font size="14.0" />
@@ -219,7 +206,7 @@
                         <!-- En-tête du chat -->
                         <HBox alignment="CENTER" style="-fx-background-color: #34495e; -fx-padding: 12; -fx-background-radius: 12 12 0 0;">
                             <children>
-                                <Label text="💬 CHAT" style="-fx-text-fill: white; -fx-font-weight: bold;">
+                                <Label text="CHAT" style="-fx-text-fill: white; -fx-font-weight: bold;">
                                     <font>
                                         <Font size="16.0" />
                                     </font>
@@ -260,7 +247,7 @@
                                         <VBox spacing="3.0">
                                             <children>
                                                 <Label text="Karim99" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 11px;" />
-                                                <Label text="C'est parti! 🚀" wrapText="true" style="-fx-background-color: white; -fx-padding: 8; -fx-background-radius: 8; -fx-text-fill: #2c3e50;">
+                                                <Label text="C'est parti!" wrapText="true" style="-fx-background-color: white; -fx-padding: 8; -fx-background-radius: 8; -fx-text-fill: #2c3e50;">
                                                     <font>
                                                         <Font size="12.0" />
                                                     </font>
@@ -280,7 +267,7 @@
                                         <Font size="12.0" />
                                     </font>
                                 </TextField>
-                                <Button text="📤" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 12 8 12; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                <Button text="Envoyer" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-font-weight: bold;">
                                     <cursor>
                                         <Cursor fx:constant="HAND" />
                                     </cursor>

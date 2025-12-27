@@ -31,9 +31,9 @@
         </HBox>
 
         <!-- VBox Lien de la partie -->
-        <VBox prefHeight="100.0" prefWidth="560.0" style="-fx-background-color: white;" spacing="10.0">
+        <VBox prefHeight="100.0" prefWidth="560.0" spacing="10.0" style="-fx-background-color: white;">
             <padding>
-                <Insets top="10.0" bottom="10.0" left="15.0" right="15.0" />
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
             </padding>
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -51,15 +51,15 @@
                     </children>
                 </HBox>
 
-                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <TextField editable="false" text="https://baccalaureat.game/partie/ABC123XYZ" prefWidth="420.0" style="-fx-background-color: #f0f0f0;">
+                        <TextField editable="false" prefWidth="420.0" style="-fx-background-color: #f0f0f0;" text="https://baccalaureat.game/partie/ABC123XYZ">
                             <font>
                                 <Font size="13.0" />
                             </font>
                         </TextField>
 
-                        <Button text="📋 Copier" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" prefWidth="100.0">
+                        <Button prefWidth="100.0" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text=" Copier">
                             <cursor>
                                 <Cursor fx:constant="HAND" />
                             </cursor>
@@ -73,14 +73,14 @@
 
 
         <!-- VBox Catégories -->
-        <VBox prefHeight="200.0" prefWidth="560.0" style="-fx-background-color: white;" spacing="10.0">
+        <VBox prefHeight="200.0" prefWidth="560.0" spacing="10.0" style="-fx-background-color: white;">
             <padding>
-                <Insets top="10.0" bottom="10.0" left="15.0" right="15.0" />
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
             </padding>
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <Label text="📚">
+                        <Label>
                             <font>
                                 <Font size="22.0" />
                             </font>
@@ -98,7 +98,7 @@
                         <Insets left="10.0" />
                     </VBox.margin>
                     <children>
-                        <CheckBox text="Prénoms" selected="true">
+                        <CheckBox selected="true" text="Prénoms">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -107,7 +107,7 @@
                             </cursor>
                         </CheckBox>
 
-                        <CheckBox text="Pays" selected="true">
+                        <CheckBox selected="true" text="Pays">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -116,7 +116,7 @@
                             </cursor>
                         </CheckBox>
 
-                        <CheckBox text="Animaux" selected="true">
+                        <CheckBox selected="true" text="Animaux">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -125,7 +125,7 @@
                             </cursor>
                         </CheckBox>
 
-                        <CheckBox text="Métiers" selected="false">
+                        <CheckBox selected="false" text="Métiers">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -134,7 +134,7 @@
                             </cursor>
                         </CheckBox>
 
-                        <CheckBox text="Fruits et légumes" selected="false">
+                        <CheckBox selected="false" text="Fruits et légumes">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -143,7 +143,7 @@
                             </cursor>
                         </CheckBox>
 
-                        <CheckBox text="Villes" selected="false">
+                        <CheckBox selected="false" text="Villes">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -152,7 +152,7 @@
                             </cursor>
                         </CheckBox>
 
-                        <CheckBox text="Marques" selected="false">
+                        <CheckBox selected="false" text="Marques">
                             <font>
                                 <Font size="14.0" />
                             </font>
