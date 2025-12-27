@@ -20,6 +20,9 @@ public class Categorie {
     @Column(nullable = false)
     private Boolean actif = true;
 
+    @Column(length = 50)
+    private String langue;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -35,6 +38,11 @@ public class Categorie {
         this.nom = nom;
     }
 
+    public Categorie(String nom, String langue) {
+        this.nom = nom;
+        this.langue = langue;
+    }
+
     // Getters et Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -48,10 +56,13 @@ public class Categorie {
     public Boolean getActif() { return actif; }
     public void setActif(Boolean actif) { this.actif = actif; }
 
+    public String getLangue() { return langue; }
+    public void setLangue(String langue) { this.langue = langue; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     @Override
     public String toString() {
-        return nom;
+        return nom + " (" + langue + ")";
     }
 }
