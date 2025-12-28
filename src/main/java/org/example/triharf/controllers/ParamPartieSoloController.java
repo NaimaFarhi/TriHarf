@@ -7,15 +7,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.dao.CategorieDAO;
 import org.example.triharf.models.Categorie;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Contrôleur pour les paramètres de la partie Solo (param_partie_solo.fxml)
@@ -36,9 +34,9 @@ public class ParamPartieSoloController {
 
     private List<String> categoriesSelectionnees = new ArrayList<>();
     private int niveauDifficulte = 1;
-    private CategorieDAO categorieDAO = new CategorieDAO();
+    private final CategorieDAO categorieDAO = new CategorieDAO();
     private List<Categorie> toutesLesCategories = new ArrayList<>();
-    private Map<String, CheckBox> checkboxMap = new HashMap<>();
+    private final Map<String, CheckBox> checkboxMap = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -50,12 +48,11 @@ public class ParamPartieSoloController {
             });
         }
 
-        // Charger TOUTES les catégories depuis le DAO
+        // Charger toutes les catégories depuis le DAO
         toutesLesCategories = categorieDAO.getAll();
-
         System.out.println("Catégories chargées depuis DAO : " + toutesLesCategories.size());
 
-        // Créer dynamiquement les checkboxes pour chaque catégorie
+        // Créer dynamiquement les checkboxes
         chargerCategoriesDynamiquement();
     }
 
@@ -68,25 +65,33 @@ public class ParamPartieSoloController {
             return;
         }
 
-        // Effacer les anciens contrôles
         containerCategories.getChildren().clear();
+        checkboxMap.clear();
 
-        // Créer une checkbox pour chaque catégorie
         for (Categorie cat : toutesLesCategories) {
             CheckBox checkbox = new CheckBox(cat.getNom());
             checkbox.setStyle("-fx-font-size: 14;");
-
-            // Ajouter un listener à chaque checkbox
             checkbox.selectedProperty().addListener((obs, oldVal, newVal) -> mettreAJourCategories());
-
-            // Ajouter à la map pour retrouver la checkbox par nom
             checkboxMap.put(cat.getNom(), checkbox);
-
-            // Ajouter au conteneur
             containerCategories.getChildren().add(checkbox);
 
             System.out.println("Checkbox créée : " + cat.getNom());
         }
+    }
+
+    /**
+     * Met à jour la liste des catégories sélectionnées
+     */
+    private void mettreAJourCategories() {
+        categoriesSelectionnees.clear();
+        for (Categorie cat : toutesLesCategories) {
+            CheckBox checkbox = checkboxMap.get(cat.getNom());
+            if (checkbox != null && checkbox.isSelected()) {
+                categoriesSelectionnees.add(cat.getNom());
+            }
+        }
+
+        System.out.println("Catégories sélectionnées : " + categoriesSelectionnees);
     }
 
     @FXML
@@ -99,40 +104,59 @@ public class ParamPartieSoloController {
         commencerPartie();
     }
 
+    /**
+     * Méthode appelée par le FXML lorsque le slider est relâché
+     */
     @FXML
-    public void handleDifficulte() {
-        // Cette méthode est appelée par le slider
+    private void handleDifficulte(MouseEvent event) {
         if (sliderDifficulte != null) {
             niveauDifficulte = (int) sliderDifficulte.getValue();
-            System.out.println("Niveau de difficulté : " + getDifficulteLabel());
+            System.out.println("Difficulté (clic) : " + getDifficulteLabel());
         }
     }
 
     /**
-     * Met à jour la liste des catégories sélectionnées
+     * Commence la partie solo après validation des catégories
      */
-    private void mettreAJourCategories() {
-        categoriesSelectionnees.clear();
-
-        // Parcourir toutes les catégories et ajouter les cochées
-        for (Categorie cat : toutesLesCategories) {
-            CheckBox checkbox = checkboxMap.get(cat.getNom());
-            if (checkbox != null && checkbox.isSelected()) {
-                categoriesSelectionnees.add(cat.getNom());
-            }
-        }
-
-        System.out.println("Catégories sélectionnées : " + categoriesSelectionnees);
-    }
-
     private void commencerPartie() {
         if (categoriesSelectionnees.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Erreur", "Sélectionnez au moins une catégorie !");
             return;
         }
+
         System.out.println("Début partie solo - Difficulté: " + getDifficulteLabel());
         System.out.println("Catégories : " + categoriesSelectionnees);
-        navigateTo("/fxml/partie.fxml", "Mode Solo");
+
+        navigateToJeuSolo();
+    }
+
+    /**
+     * Navigue vers partie.fxml et passe les données au controller
+     */
+    private void navigateToJeuSolo() {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/partie.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer le controller de partie.fxml
+            JeuSoloController controller = loader.getController();
+            controller.setCategories(categoriesSelectionnees);
+            controller.setDifficulte(niveauDifficulte);
+
+            // Démarrer la partie après avoir injecté les données
+            controller.demarrerPartie();
+
+            // Afficher la nouvelle scène
+            Stage stage = (Stage) btnRetour.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setTitle("Mode Solo");
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement de la scène partie.fxml");
+            e.printStackTrace();
+        }
     }
 
     private void retourMenu() {
@@ -142,10 +166,6 @@ public class ParamPartieSoloController {
     private void navigateTo(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
-            if (loader.getLocation() == null) {
-                System.err.println("FXML not found: " + fxmlPath);
-                return;
-            }
             Parent root = loader.load();
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             Scene scene = new Scene(root);
