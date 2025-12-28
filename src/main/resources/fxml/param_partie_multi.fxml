@@ -7,38 +7,26 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER"
-      prefHeight="500.0"
-      prefWidth="600.0"
-      spacing="5.0"
-      style="-fx-background-color: #80808047; -fx-padding: 20;"
-      xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controller.ConfigurationPartieController">
+<VBox alignment="TOP_CENTER" prefHeight="500.0" prefWidth="600.0" spacing="5.0" style="-fx-background-color: #80808047; -fx-padding: 20;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ConfigurationPartieController">
 
     <children>
 
         <!-- HEADER -->
-        <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0"
-              style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+        <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
             <children>
 
-                <Button text="←"
-                        fx:id="btnRetour"
-                        onAction="#handleRetour"
-                        style="-fx-background-color: transparent;"
-                        textFill="WHITE">
+                <Button fx:id="btnRetour" onAction="#handleRetour" style="-fx-background-color: transparent;" text="←" textFill="WHITE">
                     <font>
-                        <Font size="24.0"/>
+                        <Font size="24.0" />
                     </font>
                 </Button>
 
                 <Label text="⚙ Configuration de la partie" textFill="WHITE">
                     <font>
-                        <Font size="24.0"/>
+                        <Font size="24.0" />
                     </font>
                     <HBox.margin>
-                        <Insets left="80.0"/>
+                        <Insets left="80.0" />
                     </HBox.margin>
                 </Label>
 
@@ -46,34 +34,26 @@
         </HBox>
 
         <!-- LIEN DE LA PARTIE -->
-        <VBox prefHeight="100.0" prefWidth="560.0" spacing="10.0"
-              style="-fx-background-color: white;">
+        <VBox prefHeight="100.0" prefWidth="560.0" spacing="10.0" style="-fx-background-color: white;">
             <padding>
-                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0"/>
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
             </padding>
 
             <children>
 
                 <HBox spacing="10.0">
                     <children>
-                        <Label text="🔗"/>
-                        <Label text="Lien de la partie:"/>
+                        <Label text="🔗" />
+                        <Label text="Lien de la partie:" />
                     </children>
                 </HBox>
 
                 <HBox spacing="10.0">
                     <children>
 
-                        <TextField fx:id="txtLien"
-                                   editable="false"
-                                   prefWidth="420.0"
-                                   style="-fx-background-color: #f0f0f0;"
-                                   text="https://baccalaureat.game/partie/ABC123XYZ"/>
+                        <TextField fx:id="txtLien" editable="false" prefWidth="420.0" style="-fx-background-color: #f0f0f0;" text="https://baccalaureat.game/partie/ABC123XYZ" />
 
-                        <Button text=" Copier"
-                                fx:id="btnCopier"
-                                onAction="#handleCopier"
-                                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                        <Button fx:id="btnCopier" onAction="#handleCopier" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" text=" Copier" />
 
                     </children>
                 </HBox>
@@ -82,46 +62,31 @@
         </VBox>
 
         <!-- CATÉGORIES -->
-        <VBox prefHeight="200.0" prefWidth="560.0" spacing="10.0"
-              style="-fx-background-color: white;">
+        <VBox prefHeight="200.0" prefWidth="560.0" spacing="10.0" style="-fx-background-color: white;">
             <padding>
-                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0"/>
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
             </padding>
 
             <children>
 
                 <HBox spacing="10.0">
                     <children>
-                        <Label/>
-                        <Label text="Catégories:"/>
+                        <Label />
+                        <Label text="Catégories:" />
                     </children>
                 </HBox>
 
                 <VBox spacing="8.0">
                     <VBox.margin>
-                        <Insets left="10.0"/>
+                        <Insets left="10.0" />
                     </VBox.margin>
-
-                    <children>
-                        <CheckBox fx:id="cbPrenoms" text="Prénoms" selected="true"/>
-                        <CheckBox fx:id="cbPays" text="Pays" selected="true"/>
-                        <CheckBox fx:id="cbAnimaux" text="Animaux" selected="true"/>
-                        <CheckBox fx:id="cbMetiers" text="Métiers"/>
-                        <CheckBox fx:id="cbFruits" text="Fruits et légumes"/>
-                        <CheckBox fx:id="cbVilles" text="Villes"/>
-                        <CheckBox fx:id="cbMarques" text="Marques"/>
-                    </children>
                 </VBox>
 
             </children>
         </VBox>
 
         <!-- COMMENCER -->
-        <Button text="▶ COMMENCER LA PARTIE"
-                fx:id="btnCommencer"
-                onAction="#handleCommencer"
-                style="-fx-background-color: #27ae60; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12;"
-                textFill="WHITE"/>
+        <Button fx:id="btnCommencer" onAction="#handleCommencer" style="-fx-background-color: #27ae60; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12;" text="▶ COMMENCER LA PARTIE" textFill="WHITE" />
 
     </children>
 </VBox>
