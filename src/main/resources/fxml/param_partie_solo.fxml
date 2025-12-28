@@ -7,6 +7,15 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
 <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
       minHeight="-Infinity" minWidth="-Infinity"
       prefHeight="500.0" prefWidth="600.0"
@@ -137,20 +146,11 @@
                     </children>
                 </HBox>
 
-                <VBox spacing="8.0">
+                <!-- CONTENEUR DYNAMIQUE POUR LES CHECKBOX -->
+                <VBox fx:id="containerCategories" spacing="8.0">
                     <VBox.margin>
                         <Insets left="10.0" />
                     </VBox.margin>
-
-                    <children>
-                        <CheckBox fx:id="cbPrenoms" text="Prénoms" selected="true"/>
-                        <CheckBox fx:id="cbPays" text="Pays" selected="true"/>
-                        <CheckBox fx:id="cbAnimaux" text="Animaux" selected="true"/>
-                        <CheckBox fx:id="cbMetiers" text="Métiers"/>
-                        <CheckBox fx:id="cbFruits" text="Fruits et légumes"/>
-                        <CheckBox fx:id="cbVilles" text="Villes"/>
-                        <CheckBox fx:id="cbMarques" text="Marques"/>
-                    </children>
                 </VBox>
 
             </children>
