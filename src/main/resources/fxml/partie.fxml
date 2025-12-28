@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import javafx.scene.Cursor?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      alignment="TOP_CENTER"
+      prefWidth="500.0" prefHeight="600.0"
+      spacing="0">
+
+    <!-- En-tête violet -->
+    <HBox alignment="CENTER" prefHeight="70.0" prefWidth="500.0" spacing="80.0"
+          style="-fx-background-color: linear-gradient(to right, #9b59b6, #8e44ad); -fx-padding: 15;">
+        <children>
+            <HBox alignment="CENTER" spacing="10.0"
+                  style="-fx-background-color: white; -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                <children>
+                    <Label text="⏱">
+                        <font><Font size="18.0"/></font>
+                    </Label>
+                    <Label fx:id="lblTimer" text="02:45"
+                           style="-fx-text-fill: #8e44ad; -fx-font-weight: bold;">
+                        <font><Font size="18.0"/></font>
+                    </Label>
+                </children>
+            </HBox>
+
+            <Label fx:id="lblLettre" text="A"
+                   style="-fx-background-color: white; -fx-background-radius: 50; -fx-padding: 10 20 10 20; -fx-text-fill: #8e44ad; -fx-font-weight: bold;">
+                <font><Font size="32.0"/></font>
+            </Label>
+
+            <HBox alignment="CENTER" spacing="10.0"
+                  style="-fx-background-color: rgba(255,255,255,0.3); -fx-background-radius: 25; -fx-padding: 8 15 8 15;">
+                <children>
+                    <Label text="🏆">
+                        <font><Font size="18.0"/></font>
+                    </Label>
+                    <Label fx:id="lblScore" text="650 pts" style="-fx-text-fill: white; -fx-font-weight: bold;">
+                        <font><Font size="18.0"/></font>
+                    </Label>
+                </children>
+            </HBox>
+        </children>
+    </HBox>
+
+    <!-- Corps avec les catégories -->
+    <VBox spacing="12.0" style="-fx-background-color: #f5f5f5; -fx-padding: 20;">
+        <children>
+
+            <!-- Méthode pour créer chaque catégorie -->
+            <fx:define>
+                <HBox fx:id="catTemplate" alignment="CENTER_LEFT" spacing="15.0"
+                      style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                            <children>
+                                <Label text=" " />
+                                <Label fx:id="lblCat" style="-fx-font-weight: bold;">
+                                    <font><Font size="16.0"/></font>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <TextField fx:id="tfCat" prefWidth="300.0" promptText=""
+                                   style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                            <font><Font size="14.0"/></font>
+                        </TextField>
+                    </children>
+                </HBox>
+            </fx:define>
+
+            <!-- Catégories spécifiques -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Pays" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfPays" prefWidth="300.0" promptText="Entrez un pays..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Animal" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfAnimal" prefWidth="300.0" promptText="Entrez un animal..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Fruit" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfFruit" prefWidth="300.0" promptText="Entrez un fruit..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Métier" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfMetier" prefWidth="300.0" promptText="Entrez un métier..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Film" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfFilm" prefWidth="300.0" promptText="Entrez un film..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Prénom" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfPrenom" prefWidth="300.0" promptText="Entrez un prénom..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+                <children>
+                    <HBox alignment="CENTER_LEFT" prefWidth="120.0" spacing="8.0">
+                        <children>
+                            <Label text=" " />
+                            <Label text="Ville" style="-fx-font-weight: bold;"><font><Font size="16.0"/></font></Label>
+                        </children>
+                    </HBox>
+                    <TextField fx:id="tfVille" prefWidth="300.0" promptText="Entrez une ville..."
+                               style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 10; -fx-border-width: 0;">
+                        <font><Font size="14.0"/></font>
+                    </TextField>
+                </children>
+            </HBox>
+
+        </children>
+    </VBox>
+
+    <!-- Bouton Terminer -->
+    <Button fx:id="btnTerminer" text="📋 TERMINER"
+            prefWidth="460.0" prefHeight="50.0"
+            style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 10;">
+        <cursor>
+            <Cursor fx:constant="HAND"/>
+        </cursor>
+    </Button>
+
+</VBox>

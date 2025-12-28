@@ -1,0 +1,60 @@
+/* BACKGROUND */
+.bg {
+    -fx-background-color: linear-gradient(to bottom right, #1e1e2f, #3a3a5a);
+}
+
+/* TITRE EN HAUT */
+.title {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 20px;
+}
+
+/* BOUTONS DES MODES */
+.card {
+    -fx-background-color: rgba(255, 255, 255, 0.1); /* léger fond transparent */
+    -fx-border-color: white;                        /* contour blanc */
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;                               /* curseur pointer */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0, 0, 2); /* léger ombrage */
+    -fx-padding: 5;
+}
+
+/* EFFET SURVOL */
+.card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* LABEL SUR LES BOUTONS */
+.label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 2, 0, 1, 1);
+}
+
+/* STATISTIQUES */
+VBox > Label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ffffff;
+}
+
+/* BOUTON PARAMÈTRES */
+.bottom Button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1e1e2f;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.bottom Button:hover {
+    -fx-background-color: #dddddd;
+}
