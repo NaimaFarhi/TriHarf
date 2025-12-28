@@ -22,10 +22,12 @@ module org.example.triharf {
 
     opens org.example.triharf to javafx.fxml;
     opens org.example.triharf.models to org.hibernate.orm.core;
-    //opens org.example.triharf.controllers to javafx.fxml;
-
+    opens org.example.triharf.controllers to javafx.fxml;
+    opens org.example.triharf.utils to javafx.fxml;
+    
     exports org.example.triharf;
-    //exports org.example.triharf.controllers;
+    exports org.example.triharf.controllers;
     exports org.example.triharf.models;
     exports org.example.triharf.utils;
+    
 }

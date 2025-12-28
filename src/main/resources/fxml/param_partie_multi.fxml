@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER"
+      prefHeight="500.0"
+      prefWidth="600.0"
+      spacing="5.0"
+      style="-fx-background-color: #80808047; -fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.triharf.controllers.ParamPartieMultiController">
+
+    <children>
+
+        <!-- HEADER -->
+        <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0"
+              style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <children>
+
+                <Button text="←"
+                        fx:id="btnRetour"
+                        onAction="#handleRetour"
+                        style="-fx-background-color: transparent;"
+                        textFill="WHITE">
+                    <font>
+                        <Font size="24.0"/>
+                    </font>
+                </Button>
+
+                <Label text="⚙ Configuration de la partie" textFill="WHITE">
+                    <font>
+                        <Font size="24.0"/>
+                    </font>
+                    <HBox.margin>
+                        <Insets left="80.0"/>
+                    </HBox.margin>
+                </Label>
+
+            </children>
+        </HBox>
+
+        <!-- LIEN DE LA PARTIE -->
+        <VBox prefHeight="100.0" prefWidth="560.0" spacing="10.0"
+              style="-fx-background-color: white;">
+            <padding>
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0"/>
+            </padding>
+
+            <children>
+
+                <HBox spacing="10.0">
+                    <children>
+                        <Label text="🔗"/>
+                        <Label text="Lien de la partie:"/>
+                    </children>
+                </HBox>
+
+                <HBox spacing="10.0">
+                    <children>
+
+                        <TextField fx:id="txtLien"
+                                   editable="false"
+                                   prefWidth="420.0"
+                                   style="-fx-background-color: #f0f0f0;"
+                                   text="https://baccalaureat.game/partie/ABC123XYZ"/>
+
+                        <Button text=" Copier"
+                                fx:id="btnCopier"
+                                onAction="#handleCopier"
+                                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+
+        <!-- CATÉGORIES -->
+        <VBox prefHeight="200.0" prefWidth="560.0" spacing="10.0"
+              style="-fx-background-color: white;">
+            <padding>
+                <Insets bottom="10.0" left="15.0" right="15.0" top="10.0"/>
+            </padding>
+
+            <children>
+
+                <HBox spacing="10.0">
+                    <children>
+                        <Label text="📚">
+                            <font><Font size="22.0" /></font>
+                        </Label>
+                        <Label text="Catégories:">
+                            <font><Font name="System Bold" size="18.0" /></font>
+                        </Label>
+                    </children>
+                </HBox>
+
+                <!-- CONTENEUR DYNAMIQUE POUR LES CHECKBOX -->
+                <VBox fx:id="containerCategories" spacing="8.0">
+                    <VBox.margin>
+                        <Insets left="10.0"/>
+                    </VBox.margin>
+                </VBox>
+
+            </children>
+        </VBox>
+
+        <!-- COMMENCER -->
+        <Button text="▶ COMMENCER LA PARTIE"
+                fx:id="btnCommencer"
+                onAction="#handleCommencer"
+                style="-fx-background-color: #27ae60; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12;"
+                textFill="WHITE">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+        </Button>
+
+    </children>
+</VBox>

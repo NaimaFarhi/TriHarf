@@ -1,80 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="5.0" style="-fx-background-color: #80808047; -fx-padding: 20;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="TOP_CENTER"
+      prefHeight="400.0"
+      prefWidth="600.0"
+      spacing="5.0"
+      style="-fx-background-color: #80808047; -fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.triharf.controllers.ParametresGenerauxController">
+
+   <!-- DÉCLARATION DU TOGGLEGROUP -->
+   <fx:define>
+      <ToggleGroup fx:id="langueGroup"/>
+   </fx:define>
+
    <children>
-      <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+
+      <!-- HEADER -->
+      <HBox alignment="CENTER_LEFT"
+            prefHeight="20.0"
+            prefWidth="560.0"
+            style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+
          <children>
-            <Button mnemonicParsing="false" style="-fx-background-color: transparent;" text="←" textFill="WHITE">
+
+            <Button text="←"
+                    fx:id="btnRetour"
+                    onAction="#handleRetour"
+                    style="-fx-background-color: transparent;"
+                    textFill="WHITE">
                <font>
-                  <Font name="System Bold Italic" size="24.0" />
+                  <Font size="24.0"/>
                </font>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
             </Button>
-            <Label text="⚙ Configuration de la Partie" textFill="WHITE">
+
+            <Label text="⚙ Paramètres" textFill="WHITE">
                <font>
-                  <Font name="System Bold" size="24.0" />
+                  <Font size="24.0"/>
                </font>
                <HBox.margin>
-                  <Insets left="50.0" />
+                  <Insets left="140.0"/>
                </HBox.margin>
             </Label>
+
          </children>
       </HBox>
+
+      <!-- LANGUE -->
       <VBox prefHeight="69.0" prefWidth="560.0" style="-fx-background-color: white;">
          <children>
-            <Label text=" Langue:">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-            </Label>
+
+            <Label text=" Langue:"/>
+
             <HBox prefHeight="33.0" prefWidth="560.0" spacing="130.0">
                <children>
-                  <RadioButton mnemonicParsing="false" text="Français">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="langueGroup" />
-                     </toggleGroup></RadioButton>
-                  <RadioButton mnemonicParsing="false" text=" العربية" toggleGroup="$langueGroup" />
-                  <RadioButton mnemonicParsing="false" text="English" toggleGroup="$langueGroup" />
+
+                  <RadioButton text="Français"
+                               fx:id="rbFr"
+                               toggleGroup="$langueGroup"
+                               onAction="#handleLangue"/>
+
+                  <RadioButton text=" العربية"
+                               fx:id="rbAr"
+                               toggleGroup="$langueGroup"
+                               onAction="#handleLangue"/>
+
+                  <RadioButton text="English"
+                               fx:id="rbEn"
+                               toggleGroup="$langueGroup"
+                               onAction="#handleLangue"/>
+
                </children>
             </HBox>
+
          </children>
       </VBox>
+
+      <!-- PSEUDO -->
       <VBox prefHeight="68.0" prefWidth="560.0" style="-fx-background-color: white;">
          <children>
-            <Label text=" Niveau:">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-            </Label>
-            <Slider majorTickUnit="1.0" max="2.0" minorTickCount="0" prefHeight="37.0" prefWidth="560.0" showTickLabels="true" showTickMarks="true" value="1.0" />
+
+            <HBox spacing="10.0">
+               <children>
+                  <Label text="👤"/>
+                  <Label text="Pseudo:"/>
+               </children>
+            </HBox>
+
+            <TextField fx:id="txtPseudo"
+                       promptText="Entrez votre pseudo..."/>
+
          </children>
       </VBox>
+
+      <!-- SON -->
       <VBox prefHeight="84.0" prefWidth="560.0" style="-fx-background-color: white;">
          <children>
-            <Label style="-fx-font-weight: bold;" text="Catégories sélectionnées:">
-               <font>
-                  <Font size="24.0" />
-               </font>
-            </Label>
-            <FlowPane prefHeight="85.0" prefWidth="560.0">
-               <opaqueInsets>
-                  <Insets bottom="10.0" top="10.0" />
-               </opaqueInsets>
-            </FlowPane>
-         </children></VBox>
-      <Button mnemonicParsing="false" style="-fx-background-color: #27ae60; -fx-font-weight: bold;" text="▶ JOUER" textFill="WHITE">
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-      </Button>
+
+            <HBox spacing="10.0">
+               <children>
+                  <Label text="🔊"/>
+                  <Label text="Son:"/>
+               </children>
+            </HBox>
+
+            <HBox spacing="15.0">
+
+               <CheckBox text="Activer le son"
+                         fx:id="chkSon"
+                         selected="true"
+                         onAction="#handleSon"/>
+
+               <Slider min="0" max="100" value="70"
+                       fx:id="sliderVolume"
+                       onMouseReleased="#handleVolume"/>
+
+               <Label text="70%"
+                      fx:id="lblVolume"/>
+
+            </HBox>
+
+         </children>
+      </VBox>
+
+      <!-- JOUER -->
+      <Button text="▶ JOUER"
+              fx:id="btnJouer"
+              onAction="#handleJouer"
+              style="-fx-background-color: #27ae60;"
+              textFill="WHITE"/>
+
    </children>
 </VBox>
