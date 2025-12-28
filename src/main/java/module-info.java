@@ -27,4 +27,5 @@ module org.example.triharf {
     exports org.example.triharf;
     //exports org.example.triharf.controllers;
     exports org.example.triharf.models;
+    exports org.example.triharf.utils;
 }
