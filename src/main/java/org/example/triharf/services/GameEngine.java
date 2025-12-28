@@ -66,15 +66,16 @@ public class GameEngine {
     public void stopTimer() {
         if (timer != null) {
             timer.stop();
+            timer = null; // Prevent re-entry
         }
-        endGame();
+        if (state != GameState.FINISHED) { // Guard condition
+            endGame();
+        }
     }
 
     private void endGame() {
+        if (state == GameState.FINISHED) return; // Already finished
         state = GameState.FINISHED;
-        if (timer != null) {
-            timer.stop();
-        }
         if (onGameEnd != null) {
             onGameEnd.run();
         }
