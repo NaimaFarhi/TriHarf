@@ -7,7 +7,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefHeight="750" prefWidth="1100" style="-fx-background-color: #1a1a2e;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane prefHeight="750" prefWidth="1100" style="-fx-background-color: #1a1a2e;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.MenuPrincipalController">
     <children>
 
         <!-- ===== CANVAS POUR PAILLETTES (effet étoiles) ===== -->
@@ -88,8 +88,8 @@
                                     </graphic>
                                 </Button>
 
-                                <!-- Ligne 3 : BATTLE ROYALE GOLD + MODE CHAOS -->
-                                <Button fx:id="btnBattleRoyaleGold" prefHeight="145" prefWidth="259" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.7), 20, 0.5, 0, 0);" GridPane.columnIndex="0" GridPane.rowIndex="2">
+
+                                <Button fx:id="btnSolo" prefHeight="145" prefWidth="259" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.7), 20, 0.5, 0, 0);" GridPane.columnIndex="0" GridPane.rowIndex="2">
                                     <graphic>
                                         <StackPane prefHeight="145" prefWidth="259" style="-fx-background-color: linear-gradient(to bottom right, #ffd700, #ffed4e); -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0.5, 0, 5);">
                                             <children>

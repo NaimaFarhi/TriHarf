@@ -14,7 +14,7 @@
       style="-fx-background-color: #80808047; -fx-padding: 20;"
       xmlns="http://javafx.com/javafx/8"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controller.ConfigurationPartieController">
+      fx:controller="org.example.triharf.controllers.ParamPartieMultiController">
 
     <children>
 

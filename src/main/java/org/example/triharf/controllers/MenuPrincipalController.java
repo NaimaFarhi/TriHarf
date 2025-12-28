@@ -11,7 +11,7 @@ import org.example.triharf.HelloApplication;
 import java.io.IOException;
 
 public class MenuPrincipalController {
-    // smiyaat les boutons hta nchof fxml chno atsmihom oumnia
+
     @FXML
     private Button btnSolo;
 
@@ -24,40 +24,37 @@ public class MenuPrincipalController {
     @FXML
     private Button btnChaos;
 
+
+
     @FXML
     private Button btnParametres;
 
     @FXML
-    private Button btnStatistiques;
-
-    @FXML
     public void initialize() {
+        // Les actions des boutons
+        btnSolo.setOnAction(e -> navigateTo("/fxml/param_partie_solo.fxml", "Paramètres - Mode Solo"));
+        btnMultijoueur.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Multijoueur"));
+        btnBattleRoyale.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Battle Royale"));
+        btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Chaos Mode"));
 
-        btnSolo.setOnAction(e -> navigateTo("solo-view.fxml", "Mode Solo"));
-        btnMultijoueur.setOnAction(e -> navigateTo("multijoueur-view.fxml", "Mode Multijoueur"));
-        btnBattleRoyale.setOnAction(e -> navigateTo("batailleroyale-view.fxml", "Battle Royale"));
-        btnChaos.setOnAction(e -> navigateTo("chaos-view.fxml", "Chaos Mode"));
-        btnStatistiques.setOnAction(e -> navigateTo("statistiques-view.fxml", "Statistiques"));
-
+        btnParametres.setOnAction(e -> navigateTo("/fxml/Configuration.fxml", "Paramètres"));
     }
 
     /**
      * Navigue vers une autre vue FXML
-     * @param fxmlFile nom du fichier FXML
-     * @param title titre de la fenêtre
      */
-    private void navigateTo(String fxmlFile, String title) {
+    private void navigateTo(String fxmlPath, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("views/" + fxmlFile));
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
 
             Stage stage = (Stage) btnSolo.getScene().getWindow();
-            Scene scene = new Scene(root, 800, 600);
+            Scene scene = new Scene(root);
             stage.setTitle(title);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Erreur lors du chargement de " + fxmlFile);
+            System.err.println("Erreur lors du chargement de " + fxmlPath);
             e.printStackTrace();
         }
     }
