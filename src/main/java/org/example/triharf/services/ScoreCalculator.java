@@ -40,6 +40,12 @@ public class ScoreCalculator {
         return 0;
     }
 
+    public int calculateTotalScore(String texte, long elapsedSeconds, int totalTime, int rarityScore) {
+        int baseScore = calculateScore(texte, elapsedSeconds, totalTime);
+        int rarityBonus = rarityScore; // 1-10 from AI
+        return baseScore + rarityBonus;
+    }
+
     public int calculateTotalScore(Mot mot, long elapsedSeconds, int totalTime) {
         int baseScore = calculateScore(mot.getTexte(), elapsedSeconds, totalTime);
         int rarityBonus = calculateRarityBonus(mot);

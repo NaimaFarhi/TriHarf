@@ -38,7 +38,12 @@ public class ResultsManager {
             var validationResult = validationService.validateMot(mot, categorie, lettre);
 
             if (validationResult.isValid()) {
-                int points = scoreCalculator.calculateScore(mot, elapsedSeconds, gameDuration);
+                int points = scoreCalculator.calculateTotalScore(
+                        mot,
+                        elapsedSeconds,
+                        gameDuration,
+                        validationResult.getRarityScore()
+                );
                 scoreTotal += points;
                 resultats.add(new ResultatPartie(
                         categorie.getNom(), mot, true, points, validationResult.getMessage()
