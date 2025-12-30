@@ -19,6 +19,7 @@ import java.util.Map;
 
 /**
  * Contrôleur pour les paramètres de la partie Multijoueur (param_partie_multi.fxml)
+ * Passe les données au JeuMultiController via setCategories()
  */
 public class ParamPartieMultiController {
 
@@ -32,7 +33,7 @@ public class ParamPartieMultiController {
     private Button btnCopier;
 
     @FXML
-    private VBox containerCategories; // Le VBox où vont les checkboxes
+    private VBox containerCategories;
 
     @FXML
     private Button btnCommencer;
@@ -40,45 +41,29 @@ public class ParamPartieMultiController {
     private List<String> categoriesSelectionnees = new ArrayList<>();
     private CategorieDAO categorieDAO = new CategorieDAO();
     private List<Categorie> toutesLesCategories = new ArrayList<>();
-    private Map<String, CheckBox> checkboxMap = new HashMap<>(); // Pour retrouver les checkboxes par nom
+    private Map<String, CheckBox> checkboxMap = new HashMap<>();
 
     @FXML
     public void initialize() {
-        // Charger TOUTES les catégories depuis le DAO
         toutesLesCategories = categorieDAO.getAll();
-
         System.out.println("Catégories chargées depuis DAO : " + toutesLesCategories.size());
-
-        // Créer dynamiquement les checkboxes pour chaque catégorie
         chargerCategoriesDynamiquement();
     }
 
-    /**
-     * Crée les checkboxes dynamiquement à partir des catégories du DAO
-     */
     private void chargerCategoriesDynamiquement() {
         if (containerCategories == null) {
             System.err.println("containerCategories n'existe pas dans le FXML !");
             return;
         }
 
-        // Effacer les anciens contrôles
         containerCategories.getChildren().clear();
 
-        // Créer une checkbox pour chaque catégorie
         for (Categorie cat : toutesLesCategories) {
             CheckBox checkbox = new CheckBox(cat.getNom());
             checkbox.setStyle("-fx-font-size: 14;");
-
-            // Ajouter un listener à chaque checkbox
             checkbox.selectedProperty().addListener((obs, oldVal, newVal) -> mettreAJourCategories());
-
-            // Ajouter à la map pour retrouver la checkbox par nom
             checkboxMap.put(cat.getNom(), checkbox);
-
-            // Ajouter au conteneur
             containerCategories.getChildren().add(checkbox);
-
             System.out.println("Checkbox créée : " + cat.getNom());
         }
     }
@@ -98,13 +83,9 @@ public class ParamPartieMultiController {
         copierLien();
     }
 
-    /**
-     * Met à jour la liste des catégories sélectionnées
-     */
     private void mettreAJourCategories() {
         categoriesSelectionnees.clear();
 
-        // Parcourir toutes les catégories et ajouter les cochées
         for (Categorie cat : toutesLesCategories) {
             CheckBox checkbox = checkboxMap.get(cat.getNom());
             if (checkbox != null && checkbox.isSelected()) {
@@ -128,13 +109,48 @@ public class ParamPartieMultiController {
         showAlert(Alert.AlertType.INFORMATION, "Succès", "Lien copié !");
     }
 
+    /**
+     * Commence la partie multijoueur
+     * ✅ PASSE les catégories au JeuMultiController
+     */
     private void commencerPartie() {
         if (categoriesSelectionnees.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Erreur", "Sélectionnez au moins une catégorie !");
             return;
         }
-        System.out.println("Début partie multijoueur avec catégories : " + categoriesSelectionnees);
-        navigateTo("/fxml/partie_multi.fxml", "Mode Multijoueur");
+
+        System.out.println("✅ Début partie multijoueur");
+        System.out.println("   Catégories : " + categoriesSelectionnees);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("/fxml/partie_multi.fxml")
+            );
+            Parent root = loader.load();
+
+            // ✅ CRUCIAL : Passer les données au JeuMultiController
+            JeuMultiController controller = loader.getController();
+            if (controller != null) {
+                controller.setCategories(categoriesSelectionnees);
+                // Optionnel : tu peux aussi passer le joueur et difficulté si tu les as
+                // controller.setJoueur("Joueur_Multi");
+                // controller.setDifficulte(1);
+                System.out.println("✅ Catégories passées au JeuMultiController");
+            } else {
+                System.err.println("❌ JeuMultiController non trouvé !");
+                return;
+            }
+
+            Stage stage = (Stage) btnRetour.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setTitle("Mode Multijoueur");
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement de partie_multi.fxml");
+            e.printStackTrace();
+        }
     }
 
     private void retourMenu() {

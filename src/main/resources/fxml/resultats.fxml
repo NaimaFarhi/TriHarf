@@ -10,7 +10,7 @@
       prefHeight="600.0" prefWidth="600.0" spacing="0.0"
       style="-fx-background-color: #f5f5f5;"
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.triharf.controllers.DefaiteController">
+      fx:controller="org.example.triharf.controllers.ResultatsController">
     <children>
         <VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="600.0" spacing="0.0">
             <children>
