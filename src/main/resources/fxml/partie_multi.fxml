@@ -6,14 +6,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.triharf.controllers.JeuMultiController"
             prefWidth="900.0" prefHeight="650.0"
@@ -103,8 +95,7 @@
                                        style="-fx-text-fill: white; -fx-font-weight: bold;">
                                     <font><Font size="14.0"/></font>
                                 </Label>
-                                <!-- Les colonnes des catégories seront ajoutées dynamiquement ici -->
-                                <!-- SCORE fixe (sera ajouté à la fin dynamiquement) -->
+                                <!-- Les colonnes des catégories + Score seront ajoutées dynamiquement ici par le contrôleur -->
                             </children>
                         </HBox>
 
@@ -113,7 +104,19 @@
                         <!-- Les lignes des joueurs (DYNAMIQUE) -->
                         <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: white;">
                             <content>
-                                <VBox fx:id="vboxPlayers" spacing="5" style="-fx-padding: 5;" />
+                                <VBox fx:id="vboxPlayers" spacing="5" style="-fx-padding: 5;">
+                                    <!-- Chaque ligne de joueur sera ajoutée dynamiquement ici
+                                         Structure de chaque ligne :
+                                         HBox [
+                                             Label (rang),
+                                             Label (nom joueur),
+                                             Label (réponse catégorie 1),
+                                             Label (réponse catégorie 2),
+                                             ...
+                                             Label (score)
+                                         ]
+                                    -->
+                                </VBox>
                             </content>
                         </ScrollPane>
                     </children>
@@ -134,7 +137,15 @@
                         <ScrollPane fitToWidth="true" prefHeight="440.0"
                                     style="-fx-background-color: #ecf0f1; -fx-background: #ecf0f1;">
                             <content>
-                                <VBox fx:id="vboxMessages" spacing="10.0" style="-fx-padding: 10; -fx-background-color: #ecf0f1;" />
+                                <VBox fx:id="vboxMessages" spacing="10.0" style="-fx-padding: 10; -fx-background-color: #ecf0f1;">
+                                    <!-- Les messages du chat seront ajoutés dynamiquement ici
+                                         Structure de chaque message :
+                                         VBox [
+                                             Label (nom du joueur),
+                                             Label (contenu du message)
+                                         ]
+                                    -->
+                                </VBox>
                             </content>
                         </ScrollPane>
 
