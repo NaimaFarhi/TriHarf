@@ -24,8 +24,6 @@ public class MenuPrincipalController {
     @FXML
     private Button btnChaos;
 
-
-
     @FXML
     private Button btnParametres;
 
@@ -35,7 +33,7 @@ public class MenuPrincipalController {
         btnSolo.setOnAction(e -> navigateTo("/fxml/param_partie_solo.fxml", "Paramètres - Mode Solo"));
         btnMultijoueur.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Multijoueur"));
         btnBattleRoyale.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Battle Royale"));
-        btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Chaos Mode"));
+        btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_chaos.fxml", "Paramètres - Mode Chaos"));
 
         btnParametres.setOnAction(e -> navigateTo("/fxml/Configuration.fxml", "Paramètres"));
     }
@@ -49,10 +47,8 @@ public class MenuPrincipalController {
             Parent root = loader.load();
 
             Stage stage = (Stage) btnSolo.getScene().getWindow();
-            Scene scene = new Scene(root);
+            stage.getScene().setRoot(root);
             stage.setTitle(title);
-            stage.setScene(scene);
-            stage.show();
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de " + fxmlPath);
             e.printStackTrace();

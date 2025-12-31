@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="900.0" spacing="15.0" styleClass="root-vbox" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.ParamPartieMultiController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="900.0" spacing="15.0" styleClass="root-vbox" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.ParamPartieChaosController">
 
     <children>
 
@@ -15,7 +15,7 @@
         <HBox alignment="CENTER_LEFT" prefWidth="560.0" styleClass="header-bar">
             <children>
                 <Button fx:id="btnRetour" onAction="#handleRetour" styleClass="btn-back" text="←" />
-                <Label text="⚙ Configuration de la partie" styleClass="header-title">
+                <Label text="🔥 Configuration Mode Chaos" styleClass="header-title" style="-fx-text-fill: #e74c3c;">
                     <HBox.margin>
                         <Insets left="40.0"/>
                     </HBox.margin>
@@ -40,7 +40,7 @@
 
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
-                                        <TextField fx:id="txtLien" editable="false" prefWidth="420.0" text="https://baccalaureat.game/partie/ABC123XYZ"/>
+                                        <TextField fx:id="txtLien" editable="false" prefWidth="420.0" text="https://baccalaureat.game/chaos/XYZ999"/>
                                         <Button text=" Copier" fx:id="btnCopier" onAction="#handleCopier" styleClass="btn-secondary"/>
                                     </children>
                                 </HBox>
@@ -70,7 +70,7 @@
         </ScrollPane>
 
         <!-- COMMENCER -->
-        <Button text="▶ COMMENCER LA PARTIE" fx:id="btnCommencer" onAction="#handleCommencer" styleClass="btn-action"/>
+        <Button text="▶ COMMENCER LE CHAOS" fx:id="btnCommencer" onAction="#handleCommencer" styleClass="btn-action" style="-fx-background-color: #e74c3c;"/>
 
     </children>
 </VBox>

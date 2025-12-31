@@ -7,7 +7,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.input.MouseEvent;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.dao.CategorieDAO;
 import org.example.triharf.models.Categorie;
@@ -24,7 +23,13 @@ public class ParamPartieSoloController {
     private Button btnRetour;
 
     @FXML
-    private Slider sliderDifficulte;
+    private ToggleButton btnFacile;
+
+    @FXML
+    private ToggleButton btnMoyen;
+
+    @FXML
+    private ToggleButton btnDifficile;
 
     @FXML
     private VBox containerCategories; // Le VBox où vont les checkboxes
@@ -40,13 +45,26 @@ public class ParamPartieSoloController {
 
     @FXML
     public void initialize() {
-        // Écouter les changements de difficulté
-        if (sliderDifficulte != null) {
-            sliderDifficulte.valueProperty().addListener((obs, oldVal, newVal) -> {
-                niveauDifficulte = newVal.intValue();
-                System.out.println("Niveau de difficulté : " + getDifficulteLabel());
-            });
-        }
+        // Set up ToggleGroup so only one difficulty can be selected
+        ToggleGroup difficultyGroup = new ToggleGroup();
+        if (btnFacile != null)
+            btnFacile.setToggleGroup(difficultyGroup);
+        if (btnMoyen != null)
+            btnMoyen.setToggleGroup(difficultyGroup);
+        if (btnDifficile != null)
+            btnDifficile.setToggleGroup(difficultyGroup);
+
+        // Listen for difficulty changes
+        difficultyGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == btnFacile) {
+                niveauDifficulte = 0;
+            } else if (newVal == btnMoyen) {
+                niveauDifficulte = 1;
+            } else if (newVal == btnDifficile) {
+                niveauDifficulte = 2;
+            }
+            System.out.println("Niveau de difficulté : " + getDifficulteLabel());
+        });
 
         // Charger toutes les catégories depuis le DAO
         toutesLesCategories = categorieDAO.getAll();
@@ -57,7 +75,7 @@ public class ParamPartieSoloController {
     }
 
     /**
-     * Crée les checkboxes dynamiquement à partir des catégories du DAO
+     * Crée les ToggleButtons (chips) dynamiquement à partir des catégories du DAO
      */
     private void chargerCategoriesDynamiquement() {
         if (containerCategories == null) {
@@ -68,15 +86,41 @@ public class ParamPartieSoloController {
         containerCategories.getChildren().clear();
         checkboxMap.clear();
 
-        for (Categorie cat : toutesLesCategories) {
-            CheckBox checkbox = new CheckBox(cat.getNom());
-            checkbox.setStyle("-fx-font-size: 14;");
-            checkbox.selectedProperty().addListener((obs, oldVal, newVal) -> mettreAJourCategories());
-            checkboxMap.put(cat.getNom(), checkbox);
-            containerCategories.getChildren().add(checkbox);
+        // Create a FlowPane for chip layout
+        javafx.scene.layout.FlowPane flowPane = new javafx.scene.layout.FlowPane();
+        flowPane.setHgap(10);
+        flowPane.setVgap(10);
+        flowPane.setAlignment(javafx.geometry.Pos.CENTER);
 
-            System.out.println("Checkbox créée : " + cat.getNom());
+        // Add "Select All" toggle button first
+        ToggleButton selectAllBtn = new ToggleButton("✨ Tout sélectionner");
+        selectAllBtn.getStyleClass().addAll("category-chip", "category-select-all");
+        selectAllBtn.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            for (javafx.scene.Node node : flowPane.getChildren()) {
+                if (node instanceof ToggleButton && node != selectAllBtn) {
+                    ((ToggleButton) node).setSelected(newVal);
+                }
+            }
+            mettreAJourCategories();
+        });
+        flowPane.getChildren().add(selectAllBtn);
+
+        // Add category chips
+        for (Categorie cat : toutesLesCategories) {
+            ToggleButton chip = new ToggleButton(cat.getNom());
+            chip.getStyleClass().add("category-chip");
+            chip.selectedProperty().addListener((obs, oldVal, newVal) -> mettreAJourCategories());
+
+            // Store reference using a fake checkbox for the existing map
+            CheckBox fakeCheckbox = new CheckBox();
+            fakeCheckbox.selectedProperty().bindBidirectional(chip.selectedProperty());
+            checkboxMap.put(cat.getNom(), fakeCheckbox);
+
+            flowPane.getChildren().add(chip);
+            System.out.println("Chip créé : " + cat.getNom());
         }
+
+        containerCategories.getChildren().add(flowPane);
     }
 
     /**
@@ -102,17 +146,6 @@ public class ParamPartieSoloController {
     @FXML
     public void handleCommencer() {
         commencerPartie();
-    }
-
-    /**
-     * Méthode appelée par le FXML lorsque le slider est relâché
-     */
-    @FXML
-    private void handleDifficulte(MouseEvent event) {
-        if (sliderDifficulte != null) {
-            niveauDifficulte = (int) sliderDifficulte.getValue();
-            System.out.println("Difficulté (clic) : " + getDifficulteLabel());
-        }
     }
 
     /**

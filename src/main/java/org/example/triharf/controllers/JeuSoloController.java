@@ -67,9 +67,11 @@ public class JeuSoloController {
     // ===== DAO =====
     private CategorieDAO categorieDAO = new CategorieDAO();
 
-    /* =======================
-       INJECTION METHODS
-       ======================= */
+    /*
+     * =======================
+     * INJECTION METHODS
+     * =======================
+     */
 
     public void setCategories(List<String> categoriesNoms) {
         this.categoriesNoms = categoriesNoms;
@@ -92,9 +94,11 @@ public class JeuSoloController {
         this.joueur = joueur;
     }
 
-    /* =======================
-       INITIALIZATION
-       ======================= */
+    /*
+     * =======================
+     * INITIALIZATION
+     * =======================
+     */
 
     @FXML
     public void initialize() {
@@ -104,9 +108,11 @@ public class JeuSoloController {
         System.out.println("✅ JeuSoloController initialisé");
     }
 
-    /* =======================
-       DÉMARRAGE DE LA PARTIE
-       ======================= */
+    /*
+     * =======================
+     * DÉMARRAGE DE LA PARTIE
+     * =======================
+     */
 
     public void demarrerPartie() {
         if (categories == null || categories.isEmpty()) {
@@ -156,9 +162,11 @@ public class JeuSoloController {
         }
     }
 
-    /* =======================
-       UI DYNAMIQUE
-       ======================= */
+    /*
+     * =======================
+     * UI DYNAMIQUE
+     * =======================
+     */
 
     private void creerChampsDynamiquement() {
         containerCategories.getChildren().clear();
@@ -167,17 +175,17 @@ public class JeuSoloController {
 
         for (Categorie categorie : categories) {
             HBox ligne = new HBox(15);
-            ligne.setPadding(new Insets(10));
-            ligne.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5;");
+            ligne.getStyleClass().add("game-category-row"); // Use CSS class
 
             Label labelCategorie = new Label(categorie.getNom());
-            labelCategorie.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+            labelCategorie.getStyleClass().add("game-category-label"); // CSS class for black text
             labelCategorie.setMinWidth(120);
 
             TextField textField = new TextField();
             textField.setPromptText("Entrez une réponse...");
             textField.setPrefWidth(300);
-            textField.setStyle("-fx-font-size: 12;");
+            textField.getStyleClass().add("game-input-field"); // Use new input style
+            // Remove previous inline style override if any defaults conflict
 
             textFieldsParCategorie.put(categorie.getNom(), textField);
             reponses.put(categorie, "");
@@ -193,9 +201,11 @@ public class JeuSoloController {
         }
     }
 
-    /* =======================
-       LOGIQUE DU JEU
-       ======================= */
+    /*
+     * =======================
+     * LOGIQUE DU JEU
+     * =======================
+     */
 
     private void afficherLettre() {
         lblLettre.setText(lettreActuelle.toString());
@@ -210,7 +220,8 @@ public class JeuSoloController {
         scorePreview = 0;
         for (TextField tf : textFieldsParCategorie.values()) {
             String reponse = tf.getText().trim();
-            if (!reponse.isEmpty() && Character.toLowerCase(reponse.charAt(0)) == Character.toLowerCase(lettreActuelle)) {
+            if (!reponse.isEmpty()
+                    && Character.toLowerCase(reponse.charAt(0)) == Character.toLowerCase(lettreActuelle)) {
                 scorePreview += 10; // Score de preview
             }
         }
@@ -229,9 +240,11 @@ public class JeuSoloController {
         }
     }
 
-    /* =======================
-       FIN DE PARTIE
-       ======================= */
+    /*
+     * =======================
+     * FIN DE PARTIE
+     * =======================
+     */
 
     @FXML
     public void handleTerminer(ActionEvent event) {
@@ -281,15 +294,16 @@ public class JeuSoloController {
         }
     }
 
-    /* =======================
-       NAVIGATION
-       ======================= */
+    /*
+     * =======================
+     * NAVIGATION
+     * =======================
+     */
 
     private void navigateToResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/Resultats.fxml")
-            );
+                    HelloApplication.class.getResource("/fxml/Resultats.fxml"));
             Parent root = loader.load();
 
             // ⚠️ CRUCIAL : Passer les données au controller suivant
@@ -319,9 +333,11 @@ public class JeuSoloController {
         }
     }
 
-    /* =======================
-       UTILITAIRES
-       ======================= */
+    /*
+     * =======================
+     * UTILITAIRES
+     * =======================
+     */
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

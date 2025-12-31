@@ -2,248 +2,195 @@
 
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefHeight="750" prefWidth="1100" style="-fx-background-color: #1a1a2e;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.MenuPrincipalController">
+<StackPane prefHeight="600" prefWidth="900" styleClass="root-stack" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.MenuPrincipalController">
     <children>
+        <!-- Canvas/Effect layer could go here if implemented properly in Java, but purely FXML-based CSS background is safer -->
+        <Pane styleClass="bg-pane" />
 
-        <!-- ===== CANVAS POUR PAILLETTES (effet étoiles) ===== -->
-        <Pane style="-fx-background-color: #1a1a2e; -fx-background-size: cover;">
-            <!-- Paillettes argentées simulées -->
-            <style>
-                .sparkle {
-                -fx-background-color: radial-gradient(circle, silver 0%, transparent 70%);
-                }
-            </style>
-        </Pane>
+<BorderPane style="-fx-background-color: transparent;" prefWidth="900.0" prefHeight="600.0">
 
-        <BorderPane prefHeight="750" prefWidth="1100" style="-fx-background-color: transparent;">
-
-            <!-- ===== LOGO EN HAUT ===== -->
+            <!-- ===== LOGO SECTION & SETTINGS ===== -->
             <top>
-                <HBox alignment="CENTER" style="-fx-background-color: transparent;">
-                    <padding>
-                        <Insets bottom="25" top="30" />
-                    </padding>
+                <AnchorPane styleClass="top-bar">
                     <children>
-                        <ImageView fitHeight="120" fitWidth="350" preserveRatio="true">
-                            <image>
-                                <Image url="@../images/logo.png" />
-                            </image>
-                        </ImageView>
+                        <!-- Settings Button Top-Left -->
+                        <Button fx:id="btnParametres" text="⚙" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0" styleClass="btn-settings" style="-fx-font-size: 24px; -fx-padding: 5 12;"/>
+
+                        <!-- Logo Centered -->
+                        <HBox alignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" pickOnBounds="false">
+                            <children>
+                                <ImageView fitHeight="100" fitWidth="300" preserveRatio="true" pickOnBounds="true">
+                                    <image>
+                                        <Image url="@../images/logo.png" />
+                                    </image>
+                                </ImageView>
+                            </children>
+                        </HBox>
                     </children>
-                </HBox>
+                </AnchorPane>
             </top>
 
-            <!-- ===== CENTRE : BOUTONS À GAUCHE + STATS À DROITE ===== -->
+            <!-- ===== CENTER SECTION: MODES & STATS ===== -->
             <center>
-                <HBox alignment="CENTER" spacing="50">
-                    <padding>
-                        <Insets bottom="30" left="50" right="50" top="10" />
-                    </padding>
+                <ScrollPane fitToWidth="true" styleClass="scroll-pane" style="-fx-background: transparent; -fx-background-color: transparent;">
+                    <content>
+                        <HBox alignment="CENTER" spacing="40" style="-fx-padding: 20;">
                     <children>
 
-                        <!-- ===== GRILLE DES BOUTONS (GAUCHE) ===== -->
-                        <GridPane alignment="CENTER" hgap="22" vgap="22">
+                        <!-- ===== GAME MODES GRID ===== -->
+                        <GridPane alignment="CENTER" hgap="25" vgap="25">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50" />
+                                <ColumnConstraints percentWidth="50" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints valignment="CENTER" />
+                                <RowConstraints valignment="CENTER" />
+                            </rowConstraints>
                             <children>
 
-                                <!-- Ligne 1 : PARTIE SOLO -->
-                                <Button fx:id="btnSolo" prefHeight="145" prefWidth="540" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(192,192,192,0.6), 15, 0.4, 0, 0);" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0" />
-
-                                <!-- Ligne 2 : MULTIJOUEURS + BATTLE ROYALE -->
-                                <Button fx:id="btnMultijoueur" prefHeight="145" prefWidth="259" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(192,192,192,0.6), 15, 0.4, 0, 0);" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <!-- MODE: SOLO -->
+                                <Button fx:id="btnSolo" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                     <graphic>
-                                        <StackPane prefHeight="145" prefWidth="259" style="-fx-background-color: linear-gradient(to bottom right, #f093fb, #f5576c); -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0.5, 0, 5);">
+                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-solo">
                                             <children>
-                                                <ImageView fitHeight="145" fitWidth="259" opacity="0.3" preserveRatio="false">
-                                                    <image>
-                                                        <Image url="@../images/multijoueurs.png" />
-                                                    </image>
-                                                </ImageView>
-                                                <VBox alignment="CENTER" spacing="5" />
-                                            </children>
-                                        </StackPane>
-                                    </graphic>
-                                </Button>
-
-                                <Button fx:id="btnBattleRoyale" prefHeight="145" prefWidth="259" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(192,192,192,0.6), 15, 0.4, 0, 0);" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                    <graphic>
-                                        <StackPane prefHeight="145" prefWidth="259" style="-fx-background-color: linear-gradient(to bottom right, #4facfe, #00f2fe); -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0.5, 0, 5);">
-                                            <children>
-                                                <ImageView fitHeight="145" fitWidth="259" opacity="0.3" preserveRatio="false">
-                                                    <image>
-                                                        <Image url="@../images/battleroyale.png" />
-                                                    </image>
-                                                </ImageView>
-                                                <VBox alignment="CENTER" spacing="5">
-                                                    <children>
-                                                        <HBox alignment="CENTER" spacing="5" />
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </StackPane>
-                                    </graphic>
-                                </Button>
-
-
-                                <Button fx:id="btnSolo" prefHeight="145" prefWidth="259" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.7), 20, 0.5, 0, 0);" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                                    <graphic>
-                                        <StackPane prefHeight="145" prefWidth="259" style="-fx-background-color: linear-gradient(to bottom right, #ffd700, #ffed4e); -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0.5, 0, 5);">
-                                            <children>
-                                                <ImageView fitHeight="145" fitWidth="259" opacity="0.25" preserveRatio="false">
+                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
                                                     <image>
                                                         <Image url="@../images/solo.png" />
                                                     </image>
                                                 </ImageView>
-                                                <VBox alignment="CENTER" spacing="5" />
                                             </children>
                                         </StackPane>
                                     </graphic>
                                 </Button>
 
-                                <Button fx:id="btnChaos" prefHeight="145" prefWidth="259" style="-fx-background-color: transparent; -fx-padding: 0; -fx-border-width: 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.6), 15, 0.5, 0, 0);" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                <!-- MODE: MULTIJOUEUR -->
+                                <Button fx:id="btnMultijoueur" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                     <graphic>
-                                        <StackPane prefHeight="145" prefWidth="259" style="-fx-background-color: linear-gradient(to bottom right, #ff0844, #ffb199); -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0.5, 0, 5);">
+                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-multi">
                                             <children>
-                                                <ImageView fitHeight="145" fitWidth="259" opacity="0.3" preserveRatio="false">
+                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
+                                                    <image>
+                                                        <Image url="@../images/multijoueurs.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </children>
+                                        </StackPane>
+                                    </graphic>
+                                </Button>
+
+                                <!-- MODE: BATTLE ROYALE -->
+                                <Button fx:id="btnBattleRoyale" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <graphic>
+                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-br">
+                                            <children>
+                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
+                                                    <image>
+                                                        <Image url="@../images/battleroyale.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </children>
+                                        </StackPane>
+                                    </graphic>
+                                </Button>
+
+                                <!-- MODE: CHAOS -->
+                                <Button fx:id="btnChaos" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <graphic>
+                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-chaos">
+                                            <children>
+                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
                                                     <image>
                                                         <Image url="@../images/mode_chaos.png" />
                                                     </image>
                                                 </ImageView>
-                                                <VBox alignment="CENTER" spacing="5" />
                                             </children>
                                         </StackPane>
                                     </graphic>
                                 </Button>
-                            </children>
-                            <columnConstraints>
-                                <ColumnConstraints />
-                                <ColumnConstraints />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints />
-                                <RowConstraints />
-                                <RowConstraints />
-                                <RowConstraints />
-                            </rowConstraints>
 
+                            </children>
                         </GridPane>
 
-                        <!-- ===== PANNEAU STATISTIQUES (DROITE) ===== -->
-                        <VBox prefWidth="390" spacing="14" style="-fx-background-color: linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(240,240,240,0.98)); -fx-background-radius: 18; -fx-padding: 28; -fx-effect: dropshadow(gaussian, rgba(192,192,192,0.8), 25, 0.4, 0, 8);">
+                        <!-- ===== STATS PANEL ===== -->
+                        <VBox prefWidth="380" spacing="15" styleClass="stats-panel">
                             <children>
 
-                                <!-- Titre -->
-                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                <!-- Header -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
                                     <children>
-                                        <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="STATISTIQUES" />
+                                        <Label styleClass="stats-title" text="STATISTIQUES" />
                                     </children>
-
                                 </HBox>
 
-                                <Separator style="-fx-background-color: linear-gradient(to right, transparent, silver, transparent); -fx-pref-height: 2;" />
+                                <Separator styleClass="stats-separator" />
 
-                                <!-- Stats principales -->
-                                <VBox spacing="14" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0.3, 0, 2);">
+                                <!-- Main Stats -->
+                                <VBox spacing="10" styleClass="stats-sub-panel">
                                     <children>
-                                        <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <HBox alignment="CENTER_LEFT">
                                             <children>
-                                                <Label style="-fx-font-size: 24px;" />
-                                                <Label style="-fx-font-size: 17px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Victoires:" />
+                                                <Label styleClass="stats-label" text="Victoires:" />
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <Label style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="21" />
+                                                <Label fx:id="lblVictoires" styleClass="stats-value" text="" />
                                             </children>
                                         </HBox>
-
-                                        <Separator style="-fx-background-color: #e0e0e0;" />
-
-                                        <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Separator opacity="0.5" />
+                                        <HBox alignment="CENTER_LEFT">
                                             <children>
-                                                <Label style="-fx-font-size: 24px;" />
-                                                <Label style="-fx-font-size: 17px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Parties jouées:" />
+                                                <Label styleClass="stats-label" text="Parties jouées:" />
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <Label style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="42" />
+                                                <Label fx:id="lblParties" styleClass="stats-value" text="" />
                                             </children>
                                         </HBox>
-
-                                        <Separator style="-fx-background-color: #e0e0e0;" />
-
-                                        <HBox alignment="CENTER_LEFT" spacing="12">
+                                        <Separator opacity="0.5" />
+                                        <HBox alignment="CENTER_LEFT">
                                             <children>
-                                                <Label style="-fx-font-size: 24px;" text="⭐" />
-                                                <Label style="-fx-font-size: 17px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Meilleur score:" />
+                                                <Label text="⭐ " style="-fx-font-size: 16px;" />
+                                                <Label styleClass="stats-label" text="Meilleur score:" />
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <Label style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="63" />
+                                                <Label fx:id="lblBestScore" styleClass="stats-value" text="" />
                                             </children>
                                         </HBox>
                                     </children>
                                 </VBox>
 
-                                <Separator style="-fx-background-color: linear-gradient(to right, transparent, silver, transparent); -fx-pref-height: 2;" />
+                                <Separator styleClass="stats-separator" />
 
                                 <!-- Records -->
-                                <Label style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="Records catégorie" />
+                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="Records catégorie" />
 
-                                <VBox spacing="11" style="-fx-background-color: linear-gradient(to bottom, #fffacd, #fff8dc); -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.3), 8, 0.3, 0, 2);">
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT" spacing="10">
-                                            <children>
-                                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #d4af37; -fx-min-width: 60;" text="50 sec" />
-                                                <Label style="-fx-font-size: 15px; -fx-text-fill: #666;" text="Prénom:" />
-                                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;" text="Lisa" />
-                                            </children>
-                                        </HBox>
-
-                                        <HBox alignment="CENTER_LEFT" spacing="10">
-                                            <children>
-                                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #d4af37; -fx-min-width: 60;" text="46 sec" />
-                                                <Label style="-fx-font-size: 15px; -fx-text-fill: #666;" text="Pays:" />
-                                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;" text="Japon" />
-                                            </children>
-                                        </HBox>
-
-                                        <HBox alignment="CENTER_LEFT" spacing="10">
-                                            <children>
-                                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #d4af37; -fx-min-width: 60;" text="32 sec" />
-                                                <Label style="-fx-font-size: 15px; -fx-text-fill: #666;" text="Animal:" />
-                                                <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;" text="Kangourou" />
-                                            </children>
-                                        </HBox>
-                                    </children>
+                                <VBox fx:id="vboxRecords" spacing="8" styleClass="records-panel">
+                                    <!-- Dynamic records will be added here -->
                                 </VBox>
                             </children>
-
                         </VBox>
-                    </children>
 
+                    </children>
                 </HBox>
+                    </content>
+                </ScrollPane>
             </center>
 
-            <!-- ===== BOUTONS EN BAS ===== -->
+            <!-- ===== BOTTOM SECTION: REJOINDRE UNE PARTIE ===== -->
             <bottom>
-                <HBox alignment="CENTER" spacing="750" style="-fx-background-color: transparent;">
-                    <padding>
-                        <Insets bottom="22" left="35" right="35" top="8" />
-                    </padding>
+                <VBox alignment="CENTER" style="-fx-padding: 0 0 20 0;">
                     <children>
-
-                        <Button fx:id="btnParametres" prefHeight="53.0" prefWidth="185.0" style="-fx-background-color: rgba(192,192,192,0.3); -fx-background-radius: 25; -fx-padding: 12 20 12 20; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(192,192,192,0.5), 12, 0.5, 0, 4); -fx-border-color: silver; -fx-border-radius: 25; -fx-border-width: 2;">
-                            <graphic>
-                                <HBox alignment="CENTER" spacing="10">
-                                    <children>
-                                        <Label style="-fx-font-size: 16px; -fx-text-fill: white; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 5, 0.7, 0, 1);" text="PARAMÈTRES" />
-                                    </children>
-                                </HBox>
-                            </graphic>
-                        </Button>
+                        <HBox alignment="CENTER" spacing="10" styleClass="join-game-container" style="-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 50; -fx-padding: 10 20; -fx-max-width: 500;">
+                            <children>
+                                <Label text="🔑" style="-fx-font-size: 20px;"/>
+                                <TextField fx:id="tfCodePartie" promptText="Entrer le code de la partie..." styleClass="join-input" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-prompt-text-fill: #aaa; -fx-font-size: 16px; -fx-pref-width: 250px;"/>
+                                <Button fx:id="btnRejoindre" text="REJOINDRE" styleClass="btn-action-small" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 30; -fx-cursor: hand;"/>
+                            </children>
+                        </HBox>
                     </children>
-                </HBox>
+                </VBox>
             </bottom>
 
         </BorderPane>
     </children>
-
 </StackPane>
