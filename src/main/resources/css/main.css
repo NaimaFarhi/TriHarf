@@ -354,6 +354,29 @@
     -fx-border-color: #8e44ad;
 }
 
+/* NEW BOX LAYOUT STYLES */
+.game-category-box {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 8, 0, 0, 2);
+    -fx-border-color: rgba(255, 255, 255, 0.4);
+    -fx-border-radius: 12;
+    -fx-transition: all 0.2s;
+}
+
+.game-category-box:hover {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(142, 68, 173, 0.3), 12, 0, 0, 4);
+}
+
+.game-category-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-alignment: CENTER;
+}
+
 /* =========================================
    RESULTS SCREEN STYLES
    ========================================= */

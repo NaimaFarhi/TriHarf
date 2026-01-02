@@ -43,10 +43,26 @@ public class ListeAttenteController {
         System.out.println("✅ ListeAttenteController initialisé");
     }
 
+    private String gameMode = "MULTI";
+
+    public void setGameMode(String mode) {
+        this.gameMode = mode;
+        System.out.println("Mode de jeu (Attente) : " + mode);
+    }
+
     @FXML
     private void handlePret() {
-        System.out.println("✅ Joueur prêt - Redirection vers partie_multi.fxml");
-        navigateTo("/fxml/partie_multi.fxml", "Mode Multijoueur");
+        System.out.println("✅ Joueur prêt - Redirection vers " + gameMode);
+
+        String targetFxml = "/fxml/partie_multi.fxml";
+        String title = "Mode Multijoueur";
+
+        if ("BATTLE".equals(gameMode)) {
+            targetFxml = "/fxml/partie_battle.fxml";
+            title = "Battle Royale";
+        }
+
+        navigateTo(targetFxml, title);
     }
 
     @FXML

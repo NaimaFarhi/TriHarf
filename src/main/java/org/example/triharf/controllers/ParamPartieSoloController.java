@@ -180,11 +180,10 @@ public class ParamPartieSoloController {
             controller.demarrerPartie();
 
             // Afficher la nouvelle scène
+            // Afficher la nouvelle scène
             Stage stage = (Stage) btnRetour.getScene().getWindow();
-            Scene scene = new Scene(root);
+            stage.getScene().setRoot(root);
             stage.setTitle("Mode Solo");
-            stage.setScene(scene);
-            stage.show();
 
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de la scène partie.fxml");
@@ -201,10 +200,8 @@ public class ParamPartieSoloController {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
             Stage stage = (Stage) btnRetour.getScene().getWindow();
-            Scene scene = new Scene(root);
+            stage.getScene().setRoot(root);
             stage.setTitle(title);
-            stage.setScene(scene);
-            stage.show();
         } catch (IOException e) {
             System.err.println("Erreur: " + fxmlPath);
             e.printStackTrace();

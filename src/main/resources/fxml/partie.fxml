@@ -47,9 +47,9 @@
     <!-- Corps avec les catégories -->
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
         <content>
-            <VBox fx:id="containerCategories" spacing="12.0" style="-fx-padding: 20;">
+            <FlowPane fx:id="containerCategories" hgap="20.0" vgap="20.0" alignment="TOP_CENTER" style="-fx-padding: 20;" prefWrapLength="860.0">
                 <!-- Categories added dynamically -->
-            </VBox>
+            </FlowPane>
         </content>
     </ScrollPane>
 

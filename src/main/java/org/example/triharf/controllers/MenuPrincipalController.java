@@ -46,6 +46,16 @@ public class MenuPrincipalController {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
 
+            // Set Game Mode if navigating to Multiplayer Parameters
+            Object controller = loader.getController();
+            if (controller instanceof ParamPartieMultiController) {
+                if (title.contains("Battle Royale")) {
+                    ((ParamPartieMultiController) controller).setGameMode("BATTLE");
+                } else {
+                    ((ParamPartieMultiController) controller).setGameMode("MULTI");
+                }
+            }
+
             Stage stage = (Stage) btnSolo.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);

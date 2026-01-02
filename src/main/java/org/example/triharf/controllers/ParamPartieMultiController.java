@@ -44,6 +44,13 @@ public class ParamPartieMultiController {
     private List<Categorie> toutesLesCategories = new ArrayList<>();
     private Map<String, CheckBox> checkboxMap = new HashMap<>();
 
+    private String gameMode = "MULTI";
+
+    public void setGameMode(String mode) {
+        this.gameMode = mode;
+        System.out.println("Mode de jeu défini sur : " + mode);
+    }
+
     @FXML
     public void initialize() {
         toutesLesCategories = categorieDAO.getAll();
@@ -158,6 +165,12 @@ public class ParamPartieMultiController {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
             Parent root = loader.load();
+
+            // Pass mode to ListeAttenteController
+            ListeAttenteController controller = loader.getController();
+            if (controller != null) {
+                controller.setGameMode(this.gameMode);
+            }
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             stage.getScene().setRoot(root);

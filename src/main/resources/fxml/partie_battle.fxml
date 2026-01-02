@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.triharf.controllers.JeuBattleController"
+            prefWidth="900.0" prefHeight="600.0"
+            styleClass="root-stack"
+            stylesheets="@../css/main.css">
+
+    <!-- En-tête -->
+    <top>
+        <VBox spacing="0">
+            <children>
+                <HBox alignment="CENTER" prefHeight="70.0" styleClass="game-header" spacing="60.0" style="-fx-border-color: #c0392b; -fx-background-color: rgba(192, 57, 43, 0.2);">
+                    <children>
+                        <!-- Bouton flèche -->
+                        <Button fx:id="btnBack" text="←" styleClass="btn-back"/>
+
+                        <!-- TIMER -->
+                        <HBox alignment="CENTER" spacing="10.0" styleClass="info-box">
+                            <children>
+                                <Label text="Temps:" styleClass="info-label"/>
+                                <Label fx:id="labelTimer" text="" styleClass="info-value">
+                                    <font><Font size="18.0"/></font>
+                                </Label>
+                            </children>
+                        </HBox>
+
+                        <Label text="BATTLE ROYALE" styleClass="header-title" style="-fx-text-fill: #e74c3c;" />
+
+                        <!-- JOUEURS -->
+                        <HBox alignment="CENTER" spacing="10.0" styleClass="info-box">
+                            <children>
+                                <Label text="👥" style="-fx-text-fill: white;"/>
+                                <Label fx:id="labelNbJoueurs" text="" styleClass="info-value"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+
+                <!-- Bande avec la lettre -->
+                <HBox alignment="CENTER" prefHeight="80.0" style="-fx-background-color: rgba(192, 57, 43, 0.1); -fx-padding: 15;">
+                    <children>
+                        <VBox alignment="CENTER" spacing="5">
+                            <children>
+                                <Label text="Lettre à trouver" styleClass="info-label" style="-fx-font-size: 14px;" />
+                                <Label fx:id="lblLettre" text="" styleClass="letter-circle" style="-fx-background-color: #c0392b;">
+                                    <font><Font size="42.0"/></font>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+
+    <!-- Contenu principal -->
+    <center>
+        <HBox spacing="15.0" style="-fx-padding: 20;">
+            <children>
+                <!-- Tableau des joueurs -->
+                <VBox spacing="0.0" prefWidth="650.0" styleClass="content-panel" style="-fx-padding: 0;">
+                    <children>
+                        <HBox fx:id="hboxTableHeader" spacing="0.0" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 10;" alignment="CENTER_LEFT">
+                            <children>
+                                <Label text="RANG" prefWidth="50.0" alignment="CENTER" styleClass="info-label"/>
+                                <Label text="Joueur" prefWidth="100.0" styleClass="info-label"/>
+                            </children>
+                        </HBox>
+
+                        <Separator styleClass="stats-separator" />
+
+                        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+                            <content>
+                                <VBox fx:id="vboxPlayers" spacing="5" style="-fx-padding: 5;"/>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+
+                <!-- Chat / Log -->
+                <VBox spacing="0.0" prefWidth="220.0" styleClass="content-panel" style="-fx-padding: 0;">
+                    <children>
+                        <HBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 12; -fx-background-radius: 12 12 0 0;">
+                            <children>
+                                <Label text="💬 CHAT" styleClass="info-label"/>
+                            </children>
+                        </HBox>
+
+                        <ScrollPane fitToWidth="true" prefHeight="440.0" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+                            <content>
+                                <VBox fx:id="vboxMessages" spacing="10.0" style="-fx-padding: 10;"/>
+                            </content>
+                        </ScrollPane>
+
+                        <HBox spacing="5.0" style="-fx-padding: 10; -fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 0 0 12 12;" alignment="CENTER">
+                            <TextField fx:id="tfMessageChat" promptText="Écrivez un message..." prefWidth="150.0" onAction="#handleSendMessage" />
+                            <Button fx:id="btnEnvoyer" text="➤" onAction="#handleSendMessage" styleClass="btn-secondary"/>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </center>
+    
+    <bottom>
+         <HBox alignment="CENTER" style="-fx-padding: 20;">
+              <Button fx:id="btnTerminer" text="💀 FINIR LE ROUND" styleClass="btn-terminate" prefWidth="300"/>
+         </HBox>
+    </bottom>
+
+</BorderPane>
