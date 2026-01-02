@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-bacc
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    command: serve
+
+volumes:
+  ollama_data:
+
+#docker-compose up -d
+#docker exec -it ollama-bacc ollama pull llama3.2:1b
+
+#To stop: docker-compose stop
+#To start: docker-compose start
+#To restart: docker-compose restart
+#To delete: docker-compose down

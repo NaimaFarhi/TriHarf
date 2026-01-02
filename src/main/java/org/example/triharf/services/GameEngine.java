@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import java.util.Random;
+import java.util.stream.Stream;
 
 public class GameEngine {
     private static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -27,9 +28,12 @@ public class GameEngine {
         this.state = GameState.NOT_STARTED;
     }
 
+    //use streams to generate a letter
     public Character generateRandomLetter() {
-        currentLetter = LETTERS.charAt(random.nextInt(LETTERS.length()));
-        return currentLetter;
+        return LETTERS.chars()
+                .mapToObj(c -> (char) c)
+                .skip(random.nextInt(LETTERS.length()))
+                .findFirst().orElse(null);
     }
 
     public void startTimer(int durationSeconds) {

@@ -24,8 +24,6 @@ public class MenuPrincipalController {
     @FXML
     private Button btnChaos;
 
-
-
     @FXML
     private Button btnParametres;
 

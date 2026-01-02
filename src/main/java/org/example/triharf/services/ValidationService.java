@@ -1,32 +1,33 @@
 package org.example.triharf.services;
 
 import org.example.triharf.dao.MotDAO;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Mot;
 import org.example.triharf.models.Categorie;
 
 public class ValidationService {
     private MotDAO motDAO = new MotDAO();
-    private GeminiValidator geminiValidator = new GeminiValidator();
+    private OllamaValidator ollamaValidator = new OllamaValidator();
 
-    public ValidationResult validateMot(String texte, Categorie categorie, Character lettre) {
+    public ValidationResult validateMot(String texte, Categorie categorie, Character lettre, Langue langue) {
         if (texte.isEmpty() || Character.toLowerCase(texte.charAt(0)) != Character.toLowerCase(lettre)) {
             return new ValidationResult(false, "Must start with " + lettre, 0);
         }
 
         // 1. Check local DB
-        if (motDAO.exists(texte, categorie, lettre)) {
-            Mot mot = motDAO.findByTexteAndCategorie(texte, categorie);
+        if (motDAO.exists(texte, categorie, lettre, langue)) {
+            Mot mot = motDAO.findByTexteAndCategorie(texte, categorie, langue);
             motDAO.incrementUtilisation(mot);
-            int rarity = 10 - Math.min(mot.getNbUtilisations(), 9); // More uses = less rare
+            int rarity = ScoreCalculator.getLocalRarityScore(mot.getNbUtilisations()); // Use centralized logic
             return new ValidationResult(true, "Valid (local DB)", rarity);
         }
 
         // 2. Validate with AI
-        var aiResponse = geminiValidator.validateWord(texte, categorie.getNom(), lettre);
+        var aiResponse = ollamaValidator.validateWord(texte, categorie.getNom(), lettre, langue);
 
         if (aiResponse.isValid()) {
             // 3. Save to DB
-            Mot nouveauMot = new Mot(texte, categorie, lettre);
+            Mot nouveauMot = new Mot(texte, categorie, lettre, langue);
             motDAO.save(nouveauMot);
             return new ValidationResult(true, aiResponse.getMessage(), aiResponse.getRarityScore());
         }
@@ -45,8 +46,16 @@ public class ValidationService {
             this.rarityScore = rarityScore;
         }
 
-        public boolean isValid() { return valid; }
-        public String getMessage() { return message; }
-        public int getRarityScore() { return rarityScore; }
+        public boolean isValid() {
+            return valid;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public int getRarityScore() {
+            return rarityScore;
+        }
     }
 }

@@ -17,7 +17,7 @@ public class TestGameEngine {
 
         // Test ScoreCalculator
         ScoreCalculator calculator = new ScoreCalculator();
-        int score = calculator.calculateScore("Apple", 30, 180);
+        int score = calculator.calculateTotalScore("Apple", 30, 180, 2);
         System.out.println("✅ Score calculé: " + score);
 
         System.out.println("✅ Sprint 1 [F] - Terminé!");

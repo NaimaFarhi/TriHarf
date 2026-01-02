@@ -255,7 +255,7 @@ public class JeuSoloController {
             // 1️⃣ VALIDER LES MOTS via ResultsManager
             // Ceci utilise ValidationService en interne
             // ============================================
-            resultsManager.validerMots(reponses, lettreActuelle);
+            //resultsManager.validerMots(reponses, lettreActuelle, langueActuelle);
 
             // ============================================
             // 2️⃣ RÉCUPÉRER LES RÉSULTATS

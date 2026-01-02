@@ -1,6 +1,7 @@
 package org.example.triharf;
 
 import org.example.triharf.dao.*;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.*;
 import org.example.triharf.services.ValidationService;
 
@@ -18,7 +19,7 @@ public class TestDAO {
         System.out.println("✅ Catégorie: " + cat.getId());
 
         // Test Validation
-        var result = validator.validateMot("Apple", cat, 'A');
+        var result = validator.validateMot("Apple", cat, 'A', Langue.ANGLAIS);
         System.out.println("✅ Validation: " + result.getMessage());
 
         System.out.println("✅ Sprint 1 - DAOs fonctionnels!");

@@ -289,7 +289,7 @@ public class JeuMultiController {
             // ============================================
             // 1️⃣ VALIDER LES MOTS via ResultsManager
             // ============================================
-            resultsManager.validerMots(reponses, lettreActuelle);
+            //resultsManager.validerMots(reponses, lettreActuelle);
 
             // ============================================
             // 2️⃣ RÉCUPÉRER LES RÉSULTATS

@@ -1,6 +1,7 @@
 package org.example.triharf.services;
 
 import org.example.triharf.dao.CategorieDAO;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
 import org.example.triharf.models.Joueur;
 import org.example.triharf.models.Partie;
@@ -20,13 +21,15 @@ public class GameSession {
     private List<Categorie> categories;
     private Map<Categorie, String> reponses;
     private Character lettre;
+    private Langue langue;
 
-    public GameSession(String pseudoJoueur) {
+    public GameSession(String pseudoJoueur, Langue langue) {
         this.gameEngine = new GameEngine();
         this.partieService = new PartieService();
         this.categorieDAO = new CategorieDAO();
         this.joueur = partieService.getOrCreateJoueur(pseudoJoueur);
         this.reponses = new HashMap<>();
+        this.langue = langue;
     }
 
     public void demarrerPartie() {
@@ -37,7 +40,7 @@ public class GameSession {
         lettre = gameEngine.generateRandomLetter();
 
         // Créer partie en DB
-        partie = partieService.creerPartie(joueur, lettre, "SOLO");
+        partie = partieService.creerPartie(joueur, lettre, "SOLO", langue);
 
         // Démarrer timer
         int duration = PropertiesManager.getInt("game.timer.default", 180);
@@ -49,7 +52,7 @@ public class GameSession {
         gameEngine.stopTimer();
 
         // Valider tous les mots
-        resultsManager.validerMots(reponses, lettre);
+        resultsManager.validerMots(reponses, lettre, langue);
 
         // Sauvegarder résultats
         partieService.terminerPartie(

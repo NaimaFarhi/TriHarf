@@ -7,6 +7,7 @@ import org.hibernate.query.Query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CategorieDAO extends GenericDAO<Categorie> {
 
@@ -32,6 +33,20 @@ public class CategorieDAO extends GenericDAO<Categorie> {
             return null;
         }
     }
+
+    public List<String> getCategorieNames() {
+        return findAll().stream()
+                .map(Categorie::getNom)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getActiveCategorieNames() {
+        return findAll().stream()
+                .filter(Categorie::getActif)
+                .map(Categorie::getNom)
+                .collect(Collectors.toList());
+    }
+
 
     /**
      * Récupère toutes les catégories actives
