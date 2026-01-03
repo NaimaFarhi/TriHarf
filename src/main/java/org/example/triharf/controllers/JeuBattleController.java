@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
 import org.example.triharf.HelloApplication;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.services.GameEngine;
 import org.example.triharf.services.ResultsManager;
 import org.example.triharf.services.ValidationService;
@@ -300,7 +301,7 @@ public class JeuBattleController {
             // ============================================
             // 1️⃣ VALIDER
             // ============================================
-            resultsManager.validerMots(reponses, lettreActuelle);
+            resultsManager.validerMots(reponses, lettreActuelle, Langue.FRANCAIS);
 
             // ============================================
             // 2️⃣ RÉSULTATS
