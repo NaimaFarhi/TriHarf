@@ -5,135 +5,69 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="TOP_CENTER"
-      prefHeight="400.0"
-      prefWidth="600.0"
-      spacing="5.0"
-      style="-fx-background-color: #80808047; -fx-padding: 20;"
-      xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.triharf.controllers.ParametresGenerauxController">
+<VBox prefHeight="600.0" prefWidth="900.0" spacing="15.0" styleClass="root-vbox" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.ParametresGenerauxController">
 
-   <!-- DÉCLARATION DU TOGGLEGROUP -->
    <fx:define>
       <ToggleGroup fx:id="langueGroup"/>
    </fx:define>
 
-   <children>
+    <children>
 
-      <!-- HEADER -->
-      <HBox alignment="CENTER_LEFT"
-            prefHeight="20.0"
-            prefWidth="560.0"
-            style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+        <!-- HEADER -->
+        <HBox alignment="CENTER_LEFT" prefWidth="560.0" styleClass="header-bar">
+            <children>
+                <Button fx:id="btnRetour" onAction="#handleRetour" styleClass="btn-back" text="←" />
+                <Label text="⚙ Configuration" styleClass="header-title">
+                    <HBox.margin>
+                        <Insets left="40.0" />
+                    </HBox.margin>
+                </Label>
+            </children>
+        </HBox>
 
-         <children>
+        <!-- SCROLLABLE CONTENT -->
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <VBox spacing="15.0" alignment="TOP_CENTER" style="-fx-padding: 10;">
+                    <children>
 
-            <Button text="←"
-                    fx:id="btnRetour"
-                    onAction="#handleRetour"
-                    style="-fx-background-color: transparent;"
-                    textFill="WHITE">
-               <font>
-                  <Font size="24.0"/>
-               </font>
-            </Button>
+                        <!-- Choix de la langue -->
+                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                            <children>
+                                <Label styleClass="label-bright" text="Langue :" />
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <RadioButton fx:id="rbFrancais" selected="true" styleClass="radio-button" text="Français" toggleGroup="$langueGroup" />
+                                        <RadioButton fx:id="rbAnglais" styleClass="radio-button" text="English" toggleGroup="$langueGroup" />
+                                        <RadioButton fx:id="rbEspagnol" styleClass="radio-button" text="Español" toggleGroup="$langueGroup" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
 
-            <Label text="⚙ Paramètres" textFill="WHITE">
-               <font>
-                  <Font size="24.0"/>
-               </font>
-               <HBox.margin>
-                  <Insets left="140.0"/>
-               </HBox.margin>
-            </Label>
+                        <!-- Pseudo -->
+                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                            <children>
+                                <Label styleClass="label-bright" text="Pseudo :" />
+                                <TextField fx:id="txtPseudo" promptText="Entrez votre pseudo..." styleClass="text-field" />
+                            </children>
+                        </VBox>
 
-         </children>
-      </HBox>
+                        <!-- Son -->
+                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                            <children>
+                                <Label styleClass="label-bright" text="Volume :" />
+                                <CheckBox fx:id="cbMute" styleClass="check-box" text="Couper le son" />
+                                <Slider fx:id="sliderVolume" max="100" min="0" styleClass="slider" value="50" />
+                            </children>
+                        </VBox>
 
-      <!-- LANGUE -->
-      <VBox prefHeight="69.0" prefWidth="560.0" style="-fx-background-color: white;">
-         <children>
+                        <Button fx:id="btnEnregistrer" onAction="#handleEnregistrer" styleClass="btn-action" text="💾 ENREGISTRER" />
 
-            <Label text=" Langue:"/>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
 
-            <HBox prefHeight="33.0" prefWidth="560.0" spacing="130.0">
-               <children>
-
-                  <RadioButton text="Français"
-                               fx:id="rbFr"
-                               toggleGroup="$langueGroup"
-                               onAction="#handleLangue"/>
-
-                  <RadioButton text=" العربية"
-                               fx:id="rbAr"
-                               toggleGroup="$langueGroup"
-                               onAction="#handleLangue"/>
-
-                  <RadioButton text="English"
-                               fx:id="rbEn"
-                               toggleGroup="$langueGroup"
-                               onAction="#handleLangue"/>
-
-               </children>
-            </HBox>
-
-         </children>
-      </VBox>
-
-      <!-- PSEUDO -->
-      <VBox prefHeight="68.0" prefWidth="560.0" style="-fx-background-color: white;">
-         <children>
-
-            <HBox spacing="10.0">
-               <children>
-                  <Label text="👤"/>
-                  <Label text="Pseudo:"/>
-               </children>
-            </HBox>
-
-            <TextField fx:id="txtPseudo"
-                       promptText="Entrez votre pseudo..."/>
-
-         </children>
-      </VBox>
-
-      <!-- SON -->
-      <VBox prefHeight="84.0" prefWidth="560.0" style="-fx-background-color: white;">
-         <children>
-
-            <HBox spacing="10.0">
-               <children>
-                  <Label text="🔊"/>
-                  <Label text="Son:"/>
-               </children>
-            </HBox>
-
-            <HBox spacing="15.0">
-
-               <CheckBox text="Activer le son"
-                         fx:id="chkSon"
-                         selected="true"
-                         onAction="#handleSon"/>
-
-               <Slider min="0" max="100" value="70"
-                       fx:id="sliderVolume"
-                       onMouseReleased="#handleVolume"/>
-
-               <Label text="70%"
-                      fx:id="lblVolume"/>
-
-            </HBox>
-
-         </children>
-      </VBox>
-
-      <!-- JOUER -->
-      <Button text="▶ JOUER"
-              fx:id="btnJouer"
-              onAction="#handleJouer"
-              style="-fx-background-color: #27ae60;"
-              textFill="WHITE"/>
-
-   </children>
+    </children>
 </VBox>

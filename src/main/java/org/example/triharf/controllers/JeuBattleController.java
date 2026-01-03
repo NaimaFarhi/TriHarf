@@ -1,17 +1,14 @@
 package org.example.triharf.controllers;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.FlowPane;
+import javafx.animation.Timeline;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
-import javafx.collections.FXCollections;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.services.GameEngine;
 import org.example.triharf.services.ResultsManager;
@@ -22,27 +19,44 @@ import org.example.triharf.dao.CategorieDAO;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * JeuSoloController.java
- * Lie GameEngine + ResultsManager + ValidationService
- * Flux : Démarrer → Jouer → Valider → Afficher résultats
+ * JeuBattleController.java
+ * Gère le jeu Battle Royale.
+ * Similaire à JeuMultiController pour l'instant.
  */
-public class JeuSoloController {
+public class JeuBattleController {
 
     // ===== UI COMPONENTS =====
     @FXML
-    private Label lblTimer;
+    private Button btnRetour;
+
+    @FXML
+    private Label labelTimer;
+
+    @FXML
+    private Label labelNbJoueurs;
 
     @FXML
     private Label lblLettre;
 
     @FXML
-    private Label lblScore;
+    private VBox containerCategories;
 
     @FXML
-    private FlowPane containerCategories;
+    private VBox vboxPlayers;
+
+    @FXML
+    private VBox vboxMessages;
+
+    @FXML
+    private TextField tfMessageChat;
+
+    @FXML
+    private Button btnEnvoyer;
+
+    @FXML
+    private HBox hboxTableHeader;
 
     @FXML
     private Button btnTerminer;
@@ -54,16 +68,18 @@ public class JeuSoloController {
 
     // ===== STATE MANAGEMENT =====
     private Character lettreActuelle;
-    private int scorePreview = 0;
+    private int timeRemaining = 180; // 3 minutes
+    private Timeline timeline;
+    private int nbJoueurs = 1; // Sera mis à jour via réseau
     private final Map<String, TextField> textFieldsParCategorie = new HashMap<>();
     private final Map<Categorie, String> reponses = new HashMap<>();
 
     // ===== INJECTED DATA =====
-    private List<String> categoriesNoms; // Reçoit les noms de categories
-    private List<Categorie> categories; // Objets Categorie complets
-    private int difficulte;
-    private String joueur;
-    private int gameDuration = 180; // 3 minutes
+    private List<String> categoriesNoms;
+    private List<Categorie> categories;
+    private String joueur = "Joueur_Battle";
+    private int difficulte = 1;
+    private int gameDuration = 180;
 
     // ===== DAO =====
     private CategorieDAO categorieDAO = new CategorieDAO();
@@ -84,15 +100,15 @@ public class JeuSoloController {
                 this.categories.add(cat);
             }
         }
-        System.out.println("Catégories converties: " + categories.size());
-    }
-
-    public void setDifficulte(int difficulte) {
-        this.difficulte = difficulte;
+        System.out.println("✅ Catégories Battle converties: " + categories.size());
     }
 
     public void setJoueur(String joueur) {
         this.joueur = joueur;
+    }
+
+    public void setDifficulte(int difficulte) {
+        this.difficulte = difficulte;
     }
 
     /*
@@ -103,10 +119,17 @@ public class JeuSoloController {
 
     @FXML
     public void initialize() {
+        System.out.println("✅ JeuBattleController initialisé");
+
         this.gameEngine = new GameEngine();
         this.validationService = new ValidationService();
         this.resultsManager = new ResultsManager(gameDuration);
-        System.out.println("✅ JeuSoloController initialisé");
+
+        if (btnRetour != null)
+            btnRetour.setOnAction(e -> retourMenu());
+
+        if (btnTerminer != null)
+            btnTerminer.setOnAction(e -> handleTerminer());
     }
 
     /*
@@ -118,18 +141,12 @@ public class JeuSoloController {
     public void demarrerPartie() {
         if (categories == null || categories.isEmpty()) {
             System.err.println("❌ ERREUR : Aucune catégorie reçue !");
-            showAlert("Erreur", "Aucune catégorie sélectionnée !");
             return;
         }
 
-        if (joueur == null || joueur.trim().isEmpty()) {
-            joueur = "Joueur_Anonyme";
-        }
-
-        System.out.println("✅ Démarrage partie");
+        System.out.println("✅ Démarrage partie Battle Royale");
         System.out.println("   Joueur: " + joueur);
         System.out.println("   Catégories: " + categories.size());
-        System.out.println("   Difficulté: " + difficulte);
 
         try {
             // ============================================
@@ -147,7 +164,6 @@ public class JeuSoloController {
             // 3️⃣ SETUP LISTENERS
             // ============================================
             ajouterListenersScore();
-            mettreAJourScore();
 
             // ============================================
             // 4️⃣ DÉMARRER TIMER
@@ -156,10 +172,11 @@ public class JeuSoloController {
             gameEngine.setOnGameEnd(this::handleTerminerAuto);
             gameEngine.startTimer(gameDuration);
 
+            System.out.println("✅ Partie Battle démarrée");
+
         } catch (Exception e) {
             System.err.println("❌ Erreur lors du démarrage: " + e.getMessage());
             e.printStackTrace();
-            showAlert("Erreur", "Impossible de démarrer la partie");
         }
     }
 
@@ -170,81 +187,92 @@ public class JeuSoloController {
      */
 
     private void creerChampsDynamiquement() {
+        if (containerCategories == null)
+            return;
+
         containerCategories.getChildren().clear();
         textFieldsParCategorie.clear();
         reponses.clear();
 
         for (Categorie categorie : categories) {
-            // Box pour chaque catégorie
-            VBox box = new VBox(8);
-            box.setAlignment(javafx.geometry.Pos.CENTER);
-            box.getStyleClass().add("game-category-box");
-            box.setPrefWidth(180); // Fixed width for uniformity
-            box.setPadding(new Insets(10));
+            HBox ligne = new HBox(15);
+            ligne.setPadding(new Insets(10));
+            ligne.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5;");
 
-            // Nom de la catégorie (HAUT)
             Label labelCategorie = new Label(categorie.getNom());
-            labelCategorie.getStyleClass().add("game-category-label");
-            labelCategorie.setWrapText(true);
-            labelCategorie.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+            labelCategorie.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+            labelCategorie.setMinWidth(120);
 
-            // Champ de réponse (BAS)
             TextField textField = new TextField();
-            textField.setPromptText("...");
-            textField.setAlignment(javafx.geometry.Pos.CENTER);
-            textField.getStyleClass().add("game-input-field");
+            textField.setPromptText("Entrez une réponse...");
+            textField.setPrefWidth(300);
 
             textFieldsParCategorie.put(categorie.getNom(), textField);
             reponses.put(categorie, "");
 
-            box.getChildren().addAll(labelCategorie, textField);
-            containerCategories.getChildren().add(box);
+            ligne.getChildren().addAll(labelCategorie, textField);
+            containerCategories.getChildren().add(ligne);
         }
     }
 
     private void ajouterListenersScore() {
         for (TextField tf : textFieldsParCategorie.values()) {
-            tf.textProperty().addListener((obs, oldVal, newVal) -> mettreAJourScore());
+            tf.textProperty().addListener((obs, oldVal, newVal) -> {
+                // Update reponses
+            });
         }
     }
 
     /*
      * =======================
-     * LOGIQUE DU JEU
+     * AFFICHAGE
      * =======================
      */
 
     private void afficherLettre() {
-        lblLettre.setText(lettreActuelle.toString());
-        lblLettre.setStyle("-fx-font-size: 48; -fx-font-weight: bold; -fx-text-fill: #FF6B6B;");
+        if (lblLettre != null) {
+            lblLettre.setText(lettreActuelle.toString());
+            lblLettre.setStyle("-fx-font-size: 48; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"); // Red for Battle
+        }
     }
 
     private void afficherTimer() {
-        lblTimer.setText(gameEngine.formatTime());
-    }
-
-    private void mettreAJourScore() {
-        scorePreview = 0;
-        for (TextField tf : textFieldsParCategorie.values()) {
-            String reponse = tf.getText().trim();
-            if (!reponse.isEmpty()
-                    && Character.toLowerCase(reponse.charAt(0)) == Character.toLowerCase(lettreActuelle)) {
-                scorePreview += 10; // Score de preview
-            }
+        if (labelTimer != null) {
+            labelTimer.setText(gameEngine.formatTime());
         }
-        lblScore.setText(scorePreview + " pts (aperçu)");
     }
 
     private void recupererReponses() {
         reponses.clear();
-        int index = 0;
         for (Categorie categorie : categories) {
             TextField tf = textFieldsParCategorie.get(categorie.getNom());
             if (tf != null) {
                 reponses.put(categorie, tf.getText().trim());
             }
-            index++;
         }
+    }
+
+    /*
+     * =======================
+     * CHAT
+     * =======================
+     */
+
+    @FXML
+    private void handleSendMessage() {
+        if (tfMessageChat == null || vboxMessages == null)
+            return;
+
+        String message = tfMessageChat.getText().trim();
+        if (message.isEmpty())
+            return;
+
+        // Ajouter un label pour le message
+        Label msgLabel = new Label(joueur + ": " + message);
+        msgLabel.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
+        vboxMessages.getChildren().add(msgLabel);
+
+        tfMessageChat.clear();
     }
 
     /*
@@ -254,11 +282,11 @@ public class JeuSoloController {
      */
 
     @FXML
-    public void handleTerminer(ActionEvent event) {
+    private void handleTerminer() {
         terminerPartie();
     }
 
-    public void handleTerminerAuto() {
+    private void handleTerminerAuto() {
         terminerPartie();
     }
 
@@ -267,37 +295,27 @@ public class JeuSoloController {
             gameEngine.stopTimer();
             recupererReponses();
 
-            System.out.println("🏁 Partie terminée");
-            System.out.println("   Lettre: " + lettreActuelle);
-            System.out.println("   Réponses: " + reponses.size());
+            System.out.println("🏁 Partie Battle terminée");
 
             // ============================================
-            // 1️⃣ VALIDER LES MOTS via ResultsManager
-            // Ceci utilise ValidationService en interne
+            // 1️⃣ VALIDER
             // ============================================
-            //resultsManager.validerMots(reponses, lettreActuelle, langueActuelle);
+            resultsManager.validerMots(reponses, lettreActuelle);
 
             // ============================================
-            // 2️⃣ RÉCUPÉRER LES RÉSULTATS
+            // 2️⃣ RÉSULTATS
             // ============================================
             List<ResultatPartie> resultats = resultsManager.getResultats();
             int scoreTotal = resultsManager.getScoreTotal();
             long dureePartie = resultsManager.getDureePartie();
 
-            System.out.println("✅ Validation complète");
-            System.out.println("   Score total: " + scoreTotal);
-            System.out.println("   Durée: " + dureePartie + "s");
-            System.out.println("   Résultats: " + resultats.size());
-
             // ============================================
-            // 3️⃣ NAVIGUER VERS RÉSULTATS avec les données
+            // 3️⃣ NAVIGUER
             // ============================================
             navigateToResults(resultats, scoreTotal, dureePartie);
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur lors de la fermeture: " + e.getMessage());
             e.printStackTrace();
-            showAlert("Erreur", "Erreur lors de la validation: " + e.getMessage());
         }
     }
 
@@ -313,44 +331,43 @@ public class JeuSoloController {
                     HelloApplication.class.getResource("/fxml/Resultats.fxml"));
             Parent root = loader.load();
 
-            // ⚠️ CRUCIAL : Passer les données au controller suivant
+            // Passer les données au ResultatsController
             ResultatsController resultatsController = loader.getController();
             resultatsController.displayResults(resultats, scoreTotal, dureePartie, joueur, lettreActuelle);
 
-            // Obtenir la Stage de manière sécurisée
             Stage stage = null;
             if (btnTerminer != null && btnTerminer.getScene() != null) {
                 stage = (Stage) btnTerminer.getScene().getWindow();
-            } else {
-                System.err.println("❌ Impossible de trouver la Stage via btnTerminer");
-                return;
+            } else if (btnRetour != null && btnRetour.getScene() != null) {
+                stage = (Stage) btnRetour.getScene().getWindow();
             }
 
             if (stage != null) {
-                stage.setTitle("Résultats de la Partie");
-                stage.setScene(new Scene(root));
-                stage.show();
-                System.out.println("✅ Navigation vers Résultats réussie");
+                stage.getScene().setRoot(root);
+                stage.setTitle("Résultats Battle Royale");
             }
 
         } catch (IOException e) {
-            System.err.println("❌ Erreur navigation: " + e.getMessage());
             e.printStackTrace();
-            showAlert("Erreur", "Erreur lors de l'affichage des résultats");
         }
     }
 
-    /*
-     * =======================
-     * UTILITAIRES
-     * =======================
-     */
+    private void retourMenu() {
+        if (timeline != null) {
+            timeline.stop();
+        }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("/fxml/main_menu.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) btnRetour.getScene().getWindow();
+            stage.setTitle("Menu Principal");
+            stage.getScene().setRoot(root);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

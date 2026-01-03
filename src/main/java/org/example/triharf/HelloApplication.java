@@ -12,7 +12,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Initialise le SoundManager
-       //  new SoundManager();
+        // new SoundManager();
 
         // Charge le menu principal
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/fxml/main_menu.fxml"));
