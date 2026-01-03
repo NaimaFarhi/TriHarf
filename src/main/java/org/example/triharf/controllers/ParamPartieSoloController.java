@@ -175,6 +175,10 @@ public class ParamPartieSoloController {
             JeuSoloController controller = loader.getController();
             controller.setCategories(categoriesSelectionnees);
             controller.setDifficulte(niveauDifficulte);
+            
+            // INJECTION DES PARAMÈTRES GLOBAUX
+            controller.setLangue(ParametresGenerauxController.langueGlobale);
+            controller.setJoueur(ParametresGenerauxController.pseudoGlobal);
 
             // Démarrer la partie après avoir injecté les données
             controller.demarrerPartie();

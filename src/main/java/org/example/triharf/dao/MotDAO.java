@@ -51,4 +51,15 @@ public class MotDAO extends GenericDAO<Mot> {
         return findAll().stream()
                 .collect(Collectors.groupingBy(Mot::getLettre, Collectors.counting()));
     }
+
+    public void deleteAll() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createMutationQuery("DELETE FROM Mot").executeUpdate();
+            session.getTransaction().commit();
+            System.out.println("✅ Base de données mots nettoyée !");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -33,6 +33,11 @@ public class GameSession {
     }
 
     public void demarrerPartie() {
+        int duration = PropertiesManager.getInt("game.timer.default", 180);
+        demarrerPartie(duration);
+    }
+
+    public void demarrerPartie(int durationSeconds) {
         // Charger catégories actives
         categories = categorieDAO.findAllActif();
 
@@ -42,10 +47,9 @@ public class GameSession {
         // Créer partie en DB
         partie = partieService.creerPartie(joueur, lettre, "SOLO", langue);
 
-        // Démarrer timer
-        int duration = PropertiesManager.getInt("game.timer.default", 180);
-        resultsManager = new ResultsManager(duration);
-        gameEngine.startTimer(duration);
+        // Démarrer timer avec la durée spécifiée
+        resultsManager = new ResultsManager(durationSeconds);
+        gameEngine.startTimer(durationSeconds);
     }
 
     public void terminerPartie() {
@@ -54,12 +58,16 @@ public class GameSession {
         // Valider tous les mots
         resultsManager.validerMots(reponses, lettre, langue);
 
-        // Sauvegarder résultats
-        partieService.terminerPartie(
-                partie,
-                resultsManager.getScoreTotal(),
-                (int) resultsManager.getDureePartie()
-        );
+        // Sauvegarder résultats si la partie a été bien créée
+        if (partie != null) {
+            partieService.terminerPartie(
+                    partie,
+                    resultsManager.getScoreTotal(),
+                    (int) resultsManager.getDureePartie()
+            );
+        } else {
+            System.err.println("❌ ERREUR: Impossible de sauvegarder la partie (partie est null)");
+        }
     }
 
     public void setReponse(Categorie categorie, String mot) {
@@ -72,4 +80,5 @@ public class GameSession {
     public List<Categorie> getCategories() { return categories; }
     public Character getLettre() { return lettre; }
     public Joueur getJoueur() { return joueur; }
+
 }

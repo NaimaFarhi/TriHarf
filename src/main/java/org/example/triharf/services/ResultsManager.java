@@ -32,7 +32,7 @@ public class ResultsManager {
     }
 
     public void validerMots(Map<Categorie, String> reponses, Character lettre, Langue langue) {
-        resultats.clear();
+        // resultats.clear(); // Non nécessaire car on écrase la liste plus bas
 
         // Validate in parallel
         List<CompletableFuture<ResultatPartie>> futures = reponses.entrySet().stream()
@@ -58,8 +58,10 @@ public class ResultsManager {
                 }))
                 .toList();
 
-        // Wait for all
-        resultats = futures.stream().map(CompletableFuture::join).toList();
+        // Wait for all and collect in a MUTABLE list
+        resultats = futures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toCollection(ArrayList::new));
         scoreTotal = getScoreTotalStreams();
     }
 

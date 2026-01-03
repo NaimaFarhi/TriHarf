@@ -7,40 +7,35 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
+import org.example.triharf.enums.Langue;
+import org.example.triharf.services.GameSession;
+import org.example.triharf.services.SessionManager;
 
 import java.io.IOException;
 
 /**
- * Contrôleur pour les paramètres généraux de l'app (Configuration.fxml)
+ * Contrôleur pour les paramètres généraux (Configuration.fxml)
  */
 public class ParametresGenerauxController {
 
-    @FXML
-    private Button btnRetour; // Le bouton "←"
+    // Trigger recompile
+    // ================= STATIC SETTINGS =================
+    // Accessible depuis n'importe quel contrôleur
+    public static Langue langueGlobale = Langue.FRANCAIS;
+    public static String pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
 
-    @FXML
-    private RadioButton rbFrancais;
-    @FXML
-    private RadioButton rbArabic;
-    @FXML
-    private RadioButton rbEnglish;
-    @FXML
-    private ToggleGroup langueGroup;
+    @FXML private Button btnRetour;
+    @FXML private Button btnJouer;
 
-    @FXML
-    private TextField tfPseudo;
+    @FXML private RadioButton rbFrancais;
+    @FXML private RadioButton rbArabe;
+    @FXML private RadioButton rbAnglais;
+    @FXML private ToggleGroup langueGroup;
 
-    @FXML
-    private CheckBox checkboxSon;
-
-    @FXML
-    private Slider sliderVolume;
-
-    @FXML
-    private Label labelVolume; // Pour afficher "70%"
-
-    @FXML
-    private Button btnJouer; // "▶ JOUER"
+    @FXML private TextField txtPseudo;
+    @FXML private CheckBox cbMute;
+    @FXML private Slider sliderVolume;
+    // @FXML private Label labelVolume; // N'existe pas dans le FXML
 
     private String langueSelectionnee = "Français";
     private String pseudo = "";
@@ -49,94 +44,95 @@ public class ParametresGenerauxController {
 
     @FXML
     public void initialize() {
-        // RadioButtons pour la langue
-        if (rbFrancais != null) {
-            rbFrancais.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) langueSelectionnee = "Français";
-            });
-        }
-        if (rbArabic != null) {
-            rbArabic.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) langueSelectionnee = "Arabe";
-            });
-        }
-        if (rbEnglish != null) {
-            rbEnglish.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) langueSelectionnee = "English";
-            });
-        }
+
+        // Sélection par défaut
+        if (rbFrancais != null) rbFrancais.setSelected(true);
+        // labelVolume.setText((int) volume + "%"); // Retiré car pas de label
+
+        // Langue
+        langueGroup.selectedToggleProperty().addListener((obs, old, selected) -> {
+            if (selected == rbFrancais) langueSelectionnee = "Français";
+            else if (selected == rbArabe) langueSelectionnee = "Arabe";
+            else if (selected == rbAnglais) langueSelectionnee = "English";
+        });
 
         // Pseudo
-        if (tfPseudo != null) {
-            tfPseudo.textProperty().addListener((obs, oldVal, newVal) -> {
-                pseudo = newVal;
-                System.out.println("Pseudo : " + pseudo);
-            });
+        if (txtPseudo != null) {
+            // Afficher le pseudo global actuel (généré aléatoirement ou modifié)
+            txtPseudo.setText(pseudoGlobal);
+            pseudo = pseudoGlobal;
+            
+            txtPseudo.textProperty().addListener((obs, old, value) -> pseudo = value);
         }
 
-        // Son
-        if (checkboxSon != null) {
-            checkboxSon.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                sonActive = newVal;
-                System.out.println("Son " + (newVal ? "activé" : "désactivé"));
-                if (sliderVolume != null) {
-                    sliderVolume.setDisable(!newVal);
-                }
+        // Son (cbMute = true => sonActive = false)
+        if (cbMute != null) {
+            cbMute.selectedProperty().addListener((obs, old, isMuted) -> {
+                sonActive = !isMuted;
+                if (sliderVolume != null) sliderVolume.setDisable(isMuted);
             });
         }
 
         // Volume
         if (sliderVolume != null) {
-            sliderVolume.valueProperty().addListener((obs, oldVal, newVal) -> {
-                volume = newVal.doubleValue();
-                if (labelVolume != null) {
-                    labelVolume.setText((int) volume + "%");
-                }
-                System.out.println("Volume : " + (int) volume + "%");
+            sliderVolume.valueProperty().addListener((obs, old, value) -> {
+                volume = value.doubleValue();
+                // if (labelVolume != null) labelVolume.setText((int) volume + "%");
             });
         }
     }
 
-    @FXML
-    public void handleRetour() {
-        retourMenu();
-    }
-
-    @FXML
-    public void handleLangue() {
-        System.out.println("Langue sélectionnée : " + langueSelectionnee);
-    }
-
-    @FXML
-    public void handleSon() {
-        System.out.println("Son " + (sonActive ? "activé" : "désactivé"));
-        if (sliderVolume != null) {
-            sliderVolume.setDisable(!sonActive);
-        }
-    }
-
-    @FXML
-    public void handleVolume() {
-        System.out.println("Volume : " + (int) volume + "%");
-    }
+    // ================= ACTIONS =================
 
     @FXML
     public void handleJouer() {
-        allerAuMenu();
+
+        sauvegarderParametres();
+
+        if (pseudo == null || pseudo.isBlank()) {
+            pseudo = pseudoGlobal; // Keep existing random pseudo instead of resetting to "Joueur"
+        }
+
+        // Mise à jour des globales
+        pseudoGlobal = pseudo;
+        langueGlobale = getLangueEnum();
+
+        System.out.println("🎮 Paramètres Validés : " + pseudoGlobal + " | " + langueGlobale);
+
+        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
-    private void allerAuMenu() {
-        System.out.println("Paramètres sauvegardés :");
+    @FXML
+    public void handleRetour() {
+        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
+    }
+    @FXML
+    public void handleEnregistrer() {
+        sauvegarderParametres();
+        
+        // Mise à jour des globales
+        pseudoGlobal = pseudo;
+        langueGlobale = getLangueEnum();
+        
+        System.out.println("💾 Enregistrement terminé: " + pseudoGlobal + " / " + langueGlobale);
+    }
+    // ================= LOGIQUE =================
+
+    private void sauvegarderParametres() {
+        System.out.println("✅ Paramètres sauvegardés :");
         System.out.println("- Langue : " + langueSelectionnee);
         System.out.println("- Pseudo : " + pseudo);
         System.out.println("- Son : " + (sonActive ? "activé" : "désactivé"));
         System.out.println("- Volume : " + (int) volume + "%");
-
-        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
-    private void retourMenu() {
-        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
+    private Langue getLangueEnum() {
+        return switch (langueSelectionnee) {
+            case "Français" -> Langue.FRANCAIS;
+            case "Arabe" -> Langue.ARABE;
+            case "English" -> Langue.ENGLISH;
+            default -> Langue.FRANCAIS;
+        };
     }
 
     private void navigateTo(String fxmlPath, String title) {
@@ -144,12 +140,10 @@ public class ParametresGenerauxController {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
             Stage stage = (Stage) btnRetour.getScene().getWindow();
-            Scene scene = new Scene(root);
+            stage.setScene(new Scene(root));
             stage.setTitle(title);
-            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Erreur: " + fxmlPath);
             e.printStackTrace();
         }
     }
