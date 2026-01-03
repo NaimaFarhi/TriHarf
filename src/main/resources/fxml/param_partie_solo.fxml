@@ -2,165 +2,109 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
-      minHeight="-Infinity" minWidth="-Infinity"
-      prefHeight="500.0" prefWidth="600.0"
-      spacing="5.0"
-      style="-fx-background-color: #80808047; -fx-padding: 20;"
-      xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.triharf.controllers.ParamPartieSoloController">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="900.0" spacing="15.0" styleClass="root-vbox" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.ParamPartieSoloController">
     <children>
 
-        <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="560.0"
-              style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+        <!-- HEADER -->
+        <HBox alignment="CENTER_LEFT" prefWidth="560.0" styleClass="header-bar">
             <children>
-
-                <!-- bouton retour -->
-                <Button mnemonicParsing="false"
-                        fx:id="btnRetour"
-                        onAction="#handleRetour"
-                        style="-fx-background-color: transparent;"
-                        text="←" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold Italic" size="24.0" />
-                    </font>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </Button>
-
-                <Label alignment="CENTER" contentDisplay="CENTER"
-                       text="⚙ Configuration de la partie" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="24.0" />
-                    </font>
+                <Button fx:id="btnRetour" onAction="#handleRetour" styleClass="btn-back" text="←" />
+                <Label text="⚙ Configuration de la partie" styleClass="header-title">
                     <HBox.margin>
-                        <Insets left="80.0" />
+                        <Insets left="40.0" />
                     </HBox.margin>
                 </Label>
-
             </children>
         </HBox>
 
-        <!-- VBox Niveau de difficulté -->
-        <VBox prefHeight="120.0" prefWidth="560.0"
-              style="-fx-background-color: white;"
-              spacing="10.0">
-            <padding>
-                <Insets top="10.0" bottom="10.0" left="15.0" right="15.0" />
-            </padding>
-
-            <children>
-
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <!-- SCROLLABLE CONTENT -->
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-padding: 10;">
                     <children>
-                        <Label text="🎯">
-                            <font><Font size="22.0" /></font>
-                        </Label>
-                        <Label text="Niveau de difficulté:">
-                            <font><Font name="System Bold" size="18.0" /></font>
-                        </Label>
-                    </children>
-                </HBox>
-
-                <VBox spacing="8.0">
-                    <children>
-
-                        <HBox alignment="CENTER_LEFT" spacing="20.0">
+                        <!-- Niveau de difficulté -->
+                        <VBox prefWidth="560.0" spacing="15.0" styleClass="content-panel">
                             <children>
-                                <Label text="Facile" style="-fx-text-fill: #27ae60; -fx-font-weight: bold;">
-                                    <font><Font size="14.0" /></font>
-                                </Label>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="🎯" style="-fx-font-size: 20px;" textFill="white"/>
+                                        <Label text="Niveau de difficulté:" styleClass="label-bright"/>
+                                    </children>
+                                </HBox>
 
-                                <Label text="Moyen" style="-fx-text-fill: #f39c12; -fx-font-weight: bold;">
-                                    <font><Font size="14.0" /></font>
-                                    <HBox.margin>
-                                        <Insets left="140.0" />
-                                    </HBox.margin>
-                                </Label>
+                                <!-- Toggle Buttons for difficulty -->
+                                <HBox alignment="CENTER" spacing="20.0" styleClass="difficulty-container">
+                                    <children>
+                                        <!-- FACILE -->
+                                        <ToggleButton fx:id="btnFacile" styleClass="difficulty-toggle, difficulty-facile">
+                                            <graphic>
+                                                <VBox alignment="CENTER" spacing="5">
+                                                    <children>
+                                                        <Label text="🌱" styleClass="difficulty-icon"/>
+                                                        <Label text="FACILE" styleClass="difficulty-label" style="-fx-text-fill: #2ecc71;"/>
+                                                        <Label text="3 min" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+                                                    </children>
+                                                </VBox>
+                                            </graphic>
+                                        </ToggleButton>
 
-                                <Label text="Difficile" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold;">
-                                    <font><Font size="14.0" /></font>
-                                    <HBox.margin>
-                                        <Insets left="110.0" />
-                                    </HBox.margin>
-                                </Label>
+                                        <!-- MOYEN -->
+                                        <ToggleButton fx:id="btnMoyen" selected="true" styleClass="difficulty-toggle, difficulty-moyen">
+                                            <graphic>
+                                                <VBox alignment="CENTER" spacing="5">
+                                                    <children>
+                                                        <Label text="⚡" styleClass="difficulty-icon"/>
+                                                        <Label text="MOYEN" styleClass="difficulty-label" style="-fx-text-fill: #f1c40f;"/>
+                                                        <Label text="2 min" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+                                                    </children>
+                                                </VBox>
+                                            </graphic>
+                                        </ToggleButton>
+
+                                        <!-- DIFFICILE -->
+                                        <ToggleButton fx:id="btnDifficile" styleClass="difficulty-toggle, difficulty-difficile">
+                                            <graphic>
+                                                <VBox alignment="CENTER" spacing="5">
+                                                    <children>
+                                                        <Label text="🔥" styleClass="difficulty-icon"/>
+                                                        <Label text="DIFFICILE" styleClass="difficulty-label" style="-fx-text-fill: #e74c3c;"/>
+                                                        <Label text="1 min" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+                                                    </children>
+                                                </VBox>
+                                            </graphic>
+                                        </ToggleButton>
+                                    </children>
+                                </HBox>
                             </children>
-                        </HBox>
+                        </VBox>
 
-                        <!-- slider -->
-                        <Slider min="0" max="2" value="1"
-                                fx:id="sliderDifficulte"
-                                showTickLabels="false"
-                                showTickMarks="true"
-                                majorTickUnit="1"
-                                minorTickCount="0"
-                                snapToTicks="true"
-                                blockIncrement="1"
-                                prefWidth="530.0"
-                                onMouseReleased="#handleDifficulte">
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Slider>
+                        <!-- Catégories -->
+                        <VBox prefHeight="200.0" prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label text="📚" style="-fx-font-size: 20px;" textFill="white"/>
+                                        <Label text="Catégories:" styleClass="label-bright"/>
+                                    </children>
+                                </HBox>
 
+                                <VBox fx:id="containerCategories" spacing="8.0">
+                                    <VBox.margin>
+                                        <Insets left="10.0" />
+                                    </VBox.margin>
+                                </VBox>
+                            </children>
+                        </VBox>
                     </children>
                 </VBox>
+            </content>
+        </ScrollPane>
 
-            </children>
-        </VBox>
-
-        <!-- VBox Catégories -->
-        <VBox prefHeight="200.0" prefWidth="560.0"
-              style="-fx-background-color: white;"
-              spacing="10.0">
-            <padding>
-                <Insets top="10.0" bottom="10.0" left="15.0" right="15.0" />
-            </padding>
-
-            <children>
-
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <children>
-                        <Label text="📚">
-                            <font><Font size="22.0" /></font>
-                        </Label>
-                        <Label text="Catégories:">
-                            <font><Font name="System Bold" size="18.0" /></font>
-                        </Label>
-                    </children>
-                </HBox>
-
-                <!-- CONTENEUR DYNAMIQUE POUR LES CHECKBOX -->
-                <VBox fx:id="containerCategories" spacing="8.0">
-                    <VBox.margin>
-                        <Insets left="10.0" />
-                    </VBox.margin>
-                </VBox>
-
-            </children>
-        </VBox>
-
-        <!-- bouton commencer -->
-        <Button mnemonicParsing="false"
-                fx:id="btnCommencer"
-                onAction="#handleCommencer"
-                style="-fx-background-color: #27ae60; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12;"
-                text="▶ COMMENCER LA PARTIE"
-                textFill="WHITE">
-            <VBox.margin>
-                <Insets top="10.0" />
-            </VBox.margin>
-            <cursor>
-                <Cursor fx:constant="HAND" />
-            </cursor>
-        </Button>
+        <Button fx:id="btnCommencer" onAction="#handleCommencer" styleClass="btn-action" text="▶ COMMENCER LA PARTIE" />
 
     </children>
 </VBox>

@@ -50,24 +50,29 @@ public class ResultatsController {
     private String joueur;
     private Character lettre;
 
-    /* =======================
-       INITIALIZATION
-       ======================= */
+    /*
+     * =======================
+     * INITIALIZATION
+     * =======================
+     */
 
     @FXML
     public void initialize() {
         System.out.println("✅ ResultatsController initialisé");
     }
 
-    /* =======================
-       RECEPTION DES DONNÉES
-       ======================= */
+    /*
+     * =======================
+     * RECEPTION DES DONNÉES
+     * =======================
+     */
 
     /**
      * Reçoit les données de JeuSoloController
      * POINT CLEF : Appelée depuis JeuSoloController.navigateToResults()
      */
-    public void displayResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie, String joueur, Character lettre) {
+    public void displayResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie, String joueur,
+            Character lettre) {
         if (resultats == null || resultats.isEmpty()) {
             System.err.println("❌ ERREUR : Pas de résultats !");
             showAlert("Erreur", "Résultats non disponibles");
@@ -89,9 +94,11 @@ public class ResultatsController {
         afficherResultats();
     }
 
-    /* =======================
-       AFFICHAGE DES RÉSULTATS
-       ======================= */
+    /*
+     * =======================
+     * AFFICHAGE DES RÉSULTATS
+     * =======================
+     */
 
     private void afficherResultats() {
         if (lblScore == null || vboxDetails == null) {
@@ -146,7 +153,8 @@ public class ResultatsController {
      * Affiche les détails du récapitulatif dans vboxDetails
      */
     private void afficherDetailsRecapitulatif() {
-        if (vboxDetails == null) return;
+        if (vboxDetails == null)
+            return;
 
         vboxDetails.getChildren().clear();
 
@@ -176,7 +184,8 @@ public class ResultatsController {
 
         // Catégories et réponses
         Label titleCategories = new Label("Détail des réponses :");
-        titleCategories.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #34495e; -fx-padding: 15 0 10 0;");
+        titleCategories.setStyle(
+                "-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #34495e; -fx-padding: 15 0 10 0;");
         vboxDetails.getChildren().add(titleCategories);
 
         // Tableau simple des résultats
@@ -211,9 +220,11 @@ public class ResultatsController {
         }
     }
 
-    /* =======================
-       ACTIONS BUTTONS
-       ======================= */
+    /*
+     * =======================
+     * ACTIONS BUTTONS
+     * =======================
+     */
 
     @FXML
     public void handleRetourMenu(ActionEvent event) {
@@ -222,12 +233,12 @@ public class ResultatsController {
 
     @FXML
     public void handleMenu(ActionEvent event) {
-        navigateTo("/fxml/MenuPrincipal.fxml", "Menu Principal");
+        navigateTo("/fxml/main_menu.fxml", "TriHarf - Menu Principal");
     }
 
     @FXML
     public void handleReessayer(ActionEvent event) {
-        navigateTo("/fxml/MenuPrincipal.fxml", "Menu Principal");
+        navigateTo("/fxml/param_partie_solo.fxml", "Configuration de la partie");
     }
 
     @FXML
@@ -235,15 +246,16 @@ public class ResultatsController {
         navigateTo("/fxml/MenuPrincipal.fxml", "Menu Principal");
     }
 
-    /* =======================
-       NAVIGATION
-       ======================= */
+    /*
+     * =======================
+     * NAVIGATION
+     * =======================
+     */
 
     private void navigateTo(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource(fxmlPath)
-            );
+                    HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
 
             // Obtenir la Stage depuis n'importe quel composant visible
@@ -267,9 +279,11 @@ public class ResultatsController {
         }
     }
 
-    /* =======================
-       UTILITAIRES
-       ======================= */
+    /*
+     * =======================
+     * UTILITAIRES
+     * =======================
+     */
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

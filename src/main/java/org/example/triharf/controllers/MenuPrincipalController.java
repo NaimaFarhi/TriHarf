@@ -33,7 +33,7 @@ public class MenuPrincipalController {
         btnSolo.setOnAction(e -> navigateTo("/fxml/param_partie_solo.fxml", "Paramètres - Mode Solo"));
         btnMultijoueur.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Multijoueur"));
         btnBattleRoyale.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Battle Royale"));
-        btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Chaos Mode"));
+        btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_chaos.fxml", "Paramètres - Mode Chaos"));
 
         btnParametres.setOnAction(e -> navigateTo("/fxml/Configuration.fxml", "Paramètres"));
     }
@@ -46,11 +46,19 @@ public class MenuPrincipalController {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
 
+            // Set Game Mode if navigating to Multiplayer Parameters
+            Object controller = loader.getController();
+            if (controller instanceof ParamPartieMultiController) {
+                if (title.contains("Battle Royale")) {
+                    ((ParamPartieMultiController) controller).setGameMode("BATTLE");
+                } else {
+                    ((ParamPartieMultiController) controller).setGameMode("MULTI");
+                }
+            }
+
             Stage stage = (Stage) btnSolo.getScene().getWindow();
-            Scene scene = new Scene(root);
+            stage.getScene().setRoot(root);
             stage.setTitle(title);
-            stage.setScene(scene);
-            stage.show();
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de " + fxmlPath);
             e.printStackTrace();

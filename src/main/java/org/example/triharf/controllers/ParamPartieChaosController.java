@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Contrôleur pour les paramètres de la partie Multijoueur
- * (param_partie_multi.fxml)
- * Passe les données au JeuMultiController via setCategories()
+ * Contrôleur pour les paramètres du mode CHAOS
+ * (param_partie_chaos.fxml)
  */
-public class ParamPartieMultiController {
+public class ParamPartieChaosController {
 
     @FXML
     private Button btnRetour;
@@ -43,13 +42,6 @@ public class ParamPartieMultiController {
     private CategorieDAO categorieDAO = new CategorieDAO();
     private List<Categorie> toutesLesCategories = new ArrayList<>();
     private Map<String, CheckBox> checkboxMap = new HashMap<>();
-
-    private String gameMode = "MULTI";
-
-    public void setGameMode(String mode) {
-        this.gameMode = mode;
-        System.out.println("Mode de jeu défini sur : " + mode);
-    }
 
     @FXML
     public void initialize() {
@@ -101,7 +93,6 @@ public class ParamPartieMultiController {
             checkboxMap.put(cat.getNom(), fakeCheckbox);
 
             flowPane.getChildren().add(chip);
-            System.out.println("Chip créé : " + cat.getNom());
         }
 
         containerCategories.getChildren().add(flowPane);
@@ -131,15 +122,12 @@ public class ParamPartieMultiController {
                 categoriesSelectionnees.add(cat.getNom());
             }
         }
-
         System.out.println("Catégories sélectionnées : " + categoriesSelectionnees);
     }
 
     private void copierLien() {
-        if (txtLien == null) {
-            System.out.println("TextField txtLien not found!");
+        if (txtLien == null)
             return;
-        }
         String lien = txtLien.getText();
         javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
         javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
@@ -149,8 +137,8 @@ public class ParamPartieMultiController {
     }
 
     /**
-     * Commence la partie multijoueur
-     * Redirige vers la salle d'attente
+     * Commence la partie chaos
+     * Redirige directement vers partie_chaos.fxml
      */
     private void commencerPartie() {
         if (categoriesSelectionnees.isEmpty()) {
@@ -158,26 +146,24 @@ public class ParamPartieMultiController {
             return;
         }
 
-        System.out.println("✅ Début partie multijoueur");
+        System.out.println("✅ Début partie CHAOS");
         System.out.println("   Catégories : " + categoriesSelectionnees);
 
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                    HelloApplication.class.getResource("/fxml/partie_chaos.fxml"));
             Parent root = loader.load();
 
-            // Pass mode to ListeAttenteController
-            ListeAttenteController controller = loader.getController();
-            if (controller != null) {
-                controller.setGameMode(this.gameMode);
-            }
+            // Here we would pass checks to chaos controller if needed
+            // JeuChaosController controller = loader.getController();
+            // controller.setCategories(categoriesSelectionnees);
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             stage.getScene().setRoot(root);
-            stage.setTitle("Salle d'attente");
+            stage.setTitle("Mode CHAOS");
 
         } catch (IOException e) {
-            System.err.println("Erreur lors du chargement de partie_multi.fxml");
+            System.err.println("Erreur lors du chargement de partie_chaos.fxml");
             e.printStackTrace();
         }
     }
@@ -189,16 +175,11 @@ public class ParamPartieMultiController {
     private void navigateTo(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
-            if (loader.getLocation() == null) {
-                System.err.println("FXML not found: " + fxmlPath);
-                return;
-            }
             Parent root = loader.load();
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);
         } catch (IOException e) {
-            System.err.println("Erreur: " + fxmlPath);
             e.printStackTrace();
         }
     }
