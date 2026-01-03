@@ -98,6 +98,8 @@ public class ResultatsController {
     @FXML private Label lblTitre;
     @FXML private Label lblEmoji;
 
+    private org.example.triharf.utils.SoundManager soundManager = new org.example.triharf.utils.SoundManager();
+
     /**
      * Message personnalisé selon le score
      */
@@ -109,21 +111,25 @@ public class ResultatsController {
             lblEmoji.setText("😢");
             lblMessage.setText("Oups ! 😅");
             lblEncouragement.setText("Aucun mot validé. C'est normal, cela arrive ! Réessaie et tu feras mieux.");
+            org.example.triharf.utils.SoundManager.playDefeat();
         } else if (scoreTotal < 50) {
             lblTitre.setText("TERMINÉ");
             lblEmoji.setText("📝");
             lblMessage.setText("Pas mal ! 🎯");
             lblEncouragement.setText("Tu progresses. Chaque partie te rend meilleur(e) !");
+            org.example.triharf.utils.SoundManager.playVictory();
         } else if (scoreTotal < 100) {
             lblTitre.setText("BIEN JOUÉ");
             lblEmoji.setText("👏");
             lblMessage.setText("Excellent ! 🌟");
             lblEncouragement.setText("Tu es sur la bonne voie. Bravo !");
+            org.example.triharf.utils.SoundManager.playVictory();
         } else {
             lblTitre.setText("VICTOIRE");
             lblEmoji.setText("🏆");
             lblMessage.setText("INCROYABLE ! 🚀");
             lblEncouragement.setText("Quel score impressionnant ! Tu domines ce jeu !");
+            org.example.triharf.utils.SoundManager.playVictory();
         }
     }
 
