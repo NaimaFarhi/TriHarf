@@ -24,12 +24,13 @@ public class StatisticsService {
 
         String query = """
             SELECT 
-                COUNT(*) as totalParties,
-                AVG(scoreTotal) as scoreMoyen,
-                MAX(scoreTotal) as meilleurScore,
-                AVG(duree) as dureeMoyenne
-            FROM parties
-            WHERE joueur = ?
+                COUNT(p.id) as totalParties,
+                AVG(p.score) as scoreMoyen,
+                MAX(p.score) as meilleurScore,
+                AVG(p.duree_seconde) as dureeMoyenne
+            FROM parties p
+            JOIN joueurs j ON p.joueur_id = j.id
+            WHERE j.pseudo = ?
         """;
 
         try (Connection conn = DriverManager.getConnection(connectionString, username, password);
@@ -59,13 +60,14 @@ public class StatisticsService {
 
         String query = """
             SELECT 
-                mode,
-                COUNT(*) as parties,
-                AVG(scoreTotal) as scoreMoyen,
-                MAX(scoreTotal) as meilleurScore
-            FROM parties
-            WHERE joueur = ?
-            GROUP BY mode
+                p.mode,
+                COUNT(p.id) as parties,
+                AVG(p.score) as scoreMoyen,
+                MAX(p.score) as meilleurScore
+            FROM parties p
+            JOIN joueurs j ON p.joueur_id = j.id
+            WHERE j.pseudo = ?
+            GROUP BY p.mode
         """;
 
         try (Connection conn = DriverManager.getConnection(connectionString, username, password);
@@ -105,7 +107,8 @@ public class StatisticsService {
             FROM categories c
             LEFT JOIN resultats_partie rp ON c.id = rp.categorie_id
             LEFT JOIN parties p ON rp.partie_id = p.id
-            WHERE p.joueur = ? OR p.joueur IS NULL
+            LEFT JOIN joueurs j ON p.joueur_id = j.id
+            WHERE j.pseudo = ? OR j.pseudo IS NULL
             GROUP BY c.id, c.nom
         """;
 
@@ -145,10 +148,11 @@ public class StatisticsService {
 
         String query = """
             SELECT 
-                id, dateJeu, mode, scoreTotal, duree
-            FROM parties
-            WHERE joueur = ?
-            ORDER BY dateJeu DESC
+                p.id, p.date_partie, p.mode, p.score, p.duree_seconde
+            FROM parties p
+            JOIN joueurs j ON p.joueur_id = j.id
+            WHERE j.pseudo = ?
+            ORDER BY p.date_partie DESC
             LIMIT ?
         """;
 
@@ -162,10 +166,10 @@ public class StatisticsService {
             while (rs.next()) {
                 Map<String, Object> partie = new HashMap<>();
                 partie.put("id", rs.getInt("id"));
-                partie.put("date", rs.getDate("dateJeu"));
+                partie.put("date", rs.getDate("date_partie"));
                 partie.put("mode", rs.getString("mode"));
-                partie.put("score", rs.getInt("scoreTotal"));
-                partie.put("duree", rs.getInt("duree"));
+                partie.put("score", rs.getInt("score"));
+                partie.put("duree", rs.getInt("duree_seconde"));
 
                 parties.add(partie);
             }
@@ -184,11 +188,12 @@ public class StatisticsService {
 
         String query = """
             SELECT 
-                DATE(dateJeu) as date,
-                AVG(scoreTotal) as scoreMoyen
-            FROM parties
-            WHERE joueur = ? AND dateJeu >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY DATE(dateJeu)
+                DATE(p.date_partie) as date,
+                AVG(p.score) as scoreMoyen
+            FROM parties p
+            JOIN joueurs j ON p.joueur_id = j.id
+            WHERE j.pseudo = ? AND p.date_partie >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(p.date_partie)
             ORDER BY date
         """;
 
@@ -218,12 +223,13 @@ public class StatisticsService {
 
         String query = """
             SELECT 
-                joueur,
-                COUNT(*) as parties,
-                MAX(scoreTotal) as meilleurScore,
-                AVG(scoreTotal) as scoreMoyen
-            FROM parties
-            GROUP BY joueur
+                j.pseudo as joueur,
+                COUNT(p.id) as parties,
+                MAX(p.score) as meilleurScore,
+                AVG(p.score) as scoreMoyen
+            FROM parties p
+            JOIN joueurs j ON p.joueur_id = j.id
+            GROUP BY j.pseudo
             ORDER BY meilleurScore DESC
             LIMIT 10
         """;
@@ -258,10 +264,11 @@ public class StatisticsService {
         String query = """
             SELECT 
                 COUNT(*) as total,
-                SUM(CASE WHEN valide = 1 THEN 1 ELSE 0 END) as reussies
+                SUM(CASE WHEN rp.valide = 1 THEN 1 ELSE 0 END) as reussies
             FROM resultats_partie rp
             JOIN parties p ON rp.partie_id = p.id
-            WHERE p.joueur = ?
+            JOIN joueurs j ON p.joueur_id = j.id
+            WHERE j.pseudo = ?
         """;
 
         try (Connection conn = DriverManager.getConnection(connectionString, username, password);
