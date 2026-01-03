@@ -22,8 +22,8 @@
                         <!-- En-tête -->
                         <VBox alignment="CENTER" prefHeight="150.0" prefWidth="900.0" spacing="10.0" styleClass="results-header-defeat">
                             <children>
-                                <Label text="😢" style="-fx-font-size: 48px;" />
-                                <Label text="DÉFAITE" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 32px;" />
+                                <Label fx:id="lblEmoji" text="📊" style="-fx-font-size: 48px;" />
+                                <Label fx:id="lblTitre" text="RÉSULTATS" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 32px;" />
                             </children>
                         </VBox>
 

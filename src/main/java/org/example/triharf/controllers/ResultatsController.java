@@ -95,22 +95,33 @@ public class ResultatsController {
     /**
      * Message personnalisé selon le score
      */
+    @FXML private Label lblTitre;
+    @FXML private Label lblEmoji;
+
+    /**
+     * Message personnalisé selon le score
+     */
     private void afficherMessage() {
         long nbValides = resultats.stream().filter(ResultatPartie::isValide).count();
 
         if (nbValides == 0) {
+            lblTitre.setText("DOMMAGE");
+            lblEmoji.setText("😢");
             lblMessage.setText("Oups ! 😅");
             lblEncouragement.setText("Aucun mot validé. C'est normal, cela arrive ! Réessaie et tu feras mieux.");
-        } else if (nbValides == 1) {
-            lblMessage.setText("Bien commencé ! 👍");
-            lblEncouragement.setText("Tu as trouvé 1 mot valide. Continue comme ça !");
         } else if (scoreTotal < 50) {
+            lblTitre.setText("TERMINÉ");
+            lblEmoji.setText("📝");
             lblMessage.setText("Pas mal ! 🎯");
             lblEncouragement.setText("Tu progresses. Chaque partie te rend meilleur(e) !");
         } else if (scoreTotal < 100) {
+            lblTitre.setText("BIEN JOUÉ");
+            lblEmoji.setText("👏");
             lblMessage.setText("Excellent ! 🌟");
             lblEncouragement.setText("Tu es sur la bonne voie. Bravo !");
         } else {
+            lblTitre.setText("VICTOIRE");
+            lblEmoji.setText("🏆");
             lblMessage.setText("INCROYABLE ! 🚀");
             lblEncouragement.setText("Quel score impressionnant ! Tu domines ce jeu !");
         }
