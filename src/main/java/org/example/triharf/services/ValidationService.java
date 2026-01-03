@@ -7,7 +7,7 @@ import org.example.triharf.models.Categorie;
 
 public class ValidationService {
     private MotDAO motDAO = new MotDAO();
-    private OllamaValidator ollamaValidator = new OllamaValidator();
+    private GroqValidator aiValidator = new GroqValidator();
 
     public ValidationResult validateMot(String texte, Categorie categorie, Character lettre, Langue langue) {
         if (texte.isEmpty() || Character.toLowerCase(texte.charAt(0)) != Character.toLowerCase(lettre)) {
@@ -23,7 +23,7 @@ public class ValidationService {
         }
 
         // 2. Validate with AI
-        var aiResponse = ollamaValidator.validateWord(texte, categorie.getNom(), lettre, langue);
+        var aiResponse = aiValidator.validateWord(texte, categorie.getNom(), lettre, langue);
 
         if (aiResponse.isValid()) {
             // 3. Save to DB
