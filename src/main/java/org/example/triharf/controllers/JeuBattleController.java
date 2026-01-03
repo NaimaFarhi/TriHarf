@@ -81,6 +81,7 @@ public class JeuBattleController {
     private String joueur = "Joueur_Battle";
     private int difficulte = 1;
     private int gameDuration = 180;
+    private Langue langue = Langue.FRANCAIS; // 👈 AJOUT: Langue par défaut en français
 
     // ===== DAO =====
     private CategorieDAO categorieDAO = new CategorieDAO();
@@ -110,6 +111,11 @@ public class JeuBattleController {
 
     public void setDifficulte(int difficulte) {
         this.difficulte = difficulte;
+    }
+
+    // 👈 AJOUT: Setter pour la langue si besoin
+    public void setLangue(Langue langue) {
+        this.langue = langue;
     }
 
     /*
@@ -145,8 +151,13 @@ public class JeuBattleController {
             return;
         }
 
+        // UTILISATION DES PARAMETRES GLOBAUX
+        this.joueur = ParametresGenerauxController.pseudoGlobal;
+        this.langue = ParametresGenerauxController.langueGlobale;
+
         System.out.println("✅ Démarrage partie Battle Royale");
         System.out.println("   Joueur: " + joueur);
+        System.out.println("   Langue: " + langue);
         System.out.println("   Catégories: " + categories.size());
 
         try {
@@ -301,7 +312,7 @@ public class JeuBattleController {
             // ============================================
             // 1️⃣ VALIDER
             // ============================================
-            resultsManager.validerMots(reponses, lettreActuelle, Langue.FRANCAIS);
+            resultsManager.validerMots(reponses, lettreActuelle, langue); // 👈 CORRECTION: Ajout du 3ème paramètre
 
             // ============================================
             // 2️⃣ RÉSULTATS

@@ -15,8 +15,10 @@
       stylesheets="@../css/main.css">
 
     <!-- En-tête violet -->
-    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="900.0" spacing="80.0" styleClass="game-header">
+    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="900.0" spacing="40.0" styleClass="game-header">
         <children>
+            <Button fx:id="btnRetour" text="✖" style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 20px; -fx-cursor: hand;" />
+
             <!-- TIMER -->
             <HBox alignment="CENTER" spacing="10.0" styleClass="info-box">
                 <children>

@@ -41,7 +41,7 @@ public class TestInteractifComplet {
 
         Langue langue = switch(langChoice) {
             case 1 -> Langue.FRANCAIS;
-            case 2 -> Langue.ANGLAIS;
+            case 2 -> Langue.ENGLISH;
             case 3 -> Langue.ARABE;
             default -> Langue.FRANCAIS;
         };

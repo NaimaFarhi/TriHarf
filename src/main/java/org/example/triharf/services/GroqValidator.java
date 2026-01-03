@@ -44,7 +44,7 @@ public class GroqValidator {
                                Character letter, Langue langue) {
         String langName = switch(langue) {
             case FRANCAIS -> "French";
-            case ANGLAIS -> "English";
+            case ENGLISH -> "English";
             case ARABE -> "Arabic";
         };
 
@@ -52,10 +52,13 @@ public class GroqValidator {
                 "Validate strictly: Is '%s' a real, commonly-known %s in %s that starts with '%s'? " +
                         "Rules: " +
                         "- Must be a legitimate word in %s language " +
-                        "- Must fit the category exactly (e.g., 'Dog' is Animal, not Person) " +
+                        "- Must fit the category exactly " +
                         "- Must start with letter '%s' " +
-                        "- No slang, abbreviations, or proper nouns unless category requires it " +
-                        "- Rarity: 1=extremely common (cat, dog), 10=very rare/technical " +
+                        "- PROHIBIT foreign names (e.g. 'España' in French is INVALID, must be 'Espagne') " +
+                        "- PROHIBIT English spelling if target language is different (e.g. reject 'Zebra' in French, want 'Zèbre') " +
+                        "- Proper nouns (Cities, Countries, Celebrities, Full Names, Brands) ARE ALLOWED if category implies it " +
+                        "- Multi-word answers with spaces ARE ALLOWED (e.g. 'New York', 'Will Smith') " +
+                        "- Rarity: 1=extremely common, 10=very rare " +
                         "Respond ONLY: {\"valid\":true/false,\"rarity\":1-10}",
                 word, categoryName, langName, letter, langName, letter
         );

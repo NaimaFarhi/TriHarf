@@ -82,6 +82,7 @@ public class JeuMultiController {
     private String joueur = "Joueur_Multi";
     private int difficulte = 1;
     private int gameDuration = 180;
+    private org.example.triharf.enums.Langue langue = org.example.triharf.enums.Langue.FRANCAIS;
 
     // ===== DAO =====
     private CategorieDAO categorieDAO = new CategorieDAO();
@@ -139,8 +140,13 @@ public class JeuMultiController {
             return;
         }
 
+        // UTILISATION DES PARAMETRES GLOBAUX
+        this.joueur = ParametresGenerauxController.pseudoGlobal;
+        this.langue = ParametresGenerauxController.langueGlobale;
+
         System.out.println("✅ Démarrage partie multijoueur");
         System.out.println("   Joueur: " + joueur);
+        System.out.println("   Langue: " + langue);
         System.out.println("   Catégories: " + categories.size());
 
         try {
@@ -289,7 +295,7 @@ public class JeuMultiController {
             // ============================================
             // 1️⃣ VALIDER LES MOTS via ResultsManager
             // ============================================
-            //resultsManager.validerMots(reponses, lettreActuelle);
+            resultsManager.validerMots(reponses, lettreActuelle, langue);
 
             // ============================================
             // 2️⃣ RÉCUPÉRER LES RÉSULTATS

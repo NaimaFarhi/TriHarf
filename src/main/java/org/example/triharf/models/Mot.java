@@ -25,7 +25,7 @@ public class Mot {
     private Character lettre;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10)
+    @Column(name = "langue_code", length = 20)
     private Langue langue;
 
     @Column(nullable = false)

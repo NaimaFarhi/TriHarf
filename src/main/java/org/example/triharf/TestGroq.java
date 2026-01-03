@@ -19,7 +19,7 @@ public class TestGroq {
         for (String[] test : tests) {
 
             var result = validator.validateWord(
-                    test[0], test[1], test[2].charAt(0), Langue.ANGLAIS
+                    test[0], test[1], test[2].charAt(0), Langue.ENGLISH
             );
 
             System.out.printf("%-10s | %-10s | %s | Rarity: %d\n",

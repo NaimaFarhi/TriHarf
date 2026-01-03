@@ -39,7 +39,7 @@
                                     <children>
                                         <RadioButton fx:id="rbFrancais" selected="true" styleClass="radio-button" text="Français" toggleGroup="$langueGroup" />
                                         <RadioButton fx:id="rbAnglais" styleClass="radio-button" text="English" toggleGroup="$langueGroup" />
-                                        <RadioButton fx:id="rbEspagnol" styleClass="radio-button" text="Español" toggleGroup="$langueGroup" />
+                                        <RadioButton fx:id="rbArabe" styleClass="radio-button" text="Arabe" toggleGroup="$langueGroup" />
                                     </children>
                                 </HBox>
                             </children>

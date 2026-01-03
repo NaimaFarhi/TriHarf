@@ -27,7 +27,7 @@ public class Partie {
     private String mode;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10)
+    @Column(name = "langue_code", length = 20)
     private Langue langue;
 
     @Column(name = "duree_seconde")

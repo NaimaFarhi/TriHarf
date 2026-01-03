@@ -3,354 +3,239 @@ package org.example.triharf.controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.geometry.Insets;
-import javafx.collections.FXCollections;
+
 import org.example.triharf.HelloApplication;
-import org.example.triharf.services.GameEngine;
-import org.example.triharf.services.ResultsManager;
-import org.example.triharf.services.ValidationService;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
 import org.example.triharf.models.ResultatPartie;
+import org.example.triharf.services.GameSession;
 import org.example.triharf.dao.CategorieDAO;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * JeuSoloController.java
- * Lie GameEngine + ResultsManager + ValidationService
- * Flux : Démarrer → Jouer → Valider → Afficher résultats
+ * JeuSoloController
+ * 👉 UI SEULEMENT
+ * 👉 Toute la logique métier est dans GameSession
  */
 public class JeuSoloController {
 
-    // ===== UI COMPONENTS =====
-    @FXML
-    private Label lblTimer;
+    // ================= UI =================
+    @FXML private Label lblTimer;
+    @FXML private Label lblLettre;
+    @FXML private FlowPane containerCategories;
+    @FXML private Button btnTerminer;
+    @FXML private Button btnRetour;
 
-    @FXML
-    private Label lblLettre;
-
-    @FXML
-    private Label lblScore;
-
-    @FXML
-    private FlowPane containerCategories;
-
-    @FXML
-    private Button btnTerminer;
-
-    // ===== SERVICES (Backend Layer - F) =====
-    private GameEngine gameEngine;
-    private ResultsManager resultsManager;
-    private ValidationService validationService;
-
-    // ===== STATE MANAGEMENT =====
-    private Character lettreActuelle;
-    private int scorePreview = 0;
-    private final Map<String, TextField> textFieldsParCategorie = new HashMap<>();
-    private final Map<Categorie, String> reponses = new HashMap<>();
-
-    // ===== INJECTED DATA =====
-    private List<String> categoriesNoms; // Reçoit les noms de categories
-    private List<Categorie> categories; // Objets Categorie complets
-    private int difficulte;
+    // ================= STATE =================
+    private GameSession gameSession;
+    private Langue langue;
     private String joueur;
-    private int gameDuration = 180; // 3 minutes
 
-    // ===== DAO =====
-    private CategorieDAO categorieDAO = new CategorieDAO();
+    private List<Categorie> categories = new ArrayList<>();
+    private final Map<Categorie, TextField> champsParCategorie = new HashMap<>();
 
-    /*
-     * =======================
-     * INJECTION METHODS
-     * =======================
-     */
+    private final CategorieDAO categorieDAO = new CategorieDAO();
 
-    public void setCategories(List<String> categoriesNoms) {
-        this.categoriesNoms = categoriesNoms;
-        // Convertir les noms en objets Categorie
-        this.categories = new ArrayList<>();
-        for (String nom : categoriesNoms) {
-            Categorie cat = categorieDAO.findByNom(nom);
-            if (cat != null) {
-                this.categories.add(cat);
-            }
-        }
-        System.out.println("Catégories converties: " + categories.size());
-    }
+    // ================= INJECTION =================
 
-    public void setDifficulte(int difficulte) {
-        this.difficulte = difficulte;
+    public void setLangue(Langue langue) {
+        this.langue = langue;
     }
 
     public void setJoueur(String joueur) {
         this.joueur = joueur;
     }
 
-    /*
-     * =======================
-     * INITIALIZATION
-     * =======================
-     */
+    public void setCategories(List<String> nomsCategories) {
+        categories.clear();
+        for (String nom : nomsCategories) {
+            Categorie c = categorieDAO.findByNom(nom);
+            if (c != null) {
+                categories.add(c);
+            }
+        }
+        System.out.println("✅ Catégories chargées: " + categories.size());
+    }
+
+    // ================= INIT =================
 
     @FXML
     public void initialize() {
-        this.gameEngine = new GameEngine();
-        this.validationService = new ValidationService();
-        this.resultsManager = new ResultsManager(gameDuration);
+
+        btnRetour.setOnAction(e -> retourMenu());
+        btnTerminer.setOnAction(this::handleTerminer);
+
         System.out.println("✅ JeuSoloController initialisé");
     }
 
-    /*
-     * =======================
-     * DÉMARRAGE DE LA PARTIE
-     * =======================
-     */
+    // ================= DÉMARRAGE =================
 
     public void demarrerPartie() {
-        if (categories == null || categories.isEmpty()) {
-            System.err.println("❌ ERREUR : Aucune catégorie reçue !");
-            showAlert("Erreur", "Aucune catégorie sélectionnée !");
+
+        if (categories.isEmpty()) {
+            showAlert("Erreur", "Aucune catégorie sélectionnée");
             return;
         }
 
-        if (joueur == null || joueur.trim().isEmpty()) {
-            joueur = "Joueur_Anonyme";
-        }
+        // Fallback: Si pas injectés, on prend les globaux
+        if (joueur == null) joueur = ParametresGenerauxController.pseudoGlobal;
+        if (langue == null) langue = ParametresGenerauxController.langueGlobale;
 
-        System.out.println("✅ Démarrage partie");
-        System.out.println("   Joueur: " + joueur);
-        System.out.println("   Catégories: " + categories.size());
-        System.out.println("   Difficulté: " + difficulte);
+        gameSession = new GameSession(joueur, langue);
 
-        try {
-            // ============================================
-            // 1️⃣ GÉNÉRER LETTRE
-            // ============================================
-            lettreActuelle = gameEngine.generateRandomLetter();
-            afficherLettre();
+        // Calcul durée selon difficulté (0=Facile=180s, 1=Moyen=120s, 2=Difficile=60s)
+        int dureeSecondes = switch (difficulte) {
+            case 0 -> 180; // 3 min
+            case 1 -> 120; // 2 min
+            case 2 -> 60;  // 1 min
+            default -> 120;
+        };
 
-            // ============================================
-            // 2️⃣ CRÉER UI DYNAMIQUE
-            // ============================================
-            creerChampsDynamiquement();
+        gameSession.demarrerPartie(dureeSecondes);
 
-            // ============================================
-            // 3️⃣ SETUP LISTENERS
-            // ============================================
-            ajouterListenersScore();
-            mettreAJourScore();
+        // Lettre
+        lblLettre.setText(gameSession.getLettre().toString());
 
-            // ============================================
-            // 4️⃣ DÉMARRER TIMER
-            // ============================================
-            gameEngine.setOnTimerUpdate(this::afficherTimer);
-            gameEngine.setOnGameEnd(this::handleTerminerAuto);
-            gameEngine.startTimer(gameDuration);
+        // Timer
+        gameSession.getGameEngine().setOnTimerUpdate(() ->
+                lblTimer.setText(gameSession.getGameEngine().formatTime())
+        );
 
-        } catch (Exception e) {
-            System.err.println("❌ Erreur lors du démarrage: " + e.getMessage());
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de démarrer la partie");
-        }
+        gameSession.getGameEngine().setOnGameEnd(this::terminerPartie);
+
+        creerChamps();
     }
 
-    /*
-     * =======================
-     * UI DYNAMIQUE
-     * =======================
-     */
+    // ================= UI DYNAMIQUE =================
 
-    private void creerChampsDynamiquement() {
+    private void creerChamps() {
         containerCategories.getChildren().clear();
-        textFieldsParCategorie.clear();
-        reponses.clear();
+        champsParCategorie.clear();
 
         for (Categorie categorie : categories) {
-            // Box pour chaque catégorie
+
             VBox box = new VBox(8);
-            box.setAlignment(javafx.geometry.Pos.CENTER);
-            box.getStyleClass().add("game-category-box");
-            box.setPrefWidth(180); // Fixed width for uniformity
             box.setPadding(new Insets(10));
+            box.setPrefWidth(180);
 
-            // Nom de la catégorie (HAUT)
-            Label labelCategorie = new Label(categorie.getNom());
-            labelCategorie.getStyleClass().add("game-category-label");
-            labelCategorie.setWrapText(true);
-            labelCategorie.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+            Label label = new Label(categorie.getNom());
+            TextField tf = new TextField();
+            tf.setPromptText("Mot...");
 
-            // Champ de réponse (BAS)
-            TextField textField = new TextField();
-            textField.setPromptText("...");
-            textField.setAlignment(javafx.geometry.Pos.CENTER);
-            textField.getStyleClass().add("game-input-field");
+            champsParCategorie.put(categorie, tf);
 
-            textFieldsParCategorie.put(categorie.getNom(), textField);
-            reponses.put(categorie, "");
-
-            box.getChildren().addAll(labelCategorie, textField);
+            box.getChildren().addAll(label, tf);
             containerCategories.getChildren().add(box);
         }
     }
 
-    private void ajouterListenersScore() {
-        for (TextField tf : textFieldsParCategorie.values()) {
-            tf.textProperty().addListener((obs, oldVal, newVal) -> mettreAJourScore());
-        }
-    }
-
-    /*
-     * =======================
-     * LOGIQUE DU JEU
-     * =======================
-     */
-
-    private void afficherLettre() {
-        lblLettre.setText(lettreActuelle.toString());
-        lblLettre.setStyle("-fx-font-size: 48; -fx-font-weight: bold; -fx-text-fill: #FF6B6B;");
-    }
-
-    private void afficherTimer() {
-        lblTimer.setText(gameEngine.formatTime());
-    }
-
-    private void mettreAJourScore() {
-        scorePreview = 0;
-        for (TextField tf : textFieldsParCategorie.values()) {
-            String reponse = tf.getText().trim();
-            if (!reponse.isEmpty()
-                    && Character.toLowerCase(reponse.charAt(0)) == Character.toLowerCase(lettreActuelle)) {
-                scorePreview += 10; // Score de preview
-            }
-        }
-        lblScore.setText(scorePreview + " pts (aperçu)");
-    }
-
-    private void recupererReponses() {
-        reponses.clear();
-        int index = 0;
-        for (Categorie categorie : categories) {
-            TextField tf = textFieldsParCategorie.get(categorie.getNom());
-            if (tf != null) {
-                reponses.put(categorie, tf.getText().trim());
-            }
-            index++;
-        }
-    }
-
-    /*
-     * =======================
-     * FIN DE PARTIE
-     * =======================
-     */
+    // ================= FIN DE PARTIE =================
 
     @FXML
-    public void handleTerminer(ActionEvent event) {
+    private void handleTerminer(ActionEvent event) {
         terminerPartie();
     }
 
-    public void handleTerminerAuto() {
-        terminerPartie();
-    }
+    private boolean partieTerminee = false;
 
-    private void terminerPartie() {
-        try {
-            gameEngine.stopTimer();
-            recupererReponses();
+    private synchronized void terminerPartie() {
+        if (partieTerminee) return;
+        partieTerminee = true;
 
-            System.out.println("🏁 Partie terminée");
-            System.out.println("   Lettre: " + lettreActuelle);
-            System.out.println("   Réponses: " + reponses.size());
-
-            // ============================================
-            // 1️⃣ VALIDER LES MOTS via ResultsManager
-            // Ceci utilise ValidationService en interne
-            // ============================================
-            //resultsManager.validerMots(reponses, lettreActuelle, langueActuelle);
-
-            // ============================================
-            // 2️⃣ RÉCUPÉRER LES RÉSULTATS
-            // ============================================
-            List<ResultatPartie> resultats = resultsManager.getResultats();
-            int scoreTotal = resultsManager.getScoreTotal();
-            long dureePartie = resultsManager.getDureePartie();
-
-            System.out.println("✅ Validation complète");
-            System.out.println("   Score total: " + scoreTotal);
-            System.out.println("   Durée: " + dureePartie + "s");
-            System.out.println("   Résultats: " + resultats.size());
-
-            // ============================================
-            // 3️⃣ NAVIGUER VERS RÉSULTATS avec les données
-            // ============================================
-            navigateToResults(resultats, scoreTotal, dureePartie);
-
-        } catch (Exception e) {
-            System.err.println("❌ Erreur lors de la fermeture: " + e.getMessage());
-            e.printStackTrace();
-            showAlert("Erreur", "Erreur lors de la validation: " + e.getMessage());
+        // Récupération réponses UI → GameSession
+        for (Map.Entry<Categorie, TextField> entry : champsParCategorie.entrySet()) {
+            gameSession.setReponse(entry.getKey(), entry.getValue().getText());
         }
+
+        gameSession.terminerPartie();
+
+        List<ResultatPartie> resultats =
+                gameSession.getResultsManager().getResultats();
+
+        int score = gameSession.getResultsManager().getScoreTotal();
+        long duree = gameSession.getResultsManager().getDureePartie();
+
+        navigateToResults(resultats, score, duree);
     }
 
-    /*
-     * =======================
-     * NAVIGATION
-     * =======================
-     */
+    // ================= NAVIGATION =================
 
-    private void navigateToResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie) {
+    private void navigateToResults(
+            List<ResultatPartie> resultats,
+            int score,
+            long duree
+    ) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/Resultats.fxml"));
+                    HelloApplication.class.getResource("/fxml/Resultats.fxml")
+            );
             Parent root = loader.load();
 
-            // ⚠️ CRUCIAL : Passer les données au controller suivant
-            ResultatsController resultatsController = loader.getController();
-            resultatsController.displayResults(resultats, scoreTotal, dureePartie, joueur, lettreActuelle);
+            ResultatsController controller = loader.getController();
+            controller.displayResults(
+                    resultats,
+                    score,
+                    duree,
+                    joueur,
+                    gameSession.getLettre()
+            );
 
-            // Obtenir la Stage de manière sécurisée
-            Stage stage = null;
-            if (btnTerminer != null && btnTerminer.getScene() != null) {
-                stage = (Stage) btnTerminer.getScene().getWindow();
-            } else {
-                System.err.println("❌ Impossible de trouver la Stage via btnTerminer");
-                return;
+            Stage stage = (Stage) btnTerminer.getScene().getWindow();
+            if (stage == null && btnRetour.getScene() != null) {
+                stage = (Stage) btnRetour.getScene().getWindow();
             }
-
             if (stage != null) {
-                stage.setTitle("Résultats de la Partie");
                 stage.setScene(new Scene(root));
                 stage.show();
-                System.out.println("✅ Navigation vers Résultats réussie");
             }
 
         } catch (IOException e) {
-            System.err.println("❌ Erreur navigation: " + e.getMessage());
             e.printStackTrace();
-            showAlert("Erreur", "Erreur lors de l'affichage des résultats");
+            showAlert("Erreur", "Navigation résultats impossible");
         }
     }
 
-    /*
-     * =======================
-     * UTILITAIRES
-     * =======================
-     */
 
-    private void showAlert(String title, String message) {
+    private int difficulte = 1;
+
+    public void setDifficulte(int difficulte) {
+        this.difficulte = difficulte;
+        System.out.println("🎯 Difficulté reçue: " + difficulte);
+    }
+
+
+    private void retourMenu() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("/fxml/main_menu.fxml")
+            );
+            Parent root = loader.load();
+
+            Stage stage = (Stage) btnRetour.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================= UTILS =================
+
+    private void showAlert(String titre, String msg) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
+        alert.setTitle(titre);
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText(msg);
         alert.showAndWait();
     }
 }

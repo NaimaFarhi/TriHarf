@@ -25,10 +25,20 @@ public class PartieService {
         return partieDAO.save(partie);
     }
 
-    public void terminerPartie(Partie partie, int score, int dureeSeconde) {
+    private org.example.triharf.dao.ResultatPartieDAO resultatPartieDAO = new org.example.triharf.dao.ResultatPartieDAO();
+
+    public void terminerPartie(Partie partie, int score, int dureeSeconde, java.util.List<org.example.triharf.models.ResultatPartie> resultats) {
         partie.setScore(score);
         partie.setDureeSeconde(dureeSeconde);
         partieDAO.update(partie);
+
+        // Sauvegarder les détails (pour les stats par catégorie)
+        if (resultats != null) {
+            for (org.example.triharf.models.ResultatPartie res : resultats) {
+                res.setPartie(partie); // Lier à la partie
+                resultatPartieDAO.save(res);
+            }
+        }
 
         Joueur joueur = partie.getJoueur();
         joueur.setScoreTotal(joueur.getScoreTotal() + score);

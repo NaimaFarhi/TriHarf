@@ -10,22 +10,24 @@ public class SoundManager {
 
     public SoundManager() {
         try {
-            // Charger les fichiers audio
-            String victoryPath = getClass().getResource("/org/example/triharf/sounds/success - Sound Effect.wav").toExternalForm();
-            String defeatPath = getClass().getResource("/org/example/triharf/sounds/Lose.wav").toExternalForm();
+            // Charger les fichiers audio (Correction des chemins)
+            var victoryRes = getClass().getResource("/sounds/success - Sound Effect.wav");
+            var defeatRes = getClass().getResource("/sounds/Lose.wav");
 
-            Media victoryMedia = new Media(victoryPath);
-            Media defeatMedia = new Media(defeatPath);
-
-            victoryPlayer = new MediaPlayer(victoryMedia);
-            defeatPlayer = new MediaPlayer(defeatMedia);
-
-            // Volume par défaut (0.0 à 1.0)
-            victoryPlayer.setVolume(0.7);
-            defeatPlayer.setVolume(0.7);
+            if (victoryRes != null) {
+                Media victoryMedia = new Media(victoryRes.toExternalForm());
+                victoryPlayer = new MediaPlayer(victoryMedia);
+                victoryPlayer.setVolume(0.7);
+            }
+            
+            if (defeatRes != null) {
+                Media defeatMedia = new Media(defeatRes.toExternalForm());
+                defeatPlayer = new MediaPlayer(defeatMedia);
+                defeatPlayer.setVolume(0.7);
+            }
 
         } catch (Exception e) {
-            System.err.println("Erreur lors du chargement des sons: " + e.getMessage());
+            System.err.println("❌ Erreur lors du chargement des sons: " + e.getMessage());
         }
     }
 
