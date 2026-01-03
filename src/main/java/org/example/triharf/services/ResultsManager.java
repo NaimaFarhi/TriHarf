@@ -41,7 +41,9 @@ public class ResultsManager {
                     String mot = entry.getValue().trim();
 
                     if (mot.isEmpty()) {
-                        return new ResultatPartie(categorie.getNom(), "-", false, 0, "Pas de réponse");
+                        ResultatPartie res = new ResultatPartie(categorie.getNom(), "-", false, 0, "Pas de réponse");
+                        res.setCategorieObj(categorie);
+                        return res;
                     }
 
                     long wordSubmissionTime = submissionTimes.getOrDefault(categorie, System.currentTimeMillis());
@@ -51,9 +53,13 @@ public class ResultsManager {
 
                     if (validationResult.isValid()) {
                         int points = scoreCalculator.calculateTotalScore(mot, elapsedSeconds, gameDuration, validationResult.getRarityScore());
-                        return new ResultatPartie(categorie.getNom(), mot, true, points, validationResult.getMessage() + " (+" + points + "pts)");
+                        ResultatPartie res = new ResultatPartie(categorie.getNom(), mot, true, points, validationResult.getMessage() + " (+" + points + "pts)");
+                        res.setCategorieObj(categorie); // Set object for DB link
+                        return res;
                     } else {
-                        return new ResultatPartie(categorie.getNom(), mot, false, 0, validationResult.getMessage());
+                        ResultatPartie res = new ResultatPartie(categorie.getNom(), mot, false, 0, validationResult.getMessage());
+                        res.setCategorieObj(categorie); // Set object for DB link
+                        return res;
                     }
                 }))
                 .toList();

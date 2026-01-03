@@ -63,7 +63,8 @@ public class GameSession {
             partieService.terminerPartie(
                     partie,
                     resultsManager.getScoreTotal(),
-                    (int) resultsManager.getDureePartie()
+                    (int) resultsManager.getDureePartie(),
+                    resultsManager.getResultats()
             );
         } else {
             System.err.println("❌ ERREUR: Impossible de sauvegarder la partie (partie est null)");

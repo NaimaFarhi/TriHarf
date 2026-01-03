@@ -21,8 +21,10 @@ public class ParametresGenerauxController {
     // Trigger recompile
     // ================= STATIC SETTINGS =================
     // Accessible depuis n'importe quel contrôleur
+    // ================= STATIC SETTINGS =================
+    // Accessible depuis n'importe quel contrôleur
     public static Langue langueGlobale = Langue.FRANCAIS;
-    public static String pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
+    public static String pseudoGlobal; // Initialisé dans le bloc static block ou via PropertiesManager
 
     @FXML private Button btnRetour;
     @FXML private Button btnJouer;
@@ -56,9 +58,21 @@ public class ParametresGenerauxController {
             else if (selected == rbAnglais) langueSelectionnee = "English";
         });
 
-        // Pseudo
+        // Initialisation Pseudo Global (Persistance)
+        if (pseudoGlobal == null) {
+            String savedPseudo = org.example.triharf.utils.PropertiesManager.getProperty("player.pseudo");
+            if (savedPseudo != null && !savedPseudo.isBlank()) {
+                pseudoGlobal = savedPseudo;
+            } else {
+                pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
+                org.example.triharf.utils.PropertiesManager.setProperty("player.pseudo", pseudoGlobal);
+                org.example.triharf.utils.PropertiesManager.saveProperties();
+            }
+        }
+
+        // Pseudo UI
         if (txtPseudo != null) {
-            // Afficher le pseudo global actuel (généré aléatoirement ou modifié)
+            // Afficher le pseudo global actuel
             txtPseudo.setText(pseudoGlobal);
             pseudo = pseudoGlobal;
             
@@ -124,6 +138,11 @@ public class ParametresGenerauxController {
         System.out.println("- Pseudo : " + pseudo);
         System.out.println("- Son : " + (sonActive ? "activé" : "désactivé"));
         System.out.println("- Volume : " + (int) volume + "%");
+
+        if (pseudo != null && !pseudo.isBlank()) {
+            org.example.triharf.utils.PropertiesManager.setProperty("player.pseudo", pseudo);
+            org.example.triharf.utils.PropertiesManager.saveProperties();
+        }
     }
 
     private Langue getLangueEnum() {
