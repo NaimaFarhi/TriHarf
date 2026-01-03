@@ -44,6 +44,20 @@ public class ParametresGenerauxController {
     private double volume = 70.0;
     private boolean sonActive = true;
 
+    static {
+        // Initialisation Pseudo Global (Persistance)
+        if (pseudoGlobal == null) {
+            String savedPseudo = org.example.triharf.utils.PropertiesManager.getProperty("player.pseudo");
+            if (savedPseudo != null && !savedPseudo.isBlank()) {
+                pseudoGlobal = savedPseudo;
+            } else {
+                pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
+                org.example.triharf.utils.PropertiesManager.setProperty("player.pseudo", pseudoGlobal);
+                org.example.triharf.utils.PropertiesManager.saveProperties();
+            }
+        }
+    }
+
     @FXML
     public void initialize() {
 
@@ -57,18 +71,6 @@ public class ParametresGenerauxController {
             else if (selected == rbArabe) langueSelectionnee = "Arabe";
             else if (selected == rbAnglais) langueSelectionnee = "English";
         });
-
-        // Initialisation Pseudo Global (Persistance)
-        if (pseudoGlobal == null) {
-            String savedPseudo = org.example.triharf.utils.PropertiesManager.getProperty("player.pseudo");
-            if (savedPseudo != null && !savedPseudo.isBlank()) {
-                pseudoGlobal = savedPseudo;
-            } else {
-                pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
-                org.example.triharf.utils.PropertiesManager.setProperty("player.pseudo", pseudoGlobal);
-                org.example.triharf.utils.PropertiesManager.saveProperties();
-            }
-        }
 
         // Pseudo UI
         if (txtPseudo != null) {
