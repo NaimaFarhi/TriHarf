@@ -1,0 +1,69 @@
+package org.example.triharf.network;
+
+import java.io.*;
+import java.net.Socket;
+import java.util.Map;
+
+public class ClientHandler implements Runnable {
+    private Socket socket;
+    private String clientId;
+    private GameServer server;
+    private BufferedReader in;
+    private PrintWriter out;
+    private String currentRoomId;
+
+    public ClientHandler(Socket socket, String clientId, GameServer server) throws IOException {
+        this.socket = socket;
+        this.clientId = clientId;
+        this.server = server;
+        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.out = new PrintWriter(socket.getOutputStream(), true);
+    }
+
+    @Override
+    public void run() {
+        try {
+            String line;
+            while ((line = in.readLine()) != null) {
+                NetworkMessage message = NetworkMessage.fromJson(line);
+                handleMessage(message);
+            }
+        } catch (IOException e) {
+            System.err.println("Client disconnected: " + clientId);
+        } finally {
+            cleanup();
+        }
+    }
+
+    private void handleMessage(NetworkMessage message) {
+        switch (message.getType()) {
+            case JOIN_ROOM -> {
+                currentRoomId = (String) message.getData();
+                server.joinRoom(clientId, currentRoomId);
+            }
+            case SUBMIT_ANSWER -> handleSubmitAnswer(message);
+            case DISCONNECT -> {
+                if (currentRoomId != null) {
+                    server.leaveRoom(clientId, currentRoomId);
+                }
+            }
+        }
+    }
+
+    private void handleSubmitAnswer(NetworkMessage message) {
+        if (currentRoomId == null) return;
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> answerData = (Map<String, String>) message.getData();
+    }
+
+    public void sendMessage(NetworkMessage message) {
+        out.println(message.toJson());
+    }
+
+    private void cleanup() {
+        try { socket.close(); } catch (IOException e) {}
+    }
+
+    public String getClientId() { return clientId; }
+}
