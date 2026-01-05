@@ -51,6 +51,7 @@ public class ListeAttenteController {
     private GameClient gameClient;
     private GameServer gameServer;
     private String roomId;
+    private boolean isReady = false;
 
     public void setNetwork(GameClient client, GameServer server, String roomId) {
         this.gameClient = client;
@@ -74,21 +75,37 @@ public class ListeAttenteController {
                     updatePlayerList(players);
                 }
                 case GAME_START -> {
-                    handlePret();
+                    startGame();
                 }
             }
         });
     }
 
-    private void updatePlayerList(List<String> players) {
+    private void startGame() {
+        String targetFxml = "/fxml/partie_multi.fxml";
+        String title = "Mode Multijoueur";
+
+        if ("BATTLE".equals(gameMode)) {
+            targetFxml = "/fxml/partie_battle.fxml";
+            title = "Battle Royale";
+        }
+
+        navigateToMulti(targetFxml, title);
+    }
+
+    private void updatePlayerList(List<String> playersStatus) {
         if (vboxPlayers != null) {
             vboxPlayers.getChildren().clear();
-            for (String p : players) {
-                vboxPlayers.getChildren().add(new Label("👤 " + p));
+            for (String ps : playersStatus) {
+                String[] parts = ps.split(":");
+                String id = parts[0];
+                String status = parts.length > 1 ? parts[1] : "ATTENTE";
+                String emoji = "PREST".equals(status) ? "✅" : "⏳";
+                vboxPlayers.getChildren().add(new Label(emoji + " " + id + " (" + status + ")"));
             }
         }
         if (lblPlayerCount != null) {
-            lblPlayerCount.setText(String.valueOf(players.size()));
+            lblPlayerCount.setText(String.valueOf(playersStatus.size()));
         }
     }
 
@@ -99,22 +116,22 @@ public class ListeAttenteController {
 
     @FXML
     private void handlePret() {
-        System.out.println("✅ Joueur prêt - Redirection vers " + gameMode);
+        if (gameClient != null) {
+            isReady = !isReady; // Toggle
+            gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.PLAYER_READY, ParametresGenerauxController.pseudoGlobal, isReady));
+            
+            if (btnPret != null) {
+                btnPret.setText(isReady ? "PAS PRÊT" : "JE SUIS PRÊT");
+            }
 
-        if (gameServer != null && gameClient != null) {
-            // Host clicked ready, notify everyone
-            gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START, "HOST", roomId));
+            // Si c'est l'hôte et qu'il est prêt, il peut décider de lancer (pour l'instant automatique s'il est prêt)
+            // Mais l'utilisateur a dit "kan je clique je suis pret tu dois afficher...", il n'a pas dit de lancer tout de suite.
+            // Cependant, il faut bien lancer la partie à un moment.
+            // On va laisser l'hôte lancer s'il est prêt.
+            if (gameServer != null && isReady) {
+                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START, ParametresGenerauxController.pseudoGlobal, roomId));
+            }
         }
-
-        String targetFxml = "/fxml/partie_multi.fxml";
-        String title = "Mode Multijoueur";
-
-        if ("BATTLE".equals(gameMode)) {
-            targetFxml = "/fxml/partie_battle.fxml";
-            title = "Battle Royale";
-        }
-
-        navigateToMulti(targetFxml, title);
     }
 
     private void navigateToMulti(String fxmlPath, String title) {

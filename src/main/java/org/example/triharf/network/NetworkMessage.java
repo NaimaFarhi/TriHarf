@@ -6,6 +6,7 @@ public class NetworkMessage {
     public enum Type {
         JOIN_ROOM,
         PLAYER_JOINED,
+        PLAYER_READY,
         GAME_START,
         SUBMIT_ANSWER,
         GAME_END,

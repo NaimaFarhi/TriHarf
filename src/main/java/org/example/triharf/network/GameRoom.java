@@ -12,6 +12,7 @@ public class GameRoom {
     private Langue langue;
     private int maxPlayers;
     private boolean gameStarted;
+    private Set<String> readyPlayers;
 
     public GameRoom(String roomId, int maxPlayers, Langue langue) {
         this.roomId = roomId;
@@ -20,6 +21,7 @@ public class GameRoom {
         this.playerIds = new ArrayList<>();
         this.playerAnswers = new HashMap<>();
         this.gameStarted = false;
+        this.readyPlayers = new HashSet<>();
     }
 
     public String getRoomId() {
@@ -82,6 +84,19 @@ public class GameRoom {
 
     public void removePlayer(String playerId){
         this.playerIds.remove(playerId);
+        this.readyPlayers.remove(playerId);
+    }
+
+    public void setPlayerReady(String playerId, boolean ready) {
+        if (ready) {
+            readyPlayers.add(playerId);
+        } else {
+            readyPlayers.remove(playerId);
+        }
+    }
+
+    public Set<String> getReadyPlayers() {
+        return readyPlayers;
     }
 
     public void submitAnswer(String playerId, Categorie cat, String word){

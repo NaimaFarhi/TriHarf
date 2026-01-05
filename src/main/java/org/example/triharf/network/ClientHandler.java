@@ -41,6 +41,11 @@ public class ClientHandler implements Runnable {
                 currentRoomId = (String) message.getData();
                 server.joinRoom(clientId, currentRoomId);
             }
+            case PLAYER_READY -> {
+                if (currentRoomId != null) {
+                    server.setPlayerReady(clientId, currentRoomId, (Boolean) message.getData());
+                }
+            }
             case SUBMIT_ANSWER -> handleSubmitAnswer(message);
             case DISCONNECT -> {
                 if (currentRoomId != null) {
