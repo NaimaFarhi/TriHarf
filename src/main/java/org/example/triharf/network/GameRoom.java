@@ -13,6 +13,7 @@ public class GameRoom {
     private int maxPlayers;
     private boolean gameStarted;
     private Set<String> readyPlayers;
+    private Map<String, String> playerPseudos;
 
     public GameRoom(String roomId, int maxPlayers, Langue langue) {
         this.roomId = roomId;
@@ -22,6 +23,7 @@ public class GameRoom {
         this.playerAnswers = new HashMap<>();
         this.gameStarted = false;
         this.readyPlayers = new HashSet<>();
+        this.playerPseudos = new HashMap<>();
     }
 
     public String getRoomId() {
@@ -73,9 +75,10 @@ public class GameRoom {
         this.gameStarted = gameStarted;
     }
 
-    public boolean addPlayer(String playerId){
+    public boolean addPlayer(String playerId, String pseudo){
         if (!playerIds.contains(playerId) && !isFull()) {
             playerIds.add(playerId);
+            playerPseudos.put(playerId, pseudo);
             playerAnswers.put(playerId, new HashMap<>());
             return true;
         }
@@ -84,6 +87,7 @@ public class GameRoom {
 
     public void removePlayer(String playerId){
         this.playerIds.remove(playerId);
+        this.playerPseudos.remove(playerId);
         this.readyPlayers.remove(playerId);
     }
 
@@ -97,6 +101,10 @@ public class GameRoom {
 
     public Set<String> getReadyPlayers() {
         return readyPlayers;
+    }
+
+    public String getPseudo(String playerId) {
+        return playerPseudos.getOrDefault(playerId, playerId);
     }
 
     public void submitAnswer(String playerId, Categorie cat, String word){

@@ -39,7 +39,8 @@ public class ClientHandler implements Runnable {
         switch (message.getType()) {
             case JOIN_ROOM -> {
                 currentRoomId = (String) message.getData();
-                server.joinRoom(clientId, currentRoomId);
+                String pseudo = message.getSenderId();
+                server.joinRoom(clientId, currentRoomId, pseudo);
             }
             case PLAYER_READY -> {
                 if (currentRoomId != null) {
