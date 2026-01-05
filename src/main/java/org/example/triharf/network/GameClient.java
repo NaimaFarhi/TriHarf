@@ -1,5 +1,7 @@
 package org.example.triharf.network;
 
+import org.example.triharf.utils.PropertiesManager;
+
 import java.io.*;
 import java.net.*;
 import java.util.function.Consumer;
@@ -9,8 +11,8 @@ import java.util.function.Consumer;
  * Connects to GameServer and sends/receives messages
  */
 public class GameClient {
-    private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 8888;
+    private static final String SERVER_HOST = PropertiesManager.getProperty("server.host", "localhost");
+    private static final int SERVER_PORT = PropertiesManager.getInt("server.port", 8888); // Server's local IP
 
     private Socket socket;  // TCP connection to server
     private BufferedReader in;  // Read messages from server
