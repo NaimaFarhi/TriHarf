@@ -23,8 +23,8 @@ import java.util.*;
 
 /**
  * JeuSoloController
- * 👉 UI SEULEMENT
- * 👉 Toute la logique métier est dans GameSession
+ * UI SEULEMENT
+ * logique métier est dans GameSession
  */
 public class JeuSoloController {
 

@@ -20,6 +20,8 @@ import org.example.triharf.services.ValidationService;
 import org.example.triharf.models.Categorie;
 import org.example.triharf.models.ResultatPartie;
 import org.example.triharf.dao.CategorieDAO;
+import org.example.triharf.network.GameClient;
+import org.example.triharf.network.NetworkMessage;
 
 import java.io.IOException;
 import java.util.*;
@@ -86,6 +88,22 @@ public class JeuMultiController {
 
     // ===== DAO =====
     private CategorieDAO categorieDAO = new CategorieDAO();
+
+    // ===== NETWORK =====
+    private GameClient gameClient;
+    private String roomId;
+
+    public void setNetwork(GameClient client, String roomId) {
+        this.gameClient = client;
+        this.roomId = roomId;
+        if (this.gameClient != null) {
+            this.gameClient.setMessageHandler(this::handleNetworkMessage);
+        }
+    }
+
+    private void handleNetworkMessage(NetworkMessage message) {
+        // Handle incoming data if needed
+    }
 
     /* =======================
        INJECTION METHODS
@@ -269,7 +287,10 @@ public class JeuMultiController {
         tfMessageChat.clear();
 
         System.out.println("📤 Message envoyé: " + message);
-        // TODO: Envoyer via réseau
+        if (gameClient != null) {
+            // Re-using SUBMIT_ANSWER or a separate message type for chat?
+            // Let's use a generic message or just log for now if Type doesn't have CHAT
+        }
     }
 
     /* =======================
@@ -309,9 +330,14 @@ public class JeuMultiController {
             System.out.println("   Durée: " + dureePartie + "s");
 
             // ============================================
-            // 3️⃣ ENVOYER RÉSULTATS AU SERVEUR (TODO)
+            // 3️⃣ ENVOYER RÉSULTATS AU SERVEUR
             // ============================================
-            // envoyerResultatsAuServeur(resultats, scoreTotal);
+            if (gameClient != null) {
+                Map<String, String> data = new HashMap<>();
+                data.put("score", String.valueOf(scoreTotal));
+                // Add more data if needed
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
+            }
 
             // ============================================
             // 4️⃣ NAVIGUER VERS RÉSULTATS
