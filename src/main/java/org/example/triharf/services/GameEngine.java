@@ -88,6 +88,7 @@ public class GameEngine {
     // Getters & Setters
     public Character getCurrentLetter() { return currentLetter; }
     public int getRemainingTime() { return remainingTime; }
+    public void setRemainingTime(int remainingTime) { this.remainingTime = remainingTime; }
     public GameState getState() { return state; }
 
     public void setOnTimerUpdate(Runnable callback) { this.onTimerUpdate = callback; }
