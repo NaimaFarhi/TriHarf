@@ -35,6 +35,10 @@ public class MenuPrincipalController {
     private javafx.scene.control.Label lblBestScore;
     @FXML
     private javafx.scene.layout.VBox vboxRecords;
+    @FXML
+    private javafx.scene.control.TextField tfCodePartie;
+    @FXML
+    private javafx.scene.control.Button btnRejoindre;
 
     private org.example.triharf.services.StatisticsService statisticsService = new org.example.triharf.services.StatisticsService();
 
@@ -50,6 +54,9 @@ public class MenuPrincipalController {
         btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_chaos.fxml", "Paramètres - Mode Chaos"));
 
         btnParametres.setOnAction(e -> navigateTo("/fxml/Configuration.fxml", "Paramètres"));
+        if (btnRejoindre != null) {
+            btnRejoindre.setOnAction(e -> handleRejoindre());
+        }
 
         loadStatistics();
     }
@@ -130,6 +137,41 @@ public class MenuPrincipalController {
             stage.setTitle(title);
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de " + fxmlPath);
+            e.printStackTrace();
+        }
+    }
+
+    private void handleRejoindre() {
+        String code = "";
+        if (tfCodePartie != null) {
+            code = tfCodePartie.getText().trim();
+        }
+        if (code.isEmpty()) return;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+            Parent root = loader.load();
+
+            ListeAttenteController controller = loader.getController();
+            if (controller != null) {
+                controller.setGameMode("MULTI");
+                
+                // Initialize client and join room
+                org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient();
+                client.connect();
+                client.sendMessage(new org.example.triharf.network.NetworkMessage(
+                    org.example.triharf.network.NetworkMessage.Type.JOIN_ROOM,
+                    ParametresGenerauxController.pseudoGlobal,
+                    code
+                ));
+                
+                controller.setNetwork(client, null, code);
+            }
+
+            Stage stage = (Stage) btnRejoindre.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.setTitle("Salle d'attente");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

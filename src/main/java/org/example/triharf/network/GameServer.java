@@ -61,14 +61,41 @@ public class GameServer {
             return false;
         }
 
-        // Notify all players in room
+        // Notify all players in room with status list
+        List<String> playerStatusList = new ArrayList<>();
+        for (String pid : room.getPlayerIds()) {
+            String status = room.getReadyPlayers().contains(pid) ? "PREST" : "ATTENTE";
+            playerStatusList.add(pid + ":" + status);
+        }
+
         NetworkMessage msg = new NetworkMessage(
                 NetworkMessage.Type.PLAYER_JOINED,
-                clientId,
-                room.getPlayerIds()
+                "SERVER",
+                playerStatusList
         );
         broadcast(roomId, msg);
         return true;
+    }
+
+    public synchronized void setPlayerReady(String clientId, String roomId, boolean ready) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null) {
+            room.setPlayerReady(clientId, ready);
+            
+            // Map player IDs to status
+            List<String> playerStatusList = new ArrayList<>();
+            for (String pid : room.getPlayerIds()) {
+                String status = room.getReadyPlayers().contains(pid) ? "PREST" : "ATTENTE";
+                playerStatusList.add(pid + ":" + status);
+            }
+
+            NetworkMessage msg = new NetworkMessage(
+                    NetworkMessage.Type.PLAYER_JOINED,
+                    "SERVER",
+                    playerStatusList
+            );
+            broadcast(roomId, msg);
+        }
     }
 
     // Player leaves room
