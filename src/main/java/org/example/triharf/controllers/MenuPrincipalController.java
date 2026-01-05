@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class MenuPrincipalController {
 
@@ -142,37 +143,65 @@ public class MenuPrincipalController {
     }
 
     private void handleRejoindre() {
-        String code = "";
-        if (tfCodePartie != null) {
-            code = tfCodePartie.getText().trim();
-        }
+        if (tfCodePartie == null) return;
+        final String code = tfCodePartie.getText().trim();
         if (code.isEmpty()) return;
 
-        try {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
-            Parent root = loader.load();
+        // Désactiver le bouton pour éviter des clics multiples
+        if (btnRejoindre != null) btnRejoindre.setDisable(true);
 
-            ListeAttenteController controller = loader.getController();
-            if (controller != null) {
-                controller.setGameMode("MULTI");
-                
-                // Initialize client and join room
+        new Thread(() -> {
+            try {
+                // Initialiser le client et se connecter
                 org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient();
+                
+                // Tentative de connexion
                 client.connect();
+                
+                // Si connecté, on envoie le message de join
+                String pseudo = ParametresGenerauxController.pseudoGlobal;
+                if (pseudo == null || pseudo.isEmpty()) pseudo = "Joueur_" + new Random().nextInt(1000);
+                
                 client.sendMessage(new org.example.triharf.network.NetworkMessage(
                     org.example.triharf.network.NetworkMessage.Type.JOIN_ROOM,
-                    ParametresGenerauxController.pseudoGlobal,
+                    pseudo,
                     code
                 ));
-                
-                controller.setNetwork(client, null, code);
-            }
 
-            Stage stage = (Stage) btnRejoindre.getScene().getWindow();
-            stage.getScene().setRoot(root);
-            stage.setTitle("Salle d'attente");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                // Naviguer sur le thread UI
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                        Parent root = loader.load();
+
+                        ListeAttenteController controller = loader.getController();
+                        if (controller != null) {
+                            controller.setGameMode("MULTI");
+                            controller.setNetwork(client, null, code);
+                        }
+
+                        Stage stage = (Stage) btnRejoindre.getScene().getWindow();
+                        stage.getScene().setRoot(root);
+                        stage.setTitle("Salle d'attente");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            } catch (IOException e) {
+                javafx.application.Platform.runLater(() -> {
+                    if (btnRejoindre != null) btnRejoindre.setDisable(false);
+                    showAlert("Erreur de connexion", "Impossible de rejoindre la partie. Vérifiez le code ou assurez-vous que le serveur est lancé.");
+                });
+            }
+        }).start();
+    }
+
+    private void showAlert(String title, String content) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

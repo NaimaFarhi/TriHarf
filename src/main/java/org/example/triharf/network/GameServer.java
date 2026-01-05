@@ -55,17 +55,18 @@ public class GameServer {
     }
 
     // Player joins room
-    public synchronized boolean joinRoom(String clientId, String roomId) {
+    public synchronized boolean joinRoom(String clientId, String roomId, String pseudo) {
         GameRoom room = rooms.get(roomId);
-        if (room == null || !room.addPlayer(clientId)) {
+        if (room == null || !room.addPlayer(clientId, pseudo)) {
             return false;
         }
 
-        // Notify all players in room with status list
+        // Notify all players in room with status list (using pseudos)
         List<String> playerStatusList = new ArrayList<>();
         for (String pid : room.getPlayerIds()) {
+            String name = room.getPseudo(pid);
             String status = room.getReadyPlayers().contains(pid) ? "PREST" : "ATTENTE";
-            playerStatusList.add(pid + ":" + status);
+            playerStatusList.add(name + ":" + status);
         }
 
         NetworkMessage msg = new NetworkMessage(
@@ -82,11 +83,12 @@ public class GameServer {
         if (room != null) {
             room.setPlayerReady(clientId, ready);
             
-            // Map player IDs to status
+            // Map player names to status
             List<String> playerStatusList = new ArrayList<>();
             for (String pid : room.getPlayerIds()) {
+                String name = room.getPseudo(pid);
                 String status = room.getReadyPlayers().contains(pid) ? "PREST" : "ATTENTE";
-                playerStatusList.add(pid + ":" + status);
+                playerStatusList.add(name + ":" + status);
             }
 
             NetworkMessage msg = new NetworkMessage(
