@@ -85,6 +85,24 @@
                             </children>
                         </VBox>
 
+                        <!-- Ngrok URL section -->
+                        <VBox alignment="CENTER" spacing="10.0" styleClass="content-panel" 
+                              style="-fx-padding: 20; -fx-min-width: 400; -fx-max-width: 500;">
+                            <children>
+                                <Label text="Adresse Serveur Ngrok (Optionnel)" styleClass="label-dim" style="-fx-font-size: 14px;"/>
+                                <HBox alignment="CENTER" spacing="10.0">
+                                    <children>
+                                        <TextField fx:id="tfNgrokUrl" promptText="Copiez votre URL Ngrok ici..." 
+                                                   style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 14px; -fx-pref-width: 250;"/>
+                                        <Button fx:id="btnCopyNgrok" text="📋" onAction="#handleCopyNgrok" styleClass="btn-secondary" 
+                                                style="-fx-font-size: 14px;"/>
+                                    </children>
+                                </HBox>
+                                <Label text="Si vous utilisez Ngrok, collez l'URL ici pour la partager." 
+                                       style="-fx-text-fill: #888; -fx-font-size: 10px;"/>
+                            </children>
+                        </VBox>
+
                         <!-- Loading animation dots -->
                         <HBox alignment="CENTER" spacing="8.0">
                             <children>

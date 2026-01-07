@@ -11,9 +11,7 @@ import org.example.triharf.HelloApplication;
 import org.example.triharf.dao.CategorieDAO;
 import org.example.triharf.models.Categorie;
 
-import org.example.triharf.network.GameClient;
-import org.example.triharf.network.GameServer;
-import org.example.triharf.network.NetworkMessage;
+import org.example.triharf.services.NetworkService;
 
 import java.io.IOException;
 import java.util.*;
@@ -45,8 +43,7 @@ public class ParamPartieMultiController {
     private List<Categorie> toutesLesCategories = new ArrayList<>();
     private Map<String, CheckBox> checkboxMap = new HashMap<>();
 
-    private GameClient gameClient;
-    private GameServer gameServer;
+    private NetworkService networkService;
     private String roomId;
 
     private String gameMode = "MULTI";
@@ -155,63 +152,22 @@ public class ParamPartieMultiController {
     }
 
     private void initialiserReseau() {
-        new Thread(() -> {
-            try {
-                // 1. Démarrer le serveur dans son propre thread
-                gameServer = new GameServer();
-                Thread serverThread = new Thread(() -> {
-                    try {
-                        gameServer.start();
-                    } catch (IOException e) {
-                        System.err.println("Erreur démarrage serveur: " + e.getMessage());
-                    }
-                });
-                serverThread.setDaemon(true);
-                serverThread.start();
-
-                // 2. Attendre que le serveur soit prêt (petit délai)
-                Thread.sleep(500);
-
-                // 3. Connecter le client avec tentatives de reconnexion
-                gameClient = new GameClient();
-                int attempts = 5;
-                boolean connected = false;
-                while (attempts > 0 && !connected) {
-                    try {
-                        gameClient.connect();
-                        connected = true;
-                    } catch (IOException e) {
-                        attempts--;
-                        if (attempts > 0) {
-                            System.out.println("Tentative de connexion échouée, nouvel essai dans 500ms... (" + attempts + " essais restants)");
-                            Thread.sleep(500);
-                        } else {
-                            throw e;
-                        }
-                    }
+        this.networkService = new NetworkService();
+        
+        networkService.startHost(
+            ParametresGenerauxController.langueGlobale,
+            () -> { // On Success
+                this.roomId = networkService.getRoomId();
+                if (txtLien != null) {
+                    txtLien.setText(this.roomId);
                 }
-
-                // 4. Créer la salle une fois connecté
-                roomId = UUID.randomUUID().toString().substring(0, 8);
-                gameServer.createRoom(roomId, 4, ParametresGenerauxController.langueGlobale);
-                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.JOIN_ROOM, ParametresGenerauxController.pseudoGlobal, roomId));
-
-                // 5. Mettre à jour l'UI sur le thread JavaFX
-                javafx.application.Platform.runLater(() -> {
-                    if (txtLien != null) {
-                        txtLien.setText(roomId);
-                    }
-                    System.out.println("✅ Réseau initialisé et salle créée : " + roomId);
-                });
-
-            } catch (Exception e) {
-                javafx.application.Platform.runLater(() -> {
-                    showAlert(Alert.AlertType.ERROR, "Erreur Réseau", 
-                        "Impossible d'initialiser le réseau après plusieurs tentatives : " + e.getMessage());
-                });
-                e.printStackTrace();
+                System.out.println("✅ Réseau initialisé et salle créée : " + this.roomId);
+            },
+            (errorMsg) -> { // On Error
+                 showAlert(Alert.AlertType.ERROR, "Erreur Réseau", 
+                        "Impossible d'initialiser le réseau : " + errorMsg);
             }
-        }).start();
+        );
     }
 
     /**
@@ -236,7 +192,8 @@ public class ParamPartieMultiController {
             ListeAttenteController controller = loader.getController();
             if (controller != null) {
                 controller.setGameMode(this.gameMode);
-                controller.setNetwork(gameClient, gameServer, roomId);
+                controller.setGameMode(this.gameMode);
+                controller.setNetwork(networkService);
             }
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();

@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
@@ -40,6 +41,12 @@ public class ListeAttenteController {
     private Button btnQuitter;
 
     @FXML
+    private TextField tfNgrokUrl;
+
+    @FXML
+    private Button btnCopyNgrok;
+
+    @FXML
     private Button btnPret;
 
     @FXML
@@ -48,22 +55,18 @@ public class ListeAttenteController {
     }
 
     private String gameMode = "MULTI";
-    private GameClient gameClient;
-    private GameServer gameServer;
-    private String roomId;
     private boolean isReady = false;
+    private org.example.triharf.services.NetworkService networkService;
 
-    public void setNetwork(GameClient client, GameServer server, String roomId) {
-        this.gameClient = client;
-        this.gameServer = server;
-        this.roomId = roomId;
-
-        if (lblGameCode != null) {
-            lblGameCode.setText(roomId);
+    public void setNetwork(org.example.triharf.services.NetworkService networkService) {
+        this.networkService = networkService;
+        
+        if (networkService.getRoomId() != null && lblGameCode != null) {
+            lblGameCode.setText(networkService.getRoomId());
         }
 
-        if (gameClient != null) {
-            gameClient.setMessageHandler(this::handleIncomingMessage);
+        if (networkService.getGameClient() != null) {
+            networkService.getGameClient().setMessageHandler(this::handleIncomingMessage);
         }
     }
 
@@ -116,20 +119,18 @@ public class ListeAttenteController {
 
     @FXML
     private void handlePret() {
-        if (gameClient != null) {
+        if (networkService != null && networkService.getGameClient() != null) {
             isReady = !isReady; // Toggle
-            gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.PLAYER_READY, ParametresGenerauxController.pseudoGlobal, isReady));
+            networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.PLAYER_READY, ParametresGenerauxController.pseudoGlobal, isReady));
             
             if (btnPret != null) {
                 btnPret.setText(isReady ? "PAS PRÊT" : "JE SUIS PRÊT");
             }
 
             // Si c'est l'hôte et qu'il est prêt, il peut décider de lancer (pour l'instant automatique s'il est prêt)
-            // Mais l'utilisateur a dit "kan je clique je suis pret tu dois afficher...", il n'a pas dit de lancer tout de suite.
-            // Cependant, il faut bien lancer la partie à un moment.
-            // On va laisser l'hôte lancer s'il est prêt.
-            if (gameServer != null && isReady) {
-                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START, ParametresGenerauxController.pseudoGlobal, roomId));
+            // On vérifie si on a un serveur via le service
+            if (networkService.getGameServer() != null && isReady) {
+                 networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START, ParametresGenerauxController.pseudoGlobal, networkService.getRoomId()));
             }
         }
     }
@@ -142,7 +143,7 @@ public class ListeAttenteController {
             // Pass network to JeuMultiController
             Object controller = loader.getController();
             if (controller instanceof JeuMultiController) {
-                ((JeuMultiController) controller).setNetwork(gameClient, roomId);
+                ((JeuMultiController) controller).setNetwork(networkService);
             }
 
             Stage stage = (Stage) btnPret.getScene().getWindow();
@@ -169,6 +170,17 @@ public class ListeAttenteController {
             content.putString(lblGameCode.getText());
             clipboard.setContent(content);
             System.out.println("📋 Code copié: " + lblGameCode.getText());
+        }
+    }
+
+    @FXML
+    private void handleCopyNgrok() {
+        if (tfNgrokUrl != null && tfNgrokUrl.getText() != null && !tfNgrokUrl.getText().isEmpty()) {
+            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+            content.putString(tfNgrokUrl.getText());
+            clipboard.setContent(content);
+            System.out.println("📋 URL Ngrok copiée: " + tfNgrokUrl.getText());
         }
     }
 

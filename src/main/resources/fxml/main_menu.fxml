@@ -183,7 +183,7 @@
                         <HBox alignment="CENTER" spacing="10" styleClass="join-game-container" style="-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 50; -fx-padding: 10 20; -fx-max-width: 500;">
                             <children>
                                 <Label text="🔑" style="-fx-font-size: 20px;"/>
-                                <TextField fx:id="tfCodePartie" promptText="Entrer le code de la partie..." styleClass="join-input" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-prompt-text-fill: #aaa; -fx-font-size: 16px; -fx-pref-width: 250px;"/>
+                                <TextField fx:id="tfCodePartie" promptText="Code partie ou adresse ip:port..." styleClass="join-input" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-prompt-text-fill: #aaa; -fx-font-size: 16px; -fx-pref-width: 250px;"/>
                                 <Button fx:id="btnRejoindre" text="REJOINDRE" styleClass="btn-action-small" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 30; -fx-cursor: hand;"/>
                             </children>
                         </HBox>

@@ -90,14 +90,12 @@ public class JeuMultiController {
     private CategorieDAO categorieDAO = new CategorieDAO();
 
     // ===== NETWORK =====
-    private GameClient gameClient;
-    private String roomId;
+    private org.example.triharf.services.NetworkService networkService;
 
-    public void setNetwork(GameClient client, String roomId) {
-        this.gameClient = client;
-        this.roomId = roomId;
-        if (this.gameClient != null) {
-            this.gameClient.setMessageHandler(this::handleNetworkMessage);
+    public void setNetwork(org.example.triharf.services.NetworkService networkService) {
+        this.networkService = networkService;
+        if (this.networkService != null && this.networkService.getGameClient() != null) {
+            this.networkService.getGameClient().setMessageHandler(this::handleNetworkMessage);
         }
     }
 
@@ -287,7 +285,7 @@ public class JeuMultiController {
         tfMessageChat.clear();
 
         System.out.println("📤 Message envoyé: " + message);
-        if (gameClient != null) {
+        if (networkService != null && networkService.getGameClient() != null) {
             // Re-using SUBMIT_ANSWER or a separate message type for chat?
             // Let's use a generic message or just log for now if Type doesn't have CHAT
         }
@@ -332,11 +330,11 @@ public class JeuMultiController {
             // ============================================
             // 3️⃣ ENVOYER RÉSULTATS AU SERVEUR
             // ============================================
-            if (gameClient != null) {
+            if (networkService != null && networkService.getGameClient() != null) {
                 Map<String, String> data = new HashMap<>();
                 data.put("score", String.valueOf(scoreTotal));
                 // Add more data if needed
-                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
+                networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
             }
 
             // ============================================

@@ -147,54 +147,34 @@ public class MenuPrincipalController {
         final String code = tfCodePartie.getText().trim();
         if (code.isEmpty()) return;
 
-        // Désactiver le bouton pour éviter des clics multiples
         if (btnRejoindre != null) btnRejoindre.setDisable(true);
 
-        new Thread(() -> {
-            try {
-                // Initialiser le client et se connecter
-                org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient();
-                
-                // Tentative de connexion
-                client.connect();
-                
-                // Si connecté, on envoie le message de join
-                String pseudo = ParametresGenerauxController.pseudoGlobal;
-                if (pseudo == null || pseudo.isEmpty()) pseudo = "Joueur_" + new Random().nextInt(1000);
-                
-                client.sendMessage(new org.example.triharf.network.NetworkMessage(
-                    org.example.triharf.network.NetworkMessage.Type.JOIN_ROOM,
-                    pseudo,
-                    code
-                ));
+        org.example.triharf.services.NetworkService netService = new org.example.triharf.services.NetworkService();
+        
+        netService.startClientOnly(code, 
+            () -> { // Success
+                try {
+                    FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                    Parent root = loader.load();
 
-                // Naviguer sur le thread UI
-                javafx.application.Platform.runLater(() -> {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
-                        Parent root = loader.load();
-
-                        ListeAttenteController controller = loader.getController();
-                        if (controller != null) {
-                            controller.setGameMode("MULTI");
-                            controller.setNetwork(client, null, code);
-                        }
-
-                        Stage stage = (Stage) btnRejoindre.getScene().getWindow();
-                        stage.getScene().setRoot(root);
-                        stage.setTitle("Salle d'attente");
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    ListeAttenteController controller = loader.getController();
+                    if (controller != null) {
+                        controller.setGameMode("MULTI");
+                        controller.setNetwork(netService);
                     }
-                });
 
-            } catch (IOException e) {
-                javafx.application.Platform.runLater(() -> {
-                    if (btnRejoindre != null) btnRejoindre.setDisable(false);
-                    showAlert("Erreur de connexion", "Impossible de rejoindre la partie. Vérifiez le code ou assurez-vous que le serveur est lancé.");
-                });
+                    Stage stage = (Stage) btnRejoindre.getScene().getWindow();
+                    stage.getScene().setRoot(root);
+                    stage.setTitle("Salle d'attente");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            },
+            (errorMsg) -> { // Error
+                if (btnRejoindre != null) btnRejoindre.setDisable(false);
+                showAlert("Erreur de connexion", "Impossible de rejoindre la partie : " + errorMsg);
             }
-        }).start();
+        );
     }
 
     private void showAlert(String title, String content) {
