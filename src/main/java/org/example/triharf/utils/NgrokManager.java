@@ -8,25 +8,77 @@ public class NgrokManager {
     private String publicUrl;
     private int publicPort;
 
+    private StringBuilder logBuffer = new StringBuilder();
+
     public void start(int localPort) throws IOException, InterruptedException {
-        // Get ngrok.exe from resources
         String ngrokPath = getNgrokPath();
 
-        // Start ngrok
-        ProcessBuilder pb = new ProcessBuilder(ngrokPath, "tcp", String.valueOf(localPort));
+        ProcessBuilder pb = new ProcessBuilder(ngrokPath, "tcp", String.valueOf(localPort), "--log=stdout");
+        pb.redirectErrorStream(true);
         ngrokProcess = pb.start();
+        
+        // Clear previous logs
+        logBuffer.setLength(0);
 
-        // Wait for ngrok to start
-        Thread.sleep(2000);
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(ngrokProcess.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[NGROK] " + line);
+                    synchronized (logBuffer) {
+                        logBuffer.append(line).append("\n");
+                    }
+                }
+            } catch (IOException e) { /* ignore */ }
+        }).start();
 
-        // Get public URL from ngrok API
-        fetchPublicUrl();
+        // Retry for up to 10 seconds
+        int attempts = 0;
+        while (attempts < 20) {
+            if (!ngrokProcess.isAlive()) {
+                String logs;
+                synchronized (logBuffer) {
+                     logs = logBuffer.toString();
+                }
+                if (logs.contains("ERR_NGROK_4018") || logs.contains("requires a verified account")) {
+                    throw new IOException("NGROK_AUTH_REQUIRED");
+                }
+                throw new IOException("Ngrok process exited unexpectedly. Logs:\n" + logs);
+            }
+            
+            try {
+                Thread.sleep(500);
+                fetchPublicUrl();
+                if (publicUrl != null) return; 
+            } catch (IOException e) {
+                // API not ready yet
+            }
+            attempts++;
+        }
+        
+        throw new IOException("Ngrok API not responding after 10 seconds.");
+    }
+    
+    public void setAuthToken(String token) throws IOException, InterruptedException {
+        String ngrokPath = getNgrokPath();
+        ProcessBuilder pb = new ProcessBuilder(ngrokPath, "config", "add-authtoken", token);
+        Process p = pb.start();
+        int exitCode = p.waitFor();
+        if (exitCode != 0) {
+            throw new IOException("Failed to set authtoken. Exit code: " + exitCode);
+        }
     }
 
     private void fetchPublicUrl() throws IOException {
         // Ngrok exposes local API at http://localhost:4040/api/tunnels
         java.net.URL url = new java.net.URL("http://localhost:4040/api/tunnels");
         java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(500); // Fast fail
+        conn.setReadTimeout(500);
+
+        if (conn.getResponseCode() != 200) {
+           throw new IOException("API responded with " + conn.getResponseCode());
+        }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuilder response = new StringBuilder();
@@ -34,7 +86,7 @@ public class NgrokManager {
         while ((line = reader.readLine()) != null) {
             response.append(line);
         }
-
+        
         // Parse JSON to extract public URL
         parseNgrokResponse(response.toString());
     }

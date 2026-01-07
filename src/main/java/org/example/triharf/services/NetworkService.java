@@ -75,105 +75,43 @@ public class NetworkService {
     public void startClientOnly(String rawUrl, Runnable onSuccess, java.util.function.Consumer<String> onError) {
         executorService.submit(() -> {
             try {
-                org.example.triharf.utils.NetworkUtils.ConnectionInfo info = org.example.triharf.utils.NetworkUtils.parseUrl(rawUrl);
-                
-                // Note: The rawUrl here might be "host:port" or "host:port/roomId" or just "roomId"
-                // If it is just "roomId" (length 8, alphanumeric), we assume localhost:8888 
-                // But parseUrl defaults to cleanUrl as host if not ":". 
-                // We need to differentiate "Remote URL" vs "Simple Room Code on Localhost".
-                
-                String targetRoomId = this.roomId; // Keep existing if set? No, we reset.
-                
-                // Logic: 
-                // If input looks like RoomID (Length 8, no dots/colons), assume localhost.
-                // If input has colon or dot, assume Address. Then where is RoomID?
-                // The prompt says: "Text field for entering host's ngrok URL". And "Connect to server".
-                // It doesn't explicitly mention entering the Room ID separately.
-                // Assumption: User must enter "address:port".
-                // Then how do we join a room? 
-                // If the user enters JUST the address, we connect. Then we need to JOIN a room.
-                // WE WILL ASSUME THE ROOM ID IS PASSED SEPARATELY OR WE NEED TO ASK FOR IT?
-                // OR: The user pastes "address:port". We connect. Then... what?
-                // We'll update joinRoom to use a default or ask user?
-                // CURRENTLY: handleRejoindre passes 'code' which was the room ID.
-                // New logic: 
-                // If input is "host:port", we connect there. And RoomID? 
-                // Maybe the user enters "host:port/roomid"?
-                // Let's implement support for that in parseUrl? No, keep it simple.
-                // Let's assume the user enters "host:port". We join the server.
-                // For now, let's assume we try to join the FIRST available room or a default one if we can't specify.
-                // However, the existing code passed 'code' as 'roomId'. 
-                // IF we want to support Ngrok, maybe we force the Host to share "host:port:roomId"? 
-                // OR simpler: Input field = "host:port". We connect. Then we auto-join room "default"? Or we list rooms?
-                // To minimize UI changes, let's try to pass the RoomID as well.
-                // If the user inputs `0.tcp.ngrok.io:12345`, we treat `12345` as port.
-                // But we lack RoomId. 
-                // Let's optimistically assume for this task that the user enters "host:port" AND we might need a way to get RoomId.
-                // OR: We try to join any room.
-                // Let's check `joinRoom`. It sends `JOIN_ROOM` with `roomId`.
-                // If I send "ANY" or null, maybe server assigns one?
-                // `GameServer.joinRoom` checks `rooms.get(roomId)`. It needs exact match.
-                
-                // Hack/Solution: Allow input string to be "host:port#roomId" or similar?
-                // Or just: If it looks like a URL, use it as host:port, and assume RoomID is separate?
-                // But there is only one text field.
-                
-                // DECISION: If the input is complex (has : or .), we connect to it.
-                // We will use a default RoomID or try to find one.
-                // BUT wait, `startClientOnly` takes `targetRoomId`... oh wait, checking my own code.
-                // `startClientOnly(String targetRoomId, ...)`
-                
-                // Refactoring methodology:
-                // I will change the signature to accept `String inputString`. 
-                // I will try to extract host/port/roomId from it.
-                // Format: `host:port/roomId`. 
-                // If just `roomId` -> localhost:8888, roomId.
-                // If `host:port` -> host:port, roomId=???? (Maybe ask server? or fail?)
-                
-                // Let's implicitly assume the user will enter `host:port`. We can't guess RoomId.
-                // Maybe the Host room ID is ALWAYS the same or ignorable if 1 server = 1 game?
-                // `GameServer` creates room with random UUID.
-                
-                // Correction: I should update `GameServer` to allow listing rooms, or joining "the only room".
-                // But I can't easily change the protocol and `GameServer` logic significantly without risk.
-                // Safest bet: User must provide RoomID.
-                // I will support input format `host:port/roomId`. 
-                // Example: `0.tcp.ngrok.io:12345/ABCDFEGH`.
-                
-                // Updating parsing logic here inline or in NetworkUtils?
-                // NetworkUtils only does host/port.
-                
+                // Parse input: Expecting "host:port/roomId" or just "roomId" (localhost implied)
                 String host = "localhost";
                 int port = 8888;
-                String roomToJoin = rawUrl; // Default assumption
-                
+                String roomToJoin = rawUrl;
+
                 if (rawUrl.contains("/") && (rawUrl.contains(":") || rawUrl.contains("."))) {
+                    // Format: host:port/roomId
                     String[] split = rawUrl.split("/");
                     String addressPart = split[0];
-                    roomToJoin = (split.length > 1) ? split[1] : "";
+                    if (split.length > 1) {
+                        roomToJoin = split[1];
+                    } else {
+                        throw new IllegalArgumentException("Format attendu: host:port/CodeSalon");
+                    }
                     
-                    org.example.triharf.utils.NetworkUtils.ConnectionInfo infoCb = org.example.triharf.utils.NetworkUtils.parseUrl(addressPart);
-                    host = infoCb.host();
-                    port = infoCb.port();
-                } else if (!rawUrl.contains("/") && (rawUrl.contains(":") || rawUrl.contains("."))) {
-                     // Just address? We can't join without RoomId.
-                     // Maybe we treat the whole thing as address and RoomId is missing?
-                     // I'll assume they might use a separator like space?
-                     // Let's stick to the Slash separator.
-                     org.example.triharf.utils.NetworkUtils.ConnectionInfo infoCb = org.example.triharf.utils.NetworkUtils.parseUrl(rawUrl);
-                     host = infoCb.host();
-                     port = infoCb.port();
-                     roomToJoin = ""; // Will fail valid join
+                    org.example.triharf.utils.NetworkUtils.ConnectionInfo info = org.example.triharf.utils.NetworkUtils.parseUrl(addressPart);
+                    host = info.host();
+                    port = info.port();
+                } else if (rawUrl.contains(":") || rawUrl.contains(".")) {
+                    // Just address provided? Assuming RoomId is required by server logic.
+                    // We try to parse it, but we'll probably fail joining if no room ID.
+                    org.example.triharf.utils.NetworkUtils.ConnectionInfo info = org.example.triharf.utils.NetworkUtils.parseUrl(rawUrl);
+                    host = info.host();
+                    port = info.port();
+                    roomToJoin = ""; // Will likely fail
                 }
 
+                System.out.println("Connecting to " + host + ":" + port + " Room: " + roomToJoin);
                 connectClient(host, port);
                 
                 this.roomId = roomToJoin;
                 joinRoom(ParametresGenerauxController.pseudoGlobal, roomId);
                 javafx.application.Platform.runLater(onSuccess);
+
             } catch (Exception e) {
                 e.printStackTrace();
-                javafx.application.Platform.runLater(() -> onError.accept(e.getMessage()));
+                javafx.application.Platform.runLater(() -> onError.accept("Erreur connexion: " + e.getMessage()));
             }
         });
     }

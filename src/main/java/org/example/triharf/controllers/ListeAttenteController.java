@@ -75,6 +75,12 @@ public class ListeAttenteController {
         this.categories = categories;
     }
 
+    public void setNgrokUrl(String url) {
+        if (tfNgrokUrl != null) {
+            tfNgrokUrl.setText(url);
+        }
+    }
+
     public void setNetwork(org.example.triharf.services.NetworkService networkService) {
         this.networkService = networkService;
         

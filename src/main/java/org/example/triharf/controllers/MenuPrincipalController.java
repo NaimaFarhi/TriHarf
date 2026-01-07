@@ -147,32 +147,42 @@ public class MenuPrincipalController {
         final String code = tfCodePartie.getText().trim();
         if (code.isEmpty()) return;
 
-        if (btnRejoindre != null) btnRejoindre.setDisable(true);
+        if (btnRejoindre != null) {
+            btnRejoindre.setDisable(true);
+            btnRejoindre.setText("Connexion...");
+        }
 
         org.example.triharf.services.NetworkService netService = new org.example.triharf.services.NetworkService();
         
         netService.startClientOnly(code, 
             () -> { // Success
-                try {
-                    FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
-                    Parent root = loader.load();
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                        Parent root = loader.load();
 
-                    ListeAttenteController controller = loader.getController();
-                    if (controller != null) {
-                        controller.setGameMode("MULTI");
-                        controller.setNetwork(netService);
+                        ListeAttenteController controller = loader.getController();
+                        if (controller != null) {
+                            controller.setGameMode("MULTI");
+                            controller.setNetwork(netService);
+                        }
+
+                        Stage stage = (Stage) btnRejoindre.getScene().getWindow();
+                        stage.getScene().setRoot(root);
+                        stage.setTitle("Salle d'attente");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-
-                    Stage stage = (Stage) btnRejoindre.getScene().getWindow();
-                    stage.getScene().setRoot(root);
-                    stage.setTitle("Salle d'attente");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                });
             },
             (errorMsg) -> { // Error
-                if (btnRejoindre != null) btnRejoindre.setDisable(false);
-                showAlert("Erreur de connexion", "Impossible de rejoindre la partie : " + errorMsg);
+                javafx.application.Platform.runLater(() -> {
+                    if (btnRejoindre != null) {
+                        btnRejoindre.setDisable(false);
+                        btnRejoindre.setText("Rejoindre");
+                    }
+                    showAlert("Erreur de connexion", errorMsg);
+                });
             }
         );
     }

@@ -29,4 +29,27 @@ public class NetworkUtils {
         // Fallback or default
         return new ConnectionInfo(cleanUrl, 8888);
     }
+    
+    public static String getLocalIpAddress() {
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                java.net.NetworkInterface iface = interfaces.nextElement();
+                // Filter out loopback and inactive interfaces
+                if (iface.isLoopback() || !iface.isUp()) continue;
+
+                java.util.Enumeration<java.net.InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    java.net.InetAddress addr = addresses.nextElement();
+                    // Prefer IPv4 site-local address
+                    if (addr instanceof java.net.Inet4Address && addr.isSiteLocalAddress()) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "127.0.0.1"; // Fallback to localhost
+    } // End ConnectionInfo record was closed? No, parseUrl is static inside class.
 }
