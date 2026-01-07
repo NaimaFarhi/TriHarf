@@ -52,11 +52,28 @@ public class ListeAttenteController {
     @FXML
     public void initialize() {
         System.out.println("✅ ListeAttenteController initialisé");
+        
+        if (tfNgrokUrl != null && lblGameCode != null) {
+            tfNgrokUrl.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null && !newVal.isEmpty()) {
+                    lblGameCode.setText(newVal);
+                } else {
+                    if (networkService != null) {
+                        lblGameCode.setText(networkService.getRoomId());
+                    }
+                }
+            });
+        }
     }
 
     private String gameMode = "MULTI";
     private boolean isReady = false;
     private org.example.triharf.services.NetworkService networkService;
+    private List<String> categories;
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
 
     public void setNetwork(org.example.triharf.services.NetworkService networkService) {
         this.networkService = networkService;
@@ -144,6 +161,9 @@ public class ListeAttenteController {
             Object controller = loader.getController();
             if (controller instanceof JeuMultiController) {
                 ((JeuMultiController) controller).setNetwork(networkService);
+                if (categories != null) {
+                    ((JeuMultiController) controller).setCategories(categories);
+                }
             }
 
             Stage stage = (Stage) btnPret.getScene().getWindow();

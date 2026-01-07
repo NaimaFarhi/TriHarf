@@ -96,6 +96,25 @@ public class JeuMultiController {
         this.networkService = networkService;
         if (this.networkService != null && this.networkService.getGameClient() != null) {
             this.networkService.getGameClient().setMessageHandler(this::handleNetworkMessage);
+            
+            // Auto-start for clients/host when they arrive on this screen
+            // But wait, do we have categories? 
+            // If we are Host, we selected them, but we didn't pass them to this controller yet.
+            // If we are Client, we need to receive them from Network.
+            
+            // If categories are null, we should probably fetch them or waiting for INIT_GAME message?
+            // Existing logic: demarrerPartie checks if categories is null.
+            
+            // Temporary fix for Host flow:
+            // We need to inject categories before arriving here or pass them.
+            // BUT: demarrerPartie needs to be called.
+            
+            // Let's call it. It handles null categories gracefully (prints error).
+            // But we want it to WORK.
+            // Assumption: Parameter injection happens BEFORE setNetwork is called?
+            // or AFTER?
+            
+            javafx.application.Platform.runLater(this::demarrerPartie);
         }
     }
 

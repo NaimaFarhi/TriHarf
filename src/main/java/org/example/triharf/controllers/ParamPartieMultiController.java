@@ -192,8 +192,8 @@ public class ParamPartieMultiController {
             ListeAttenteController controller = loader.getController();
             if (controller != null) {
                 controller.setGameMode(this.gameMode);
-                controller.setGameMode(this.gameMode);
                 controller.setNetwork(networkService);
+                controller.setCategories(categoriesSelectionnees);
             }
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();
