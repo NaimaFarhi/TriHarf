@@ -155,21 +155,9 @@ public class NetworkService {
         gameClient = new GameClient();
         gameClient.setConnectionInfo(host, port);
         
-        int attempts = 5;
-        boolean connected = false;
-        while (attempts > 0 && !connected) {
-            try {
-                gameClient.connect();
-                connected = true;
-            } catch (IOException e) {
-                attempts--;
-                if (attempts > 0) {
-                    Thread.sleep(500);
-                } else {
-                    throw e;
-                }
-            }
-        }
+        // No retries needed as Socket.connect has timeout.
+        // If it fails, we want immediate feedback.
+        gameClient.connect();
     }
 
     private void joinRoom(String pseudo, String roomId) {

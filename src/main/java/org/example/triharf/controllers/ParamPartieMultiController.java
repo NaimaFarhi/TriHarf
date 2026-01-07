@@ -103,7 +103,7 @@ public class ParamPartieMultiController {
                                             
                                             Optional<String> result = dialog.showAndWait();
                                             if (result.isPresent()) {
-                                                String token = result.get();
+                                                String token = result.get().trim();
                                                 new Thread(() -> {
                                                     try {
                                                         ngrokManager.setAuthToken(token);
