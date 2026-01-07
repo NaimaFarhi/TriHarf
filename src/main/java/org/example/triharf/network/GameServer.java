@@ -1,7 +1,6 @@
 package org.example.triharf.network;
 
 import org.example.triharf.enums.Langue;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -43,38 +42,22 @@ public class GameServer {
         threadPool.shutdown();
     }
 
-
-    // Create new game room
     public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue) {
         if (!rooms.containsKey(roomId)) {
             GameRoom room = new GameRoom(roomId, maxPlayers, langue);
             rooms.put(roomId, room);
             return room;
         }
-        return null; // Room exists
+        return null;
     }
 
-    // Player joins room
     public synchronized boolean joinRoom(String clientId, String roomId, String pseudo) {
         GameRoom room = rooms.get(roomId);
         if (room == null || !room.addPlayer(clientId, pseudo)) {
             return false;
         }
 
-        // Notify all players in room with status list (using pseudos)
-        List<String> playerStatusList = new ArrayList<>();
-        for (String pid : room.getPlayerIds()) {
-            String name = room.getPseudo(pid);
-            String status = room.getReadyPlayers().contains(pid) ? "PREST" : "ATTENTE";
-            playerStatusList.add(name + ":" + status);
-        }
-
-        NetworkMessage msg = new NetworkMessage(
-                NetworkMessage.Type.PLAYER_JOINED,
-                "SERVER",
-                playerStatusList
-        );
-        broadcast(roomId, msg);
+        broadcastPlayerStatus(roomId);
         return true;
     }
 
@@ -82,8 +65,38 @@ public class GameServer {
         GameRoom room = rooms.get(roomId);
         if (room != null) {
             room.setPlayerReady(clientId, ready);
-            
-            // Map player names to status
+            broadcastPlayerStatus(roomId);
+
+            // Auto-start if all ready
+            if (room.allPlayersReady()) {
+                startGame(roomId);
+            }
+        }
+    }
+
+    public synchronized void startGame(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null && room.canStart()) {
+            room.setGameStarted(true);
+
+            Character letter = generateLetter();
+            room.setCurrentLetter(letter);
+
+            Map<String, Object> gameData = Map.of(
+                    "letter", letter.toString(),
+                    "duration", 180
+            );
+            broadcast(roomId, new NetworkMessage(
+                    NetworkMessage.Type.GAME_START,
+                    "SERVER",
+                    gameData
+            ));
+        }
+    }
+
+    private void broadcastPlayerStatus(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null) {
             List<String> playerStatusList = new ArrayList<>();
             for (String pid : room.getPlayerIds()) {
                 String name = room.getPseudo(pid);
@@ -100,25 +113,27 @@ public class GameServer {
         }
     }
 
-    // Player leaves room
+    private Character generateLetter() {
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        return letters.charAt(new Random().nextInt(letters.length()));
+    }
+
     public synchronized void leaveRoom(String clientId, String roomId) {
         GameRoom room = rooms.get(roomId);
         if (room != null) {
             room.removePlayer(clientId);
-
-            // Remove empty rooms
             if (room.getPlayerIds().isEmpty()) {
                 rooms.remove(roomId);
+            } else {
+                broadcastPlayerStatus(roomId);
             }
         }
     }
 
-    // Get room info
     public GameRoom getRoom(String roomId) {
         return rooms.get(roomId);
     }
 
-    // Send message to all players in room
     public void broadcast(String roomId, NetworkMessage message) {
         GameRoom room = rooms.get(roomId);
         if (room != null) {

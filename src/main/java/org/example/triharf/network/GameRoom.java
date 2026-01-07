@@ -26,56 +26,7 @@ public class GameRoom {
         this.playerPseudos = new HashMap<>();
     }
 
-    public String getRoomId() {
-        return roomId;
-    }
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-
-    public List<String> getPlayerIds() {
-        return playerIds;
-    }
-    public void setPlayerIds(List<String> playerIds) {
-        this.playerIds = playerIds;
-    }
-
-    public Map<String, Map<Categorie, String>> getPlayerAnswers() {
-        return playerAnswers;
-    }
-    public void setPlayerAnswers(Map<String, Map<Categorie, String>> playerAnswers) {
-        this.playerAnswers = playerAnswers;
-    }
-
-    public Character getCurrentLetter() {
-        return currentLetter;
-    }
-    public void setCurrentLetter(Character currentLetter) {
-        this.currentLetter = currentLetter;
-    }
-
-    public Langue getLangue() {
-        return langue;
-    }
-    public void setLangue(Langue langue) {
-        this.langue = langue;
-    }
-
-    public int getMaxPlayers() {
-        return maxPlayers;
-    }
-    public void setMaxPlayers(int maxPlayers) {
-        this.maxPlayers = maxPlayers;
-    }
-
-    public boolean isGameStarted() {
-        return gameStarted;
-    }
-    public void setGameStarted(boolean gameStarted) {
-        this.gameStarted = gameStarted;
-    }
-
-    public boolean addPlayer(String playerId, String pseudo){
+    public boolean addPlayer(String playerId, String pseudo) {
         if (!playerIds.contains(playerId) && !isFull()) {
             playerIds.add(playerId);
             playerPseudos.put(playerId, pseudo);
@@ -85,10 +36,10 @@ public class GameRoom {
         return false;
     }
 
-    public void removePlayer(String playerId){
-        this.playerIds.remove(playerId);
-        this.playerPseudos.remove(playerId);
-        this.readyPlayers.remove(playerId);
+    public void removePlayer(String playerId) {
+        playerIds.remove(playerId);
+        playerPseudos.remove(playerId);
+        readyPlayers.remove(playerId);
     }
 
     public void setPlayerReady(String playerId, boolean ready) {
@@ -99,31 +50,33 @@ public class GameRoom {
         }
     }
 
-    public Set<String> getReadyPlayers() {
-        return readyPlayers;
+    public boolean allPlayersReady() {
+        return !playerIds.isEmpty() && readyPlayers.size() == playerIds.size();
     }
 
-    public String getPseudo(String playerId) {
-        return playerPseudos.getOrDefault(playerId, playerId);
-    }
-
-    public void submitAnswer(String playerId, Categorie cat, String word){
+    public void submitAnswer(String playerId, Categorie cat, String word) {
         playerAnswers.putIfAbsent(playerId, new HashMap<>());
         playerAnswers.get(playerId).put(cat, word);
     }
 
-    public Boolean isFull(){
-        return this.playerIds.size() == maxPlayers;
+    public boolean isFull() {
+        return playerIds.size() == maxPlayers;
     }
 
-    public Boolean canStart() {
+    public boolean canStart() {
         return playerIds.size() >= 2;
     }
 
-    // Add methods:
-    // - addPlayer(String playerId)
-    // - removePlayer(String playerId)
-    // - submitAnswer(String playerId, Categorie cat, String word)
-    // - isFull()
-    // - canStart() // returns true if enough players
+    // Getters/Setters
+    public String getRoomId() { return roomId; }
+    public List<String> getPlayerIds() { return playerIds; }
+    public Map<String, Map<Categorie, String>> getPlayerAnswers() { return playerAnswers; }
+    public Character getCurrentLetter() { return currentLetter; }
+    public void setCurrentLetter(Character currentLetter) { this.currentLetter = currentLetter; }
+    public Langue getLangue() { return langue; }
+    public int getMaxPlayers() { return maxPlayers; }
+    public boolean isGameStarted() { return gameStarted; }
+    public void setGameStarted(boolean gameStarted) { this.gameStarted = gameStarted; }
+    public Set<String> getReadyPlayers() { return readyPlayers; }
+    public String getPseudo(String playerId) { return playerPseudos.getOrDefault(playerId, playerId); }
 }

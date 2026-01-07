@@ -14,6 +14,9 @@ public class HelloApplication extends Application {
         // Initialise le SoundManager
         // new SoundManager();
 
+        // Initialiser la base de données (si vide)
+        org.example.triharf.services.SetupService.initializeDefaultCategories();
+
         // Charge le menu principal
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/fxml/main_menu.fxml"));
         Scene scene = new Scene(fxmlLoader.load());

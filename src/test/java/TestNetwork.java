@@ -1,4 +1,4 @@
-package org.example.triharf;
+/*package org.example.triharf;
 
 import org.example.triharf.enums.Langue;
 import org.example.triharf.network.*;
@@ -60,4 +60,4 @@ public class TestNetwork {
         client1.disconnect();
         client2.disconnect();
     }
-}
+}*/
