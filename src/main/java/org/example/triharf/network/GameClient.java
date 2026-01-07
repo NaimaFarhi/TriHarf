@@ -30,7 +30,10 @@ public class GameClient {
      */
     public void connect() throws IOException {
         System.out.println("Connecting to " + serverHost + ":" + serverPort);
-        socket = new Socket(serverHost, serverPort);
+        socket = new Socket();
+        // Timeout de 5 secondes pour la connexion
+        socket.connect(new InetSocketAddress(serverHost, serverPort), 5000);
+        
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
         connected = true;

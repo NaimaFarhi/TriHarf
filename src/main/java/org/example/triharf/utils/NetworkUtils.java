@@ -31,25 +31,27 @@ public class NetworkUtils {
     }
     
     public static String getLocalIpAddress() {
-        try {
-            java.util.Enumeration<java.net.NetworkInterface> interfaces = java.net.NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                java.net.NetworkInterface iface = interfaces.nextElement();
-                // Filter out loopback and inactive interfaces
-                if (iface.isLoopback() || !iface.isUp()) continue;
+        try (final java.net.DatagramSocket socket = new java.net.DatagramSocket()) {
+            socket.connect(java.net.InetAddress.getByName("8.8.8.8"), 10002);
+            return socket.getLocalAddress().getHostAddress();
+        } catch (Exception e) {
+            // Fallback to iteration if socket fails
+            try {
+                java.util.Enumeration<java.net.NetworkInterface> interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+                while (interfaces.hasMoreElements()) {
+                    java.net.NetworkInterface iface = interfaces.nextElement();
+                    if (iface.isLoopback() || !iface.isUp()) continue;
 
-                java.util.Enumeration<java.net.InetAddress> addresses = iface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    java.net.InetAddress addr = addresses.nextElement();
-                    // Prefer IPv4 site-local address
-                    if (addr instanceof java.net.Inet4Address && addr.isSiteLocalAddress()) {
-                        return addr.getHostAddress();
+                    java.util.Enumeration<java.net.InetAddress> addresses = iface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        java.net.InetAddress addr = addresses.nextElement();
+                        if (addr instanceof java.net.Inet4Address && addr.isSiteLocalAddress()) {
+                            return addr.getHostAddress();
+                        }
                     }
                 }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            } catch (Exception ex) { /* ignore */ }
         }
-        return "127.0.0.1"; // Fallback to localhost
-    } // End ConnectionInfo record was closed? No, parseUrl is static inside class.
+        return "127.0.0.1";
+    }
 }
