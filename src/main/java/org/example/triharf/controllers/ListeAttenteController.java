@@ -52,7 +52,7 @@ public class ListeAttenteController {
     @FXML
     public void initialize() {
         System.out.println("✅ ListeAttenteController initialisé");
-        
+
         if (tfNgrokUrl != null && lblGameCode != null) {
             tfNgrokUrl.textProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null && !newVal.isEmpty()) {
@@ -83,7 +83,7 @@ public class ListeAttenteController {
 
     public void setNetwork(org.example.triharf.services.NetworkService networkService) {
         this.networkService = networkService;
-        
+
         if (networkService.getRoomId() != null && lblGameCode != null) {
             lblGameCode.setText(networkService.getRoomId());
         }
@@ -102,6 +102,21 @@ public class ListeAttenteController {
                 }
                 case GAME_START -> {
                     startGame();
+                }
+                case PLAYER_READY -> {
+                    // Update ready status in UI if needed, but PLAYER_JOINED usually carries full
+                    // status list updates
+                    // However, we can refresh the list if we get a specific ready update
+                    // Current server impl broadcasts PLAYER_JOINED updates when ready status
+                    // changes,
+                    // so we might just logging it or ignoring specific READY messages if they
+                    // aren't used for UI
+                }
+                case GAME_END -> {
+                    // Handle game end if needed in lobby (unlikely but good for completeness)
+                }
+                default -> {
+                    // Ignore unknown messages
                 }
             }
         });
@@ -144,16 +159,19 @@ public class ListeAttenteController {
     private void handlePret() {
         if (networkService != null && networkService.getGameClient() != null) {
             isReady = !isReady; // Toggle
-            networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.PLAYER_READY, ParametresGenerauxController.pseudoGlobal, isReady));
-            
+            networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.PLAYER_READY,
+                    ParametresGenerauxController.pseudoGlobal, isReady));
+
             if (btnPret != null) {
                 btnPret.setText(isReady ? "PAS PRÊT" : "JE SUIS PRÊT");
             }
 
-            // Si c'est l'hôte et qu'il est prêt, il peut décider de lancer (pour l'instant automatique s'il est prêt)
+            // Si c'est l'hôte et qu'il est prêt, il peut décider de lancer (pour l'instant
+            // automatique s'il est prêt)
             // On vérifie si on a un serveur via le service
             if (networkService.getGameServer() != null && isReady) {
-                 networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START, ParametresGenerauxController.pseudoGlobal, networkService.getRoomId()));
+                networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START,
+                        ParametresGenerauxController.pseudoGlobal, networkService.getRoomId()));
             }
         }
     }

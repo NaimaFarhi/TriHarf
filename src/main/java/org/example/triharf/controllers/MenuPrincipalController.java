@@ -3,13 +3,11 @@ package org.example.triharf.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
 
 import java.io.IOException;
-import java.util.Random;
 
 public class MenuPrincipalController {
 
@@ -70,7 +68,7 @@ public class MenuPrincipalController {
 
         // Fetch Global Stats
         java.util.Map<String, Object> stats = statisticsService.getGlobalStats(joueur);
-        
+
         if (lblParties != null) {
             lblParties.setText(String.valueOf(stats.getOrDefault("totalParties", 0)));
         }
@@ -78,9 +76,10 @@ public class MenuPrincipalController {
             lblBestScore.setText(String.valueOf(stats.getOrDefault("meilleurScore", 0)));
         }
         if (lblVictoires != null) {
-            // "Victoires" logic: strictly speaking, we don't have a "Win/Loss" in Solo yet, 
+            // "Victoires" logic: strictly speaking, we don't have a "Win/Loss" in Solo yet,
             // but we can simulate it or calculate "Success Rate" instead.
-            // For now, let's display success rate as "Victoires" or just hide/change label meaning?
+            // For now, let's display success rate as "Victoires" or just hide/change label
+            // meaning?
             // The FXML says "Victoires", let's map it to Success Rate or Wins if available.
             // StatisticsService has getGlobalSuccessRate.
             double successRate = statisticsService.getGlobalSuccessRate(joueur);
@@ -91,27 +90,26 @@ public class MenuPrincipalController {
         if (vboxRecords != null) {
             vboxRecords.getChildren().clear();
             var catStats = statisticsService.getStatsByCategorie(joueur);
-            
+
             // Sort by success rate descending
             catStats.entrySet().stream()
-                .sorted((e1, e2) -> {
-                    double r1 = (double) ((java.util.Map) e1.getValue()).get("tauxReussite");
-                    double r2 = (double) ((java.util.Map) e2.getValue()).get("tauxReussite");
-                    return Double.compare(r2, r1);
-                })
-                .limit(5)
-                .forEach(entry -> {
-                    String catName = entry.getKey();
-                    java.util.Map val = (java.util.Map) entry.getValue();
-                    double rate = (double) val.get("tauxReussite");
-                    int reussies = (int) val.get("reussies");
-                    
-                    javafx.scene.control.Label lbl = new javafx.scene.control.Label(
-                        String.format("%s: %.0f%% (%d mots)", catName, rate, reussies)
-                    );
-                    lbl.setStyle("-fx-text-fill: #555; -fx-font-size: 14px;");
-                    vboxRecords.getChildren().add(lbl);
-                });
+                    .sorted((e1, e2) -> {
+                        double r1 = (double) ((java.util.Map) e1.getValue()).get("tauxReussite");
+                        double r2 = (double) ((java.util.Map) e2.getValue()).get("tauxReussite");
+                        return Double.compare(r2, r1);
+                    })
+                    .limit(5)
+                    .forEach(entry -> {
+                        String catName = entry.getKey();
+                        java.util.Map val = (java.util.Map) entry.getValue();
+                        double rate = (double) val.get("tauxReussite");
+                        int reussies = (int) val.get("reussies");
+
+                        javafx.scene.control.Label lbl = new javafx.scene.control.Label(
+                                String.format("%s: %.0f%% (%d mots)", catName, rate, reussies));
+                        lbl.setStyle("-fx-text-fill: #555; -fx-font-size: 14px;");
+                        vboxRecords.getChildren().add(lbl);
+                    });
         }
     }
 
@@ -143,9 +141,17 @@ public class MenuPrincipalController {
     }
 
     private void handleRejoindre() {
-        if (tfCodePartie == null) return;
-        final String code = tfCodePartie.getText().trim();
-        if (code.isEmpty()) return;
+        if (tfCodePartie == null)
+            return;
+        final String input = tfCodePartie.getText().trim();
+        if (input.isEmpty())
+            return;
+
+        // Check format
+        if (!org.example.triharf.utils.NetworkUtils.isValidIpPortFormat(input)) {
+            showAlert("Format Invalide", "Veuillez entrer une adresse au format IP:Port\nExemple: 192.168.1.15:8888");
+            return;
+        }
 
         if (btnRejoindre != null) {
             btnRejoindre.setDisable(true);
@@ -153,38 +159,43 @@ public class MenuPrincipalController {
         }
 
         org.example.triharf.services.NetworkService netService = new org.example.triharf.services.NetworkService();
-        
-        netService.startClientOnly(code, 
-            () -> { // Success
-                javafx.application.Platform.runLater(() -> {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
-                        Parent root = loader.load();
 
-                        ListeAttenteController controller = loader.getController();
-                        if (controller != null) {
-                            controller.setGameMode("MULTI");
-                            controller.setNetwork(netService);
+        netService.startClientOnly(input,
+                () -> { // Success
+                    javafx.application.Platform.runLater(() -> {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(
+                                    HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                            Parent root = loader.load();
+
+                            ListeAttenteController controller = loader.getController();
+                            if (controller != null) {
+                                controller.setGameMode("MULTI");
+                                controller.setNetwork(netService);
+                            }
+
+                            Stage stage = (Stage) btnRejoindre.getScene().getWindow();
+                            stage.getScene().setRoot(root);
+                            stage.setTitle("Salle d'attente");
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-
-                        Stage stage = (Stage) btnRejoindre.getScene().getWindow();
-                        stage.getScene().setRoot(root);
-                        stage.setTitle("Salle d'attente");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    });
+                },
+                (errorMsg) -> { // Error
+                    javafx.application.Platform.runLater(() -> {
+                        if (btnRejoindre != null) {
+                            btnRejoindre.setDisable(false);
+                            btnRejoindre.setText("Rejoindre");
+                        }
+                        if (errorMsg.contains("Connection refused")) {
+                            showAlert("Erreur de connexion",
+                                    "Impossible de joindre le serveur.\nVérifiez l'adresse IP et assurez-vous que l'hôte a bien lancé la partie.");
+                        } else {
+                            showAlert("Erreur de connexion", errorMsg);
+                        }
+                    });
                 });
-            },
-            (errorMsg) -> { // Error
-                javafx.application.Platform.runLater(() -> {
-                    if (btnRejoindre != null) {
-                        btnRejoindre.setDisable(false);
-                        btnRejoindre.setText("Rejoindre");
-                    }
-                    showAlert("Erreur de connexion", errorMsg);
-                });
-            }
-        );
     }
 
     private void showAlert(String title, String content) {

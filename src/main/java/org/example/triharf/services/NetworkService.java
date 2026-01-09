@@ -26,6 +26,8 @@ public class NetworkService {
         this.executorService = Executors.newCachedThreadPool();
     }
 
+    private static final String DEFAULT_ROOM_ID = "LAN_GAME";
+
     /**
      * Démarrer une partie en tant qu'Hôte (Serveur + Client)
      */
@@ -51,9 +53,10 @@ public class NetworkService {
                 connectClient();
 
                 // 3. Créer la salle
-                this.roomId = UUID.randomUUID().toString().substring(0, 8);
+                // Use a fixed Room ID for LAN play simplicity
+                this.roomId = DEFAULT_ROOM_ID;
                 gameServer.createRoom(roomId, 4, langue);
-                
+
                 // 4. Rejoindre la salle
                 joinRoom(ParametresGenerauxController.pseudoGlobal, roomId);
 
@@ -69,42 +72,32 @@ public class NetworkService {
 
     /**
      * Rejoindre une partie existante en tant que Client uniquement
-     * (Pas implémenté complètement dans ParamPartieMultiController actuel le bouton rejoindre, 
-     * mais on prépare le terrain)
      */
     public void startClientOnly(String rawUrl, Runnable onSuccess, java.util.function.Consumer<String> onError) {
         executorService.submit(() -> {
             try {
-                // Parse input: Expecting "host:port/roomId" or just "roomId" (localhost implied)
                 String host = "localhost";
                 int port = 8888;
-                String roomToJoin = rawUrl;
+                String roomToJoin = DEFAULT_ROOM_ID; // Default to LAN room
 
-                if (rawUrl.contains("/") && (rawUrl.contains(":") || rawUrl.contains("."))) {
-                    // Format: host:port/roomId
-                    String[] split = rawUrl.split("/");
-                    String addressPart = split[0];
-                    if (split.length > 1) {
+                // Check if Room ID is provided (e.g. "1.2.3.4:8888/MyRoom")
+                String addressPart = rawUrl;
+                if (rawUrl.contains("/")) {
+                    String[] split = rawUrl.split("/", 2);
+                    addressPart = split[0];
+                    if (split.length > 1 && !split[1].isBlank()) {
                         roomToJoin = split[1];
-                    } else {
-                        throw new IllegalArgumentException("Format attendu: host:port/CodeSalon");
                     }
-                    
-                    org.example.triharf.utils.NetworkUtils.ConnectionInfo info = org.example.triharf.utils.NetworkUtils.parseUrl(addressPart);
-                    host = info.host();
-                    port = info.port();
-                } else if (rawUrl.contains(":") || rawUrl.contains(".")) {
-                    // Just address provided? Assuming RoomId is required by server logic.
-                    // We try to parse it, but we'll probably fail joining if no room ID.
-                    org.example.triharf.utils.NetworkUtils.ConnectionInfo info = org.example.triharf.utils.NetworkUtils.parseUrl(rawUrl);
-                    host = info.host();
-                    port = info.port();
-                    roomToJoin = ""; // Will likely fail
                 }
+
+                org.example.triharf.utils.NetworkUtils.ConnectionInfo info = org.example.triharf.utils.NetworkUtils
+                        .parseUrl(addressPart);
+                host = info.host();
+                port = info.port();
 
                 System.out.println("Connecting to " + host + ":" + port + " Room: " + roomToJoin);
                 connectClient(host, port);
-                
+
                 this.roomId = roomToJoin;
                 joinRoom(ParametresGenerauxController.pseudoGlobal, roomId);
                 javafx.application.Platform.runLater(onSuccess);
@@ -117,23 +110,26 @@ public class NetworkService {
     }
 
     private void connectClient() throws IOException, InterruptedException {
-        // If port/host not set, it defaults to localhost:8888 in GameClient unless configured
+        // If port/host not set, it defaults to localhost:8888 in GameClient unless
+        // configured
         // But here we need to know if we are hosting or joining
         // For Hosting, we use default (localhost)
-        // For Joining, we might have set it before calling this? 
+        // For Joining, we might have set it before calling this?
         // Better: Pass ConnectionInfo to connectClient
-        
-        // Refactoring: gameClient is instantiated here. 
+
+        // Refactoring: gameClient is instantiated here.
         if (gameClient == null) {
-            gameClient = new GameClient(); 
-            // Note: If we had parameters, we would set them here. 
+            gameClient = new GameClient();
+            // Note: If we had parameters, we would set them here.
             // But startClientOnly creates the thread then calls this.
             // We should refactor to allow passing host/port.
         }
-        
-        // Actually, let's instantiate with specific params if needed or set them before connect
-        // But since we are inside a private method used by both Host and Client flows...
-        
+
+        // Actually, let's instantiate with specific params if needed or set them before
+        // connect
+        // But since we are inside a private method used by both Host and Client
+        // flows...
+
         int attempts = 5;
         boolean connected = false;
         while (attempts > 0 && !connected) {
@@ -143,7 +139,7 @@ public class NetworkService {
             } catch (IOException e) {
                 attempts--;
                 if (attempts > 0) {
-                     Thread.sleep(500);
+                    Thread.sleep(500);
                 } else {
                     throw e;
                 }
@@ -154,7 +150,7 @@ public class NetworkService {
     private void connectClient(String host, int port) throws IOException, InterruptedException {
         gameClient = new GameClient();
         gameClient.setConnectionInfo(host, port);
-        
+
         int attempts = 5;
         boolean connected = false;
         while (attempts > 0 && !connected) {
@@ -180,8 +176,10 @@ public class NetworkService {
 
     public void stop() {
         try {
-            if (gameClient != null) gameClient.disconnect(); // Assumant qu'il y a une méthode disconnect, sinon à ajouter
-            if (gameServer != null) gameServer.stop();
+            if (gameClient != null)
+                gameClient.disconnect(); // Assumant qu'il y a une méthode disconnect, sinon à ajouter
+            if (gameServer != null)
+                gameServer.stop();
         } catch (Exception e) {
             e.printStackTrace();
         }
