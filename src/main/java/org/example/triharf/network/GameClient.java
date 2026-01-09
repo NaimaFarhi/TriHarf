@@ -1,5 +1,7 @@
 package org.example.triharf.network;
 
+import org.example.triharf.utils.PropertiesManager;
+
 import java.io.*;
 import java.net.*;
 import java.util.function.Consumer;
@@ -9,8 +11,8 @@ import java.util.function.Consumer;
  * Connects to GameServer and sends/receives messages
  */
 public class GameClient {
-    private String serverHost = "localhost";
-    private int serverPort = 8888;
+    private static final String SERVER_HOST = PropertiesManager.getProperty("server.host", "localhost");
+    private static final int SERVER_PORT = PropertiesManager.getInt("server.port", 8888); // Server's local IP
 
     private Socket socket;  // TCP connection to server
     private BufferedReader in;  // Read messages from server
@@ -19,21 +21,12 @@ public class GameClient {
     private Consumer<NetworkMessage> messageHandler;  // Callback for received messages
     private boolean connected;
 
-    public void setConnectionInfo(String host, int port) {
-        this.serverHost = host;
-        this.serverPort = port;
-    }
-
     /**
      * Establish connection to server
      * Creates socket, opens streams, starts listener thread
      */
     public void connect() throws IOException {
-        System.out.println("Connecting to " + serverHost + ":" + serverPort);
-        socket = new Socket();
-        // Timeout de 5 secondes pour la connexion
-        socket.connect(new InetSocketAddress(serverHost, serverPort), 5000);
-        
+        socket = new Socket(SERVER_HOST, SERVER_PORT);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
         connected = true;

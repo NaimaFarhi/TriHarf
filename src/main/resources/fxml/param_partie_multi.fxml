@@ -34,13 +34,13 @@
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
                                         <Label text="🔗" style="-fx-font-size: 20px;" textFill="white"/>
-                                        <Label text="Lien Ngrok (Optionnel):" styleClass="label-bright"/>
+                                        <Label text="Lien de la partie:" styleClass="label-bright"/>
                                     </children>
                                 </HBox>
 
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
-                                        <TextField fx:id="txtLien" promptText="Collez votre lien Ngrok ici (ex: 0.tcp.ngrok.io:12345)" prefWidth="420.0"/>
+                                        <TextField fx:id="txtLien" editable="false" prefWidth="420.0" text="https://baccalaureat.game/partie/ABC123XYZ"/>
                                         <Button text=" Copier" fx:id="btnCopier" onAction="#handleCopier" styleClass="btn-secondary"/>
                                     </children>
                                 </HBox>

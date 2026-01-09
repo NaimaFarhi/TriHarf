@@ -90,31 +90,14 @@ public class JeuMultiController {
     private CategorieDAO categorieDAO = new CategorieDAO();
 
     // ===== NETWORK =====
-    private org.example.triharf.services.NetworkService networkService;
+    private GameClient gameClient;
+    private String roomId;
 
-    public void setNetwork(org.example.triharf.services.NetworkService networkService) {
-        this.networkService = networkService;
-        if (this.networkService != null && this.networkService.getGameClient() != null) {
-            this.networkService.getGameClient().setMessageHandler(this::handleNetworkMessage);
-            
-            // Auto-start for clients/host when they arrive on this screen
-            // But wait, do we have categories? 
-            // If we are Host, we selected them, but we didn't pass them to this controller yet.
-            // If we are Client, we need to receive them from Network.
-            
-            // If categories are null, we should probably fetch them or waiting for INIT_GAME message?
-            // Existing logic: demarrerPartie checks if categories is null.
-            
-            // Temporary fix for Host flow:
-            // We need to inject categories before arriving here or pass them.
-            // BUT: demarrerPartie needs to be called.
-            
-            // Let's call it. It handles null categories gracefully (prints error).
-            // But we want it to WORK.
-            // Assumption: Parameter injection happens BEFORE setNetwork is called?
-            // or AFTER?
-            
-            javafx.application.Platform.runLater(this::demarrerPartie);
+    public void setNetwork(GameClient client, String roomId) {
+        this.gameClient = client;
+        this.roomId = roomId;
+        if (this.gameClient != null) {
+            this.gameClient.setMessageHandler(this::handleNetworkMessage);
         }
     }
 
@@ -304,7 +287,7 @@ public class JeuMultiController {
         tfMessageChat.clear();
 
         System.out.println("📤 Message envoyé: " + message);
-        if (networkService != null && networkService.getGameClient() != null) {
+        if (gameClient != null) {
             // Re-using SUBMIT_ANSWER or a separate message type for chat?
             // Let's use a generic message or just log for now if Type doesn't have CHAT
         }
@@ -349,11 +332,11 @@ public class JeuMultiController {
             // ============================================
             // 3️⃣ ENVOYER RÉSULTATS AU SERVEUR
             // ============================================
-            if (networkService != null && networkService.getGameClient() != null) {
+            if (gameClient != null) {
                 Map<String, String> data = new HashMap<>();
                 data.put("score", String.valueOf(scoreTotal));
                 // Add more data if needed
-                networkService.getGameClient().sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
             }
 
             // ============================================
