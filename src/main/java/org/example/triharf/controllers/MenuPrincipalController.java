@@ -4,8 +4,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
+import org.example.triharf.services.StatisticsService;
+import org.example.triharf.utils.NetworkUtils;
 
 import java.io.IOException;
 import java.util.Random;
@@ -35,12 +38,13 @@ public class MenuPrincipalController {
     private javafx.scene.control.Label lblBestScore;
     @FXML
     private javafx.scene.layout.VBox vboxRecords;
-    @FXML
-    private javafx.scene.control.TextField tfCodePartie;
+
     @FXML
     private javafx.scene.control.Button btnRejoindre;
+    @FXML private TextField tfServerIP; // Add this field
+    @FXML private TextField tfCodePartie;
 
-    private org.example.triharf.services.StatisticsService statisticsService = new org.example.triharf.services.StatisticsService();
+    private StatisticsService statisticsService = new org.example.triharf.services.StatisticsService();
 
     @FXML
     public void initialize() {
@@ -59,9 +63,6 @@ public class MenuPrincipalController {
         });
 
         btnParametres.setOnAction(e -> navigateTo("/fxml/Configuration.fxml", "Paramètres"));
-        if (btnRejoindre != null) {
-            btnRejoindre.setOnAction(e -> handleRejoindre());
-        }
 
         loadStatistics();
     }
@@ -164,36 +165,51 @@ public class MenuPrincipalController {
         }
     }
 
+    @FXML
     private void handleRejoindre() {
-        if (tfCodePartie == null) return;
-        final String code = tfCodePartie.getText().trim();
-        if (code.isEmpty()) return;
+        if (tfCodePartie == null || tfServerIP == null) return;
 
-        // Désactiver le bouton pour éviter des clics multiples
+        final String code = tfCodePartie.getText().trim();
+        final String serverIPPort = tfServerIP.getText().trim();
+
+        if (code.isEmpty() || serverIPPort.isEmpty()) {
+            showAlert("Erreur", "Veuillez entrer l'IP du serveur et le code de la partie");
+            return;
+        }
+
+        // Parse IP:PORT
+        String[] parts = NetworkUtils.parseHostPort(serverIPPort);
+        if (parts == null) {
+            showAlert("Erreur", "Format IP invalide. Utilisez: 192.168.x.x:8888");
+            return;
+        }
+
+        String serverIP = parts[0];
+        int port = Integer.parseInt(parts[1]);
+
         if (btnRejoindre != null) btnRejoindre.setDisable(true);
 
         new Thread(() -> {
             try {
-                // Initialiser le client et se connecter
-                org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient("localhost", 8888);
-                
-                // Tentative de connexion
+                org.example.triharf.network.GameClient client =
+                        new org.example.triharf.network.GameClient(serverIP, port);
+
                 client.connect();
-                
-                // Si connecté, on envoie le message de join
+
                 String pseudo = ParametresGenerauxController.pseudoGlobal;
-                if (pseudo == null || pseudo.isEmpty()) pseudo = "Joueur_" + new Random().nextInt(1000);
-                
+                if (pseudo == null || pseudo.isEmpty())
+                    pseudo = "Joueur_" + new Random().nextInt(1000);
+
                 client.sendMessage(new org.example.triharf.network.NetworkMessage(
-                    org.example.triharf.network.NetworkMessage.Type.JOIN_ROOM,
-                    pseudo,
-                    code
+                        org.example.triharf.network.NetworkMessage.Type.JOIN_ROOM,
+                        pseudo,
+                        code
                 ));
 
-                // Naviguer sur le thread UI
                 javafx.application.Platform.runLater(() -> {
                     try {
-                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/salle_attente.fxml"));
+                        FXMLLoader loader = new FXMLLoader(
+                                HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
                         Parent root = loader.load();
 
                         ListeAttenteController controller = loader.getController();
@@ -213,12 +229,12 @@ public class MenuPrincipalController {
             } catch (IOException e) {
                 javafx.application.Platform.runLater(() -> {
                     if (btnRejoindre != null) btnRejoindre.setDisable(false);
-                    showAlert("Erreur de connexion", "Impossible de rejoindre la partie. Vérifiez le code ou assurez-vous que le serveur est lancé.");
+                    showAlert("Erreur de connexion",
+                            "Impossible de rejoindre. Vérifiez l'IP et le code.");
                 });
             }
         }).start();
     }
-
     private void showAlert(String title, String content) {
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
         alert.setTitle(title);

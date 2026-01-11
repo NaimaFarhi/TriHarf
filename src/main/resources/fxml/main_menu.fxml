@@ -178,15 +178,28 @@
 
             <!-- ===== BOTTOM SECTION: REJOINDRE UNE PARTIE ===== -->
             <bottom>
-                <VBox alignment="CENTER" style="-fx-padding: 0 0 20 0;">
+                <!-- Join Game Section (find and replace existing) -->
+                <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
                     <children>
-                        <HBox alignment="CENTER" spacing="10" styleClass="join-game-container" style="-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 50; -fx-padding: 10 20; -fx-max-width: 500;">
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
                             <children>
-                                <Label text="🔑" style="-fx-font-size: 20px;"/>
-                                <TextField fx:id="tfCodePartie" promptText="Entrer le code de la partie..." styleClass="join-input" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-prompt-text-fill: #aaa; -fx-font-size: 16px; -fx-pref-width: 250px;"/>
-                                <Button fx:id="btnRejoindre" text="REJOINDRE" styleClass="btn-action-small" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 30; -fx-cursor: hand;"/>
+                                <Label text="🔗" style="-fx-font-size: 20px;" textFill="white"/>
+                                <Label text="Rejoindre une partie:" styleClass="label-bright"/>
                             </children>
                         </HBox>
+
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label text="IP du serveur:" style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
+                                <TextField fx:id="tfServerIP" promptText="192.168.91.1:8888" prefWidth="300.0"/>
+
+                                <Label text="Code de la partie:" style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
+                                <TextField fx:id="tfCodePartie" promptText="49e61c64" prefWidth="300.0"/>
+                            </children>
+                        </VBox>
+
+                        <Button fx:id="btnRejoindre" text="🎮 REJOINDRE" onAction="#handleRejoindre"
+                                styleClass="btn-secondary" prefWidth="200.0"/>
                     </children>
                 </VBox>
             </bottom>
