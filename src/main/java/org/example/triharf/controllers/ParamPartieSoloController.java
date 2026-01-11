@@ -9,33 +9,20 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.dao.CategorieDAO;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
 
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Contrôleur pour les paramètres de la partie Solo (param_partie_solo.fxml)
- */
 public class ParamPartieSoloController {
 
-    @FXML
-    private Button btnRetour;
-
-    @FXML
-    private ToggleButton btnFacile;
-
-    @FXML
-    private ToggleButton btnMoyen;
-
-    @FXML
-    private ToggleButton btnDifficile;
-
-    @FXML
-    private VBox containerCategories; // Le VBox où vont les checkboxes
-
-    @FXML
-    private Button btnCommencer;
+    @FXML private Button btnRetour;
+    @FXML private ToggleButton btnFacile;
+    @FXML private ToggleButton btnMoyen;
+    @FXML private ToggleButton btnDifficile;
+    @FXML private VBox containerCategories;
+    @FXML private Button btnCommencer;
 
     private List<String> categoriesSelectionnees = new ArrayList<>();
     private int niveauDifficulte = 1;
@@ -45,14 +32,11 @@ public class ParamPartieSoloController {
 
     @FXML
     public void initialize() {
-        // Set up ToggleGroup so only one difficulty can be selected
+        // Set up ToggleGroup for difficulty
         ToggleGroup difficultyGroup = new ToggleGroup();
-        if (btnFacile != null)
-            btnFacile.setToggleGroup(difficultyGroup);
-        if (btnMoyen != null)
-            btnMoyen.setToggleGroup(difficultyGroup);
-        if (btnDifficile != null)
-            btnDifficile.setToggleGroup(difficultyGroup);
+        if (btnFacile != null) btnFacile.setToggleGroup(difficultyGroup);
+        if (btnMoyen != null) btnMoyen.setToggleGroup(difficultyGroup);
+        if (btnDifficile != null) btnDifficile.setToggleGroup(difficultyGroup);
 
         // Listen for difficulty changes
         difficultyGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
@@ -66,16 +50,31 @@ public class ParamPartieSoloController {
             System.out.println("Niveau de difficulté : " + getDifficulteLabel());
         });
 
-        // Charger toutes les catégories depuis le DAO
-        toutesLesCategories = categorieDAO.getAll();
-        System.out.println("Catégories chargées depuis DAO : " + toutesLesCategories.size());
-
-        // Créer dynamiquement les checkboxes
-        chargerCategoriesDynamiquement();
+        // Load categories filtered by current language
+        chargerCategoriesParLangue();
     }
 
     /**
-     * Crée les ToggleButtons (chips) dynamiquement à partir des catégories du DAO
+     * Load categories based on global language setting
+     */
+    private void chargerCategoriesParLangue() {
+        Langue langueActuelle = ParametresGenerauxController.langueGlobale;
+
+        // Pass enum directly, not String
+        toutesLesCategories = categorieDAO.findActifByLangue(langueActuelle);
+
+        System.out.println("📚 Catégories chargées pour " + langueActuelle + ": " + toutesLesCategories.size());
+
+        if (toutesLesCategories.isEmpty()) {
+            System.err.println("⚠️ Aucune catégorie trouvée pour la langue: " + langueActuelle);
+            showAlert(Alert.AlertType.WARNING, "Attention",
+                    "Aucune catégorie disponible pour la langue sélectionnée.");
+        }
+
+        chargerCategoriesDynamiquement();
+    }
+    /**
+     * Create ToggleButton chips dynamically from loaded categories
      */
     private void chargerCategoriesDynamiquement() {
         if (containerCategories == null) {
@@ -86,7 +85,7 @@ public class ParamPartieSoloController {
         containerCategories.getChildren().clear();
         checkboxMap.clear();
 
-        // Create a FlowPane for chip layout
+        // Create FlowPane for chip layout
         javafx.scene.layout.FlowPane flowPane = new javafx.scene.layout.FlowPane();
         flowPane.setHgap(10);
         flowPane.setVgap(10);
@@ -111,7 +110,7 @@ public class ParamPartieSoloController {
             chip.getStyleClass().add("category-chip");
             chip.selectedProperty().addListener((obs, oldVal, newVal) -> mettreAJourCategories());
 
-            // Store reference using a fake checkbox for the existing map
+            // Store reference using a fake checkbox for existing map
             CheckBox fakeCheckbox = new CheckBox();
             fakeCheckbox.selectedProperty().bindBidirectional(chip.selectedProperty());
             checkboxMap.put(cat.getNom(), fakeCheckbox);
@@ -123,9 +122,6 @@ public class ParamPartieSoloController {
         containerCategories.getChildren().add(flowPane);
     }
 
-    /**
-     * Met à jour la liste des catégories sélectionnées
-     */
     private void mettreAJourCategories() {
         categoriesSelectionnees.clear();
         for (Categorie cat : toutesLesCategories) {
@@ -134,7 +130,6 @@ public class ParamPartieSoloController {
                 categoriesSelectionnees.add(cat.getNom());
             }
         }
-
         System.out.println("Catégories sélectionnées : " + categoriesSelectionnees);
     }
 
@@ -148,9 +143,6 @@ public class ParamPartieSoloController {
         commencerPartie();
     }
 
-    /**
-     * Commence la partie solo après validation des catégories
-     */
     private void commencerPartie() {
         if (categoriesSelectionnees.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Erreur", "Sélectionnez au moins une catégorie !");
@@ -163,28 +155,18 @@ public class ParamPartieSoloController {
         navigateToJeuSolo();
     }
 
-    /**
-     * Navigue vers partie.fxml et passe les données au controller
-     */
     private void navigateToJeuSolo() {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/partie.fxml"));
             Parent root = loader.load();
 
-            // Récupérer le controller de partie.fxml
             JeuSoloController controller = loader.getController();
             controller.setCategories(categoriesSelectionnees);
             controller.setDifficulte(niveauDifficulte);
-            
-            // INJECTION DES PARAMÈTRES GLOBAUX
             controller.setLangue(ParametresGenerauxController.langueGlobale);
             controller.setJoueur(ParametresGenerauxController.pseudoGlobal);
-
-            // Démarrer la partie après avoir injecté les données
             controller.demarrerPartie();
 
-            // Afficher la nouvelle scène
-            // Afficher la nouvelle scène
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle("Mode Solo");

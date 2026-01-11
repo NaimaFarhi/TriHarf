@@ -5,40 +5,33 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.dao.CategorieDAO;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
-
 import org.example.triharf.network.GameClient;
 import org.example.triharf.network.GameServer;
 import org.example.triharf.network.NetworkMessage;
+import org.example.triharf.utils.NetworkUtils;
 
 import java.io.IOException;
 import java.util.*;
 
 /**
- * Contrôleur pour les paramètres de la partie Multijoueur
- * (param_partie_multi.fxml)
- * Passe les données au JeuMultiController via setCategories()
+ * Unified controller for all multiplayer modes: Multi, Battle Royale, Chaos
  */
 public class ParamPartieMultiController {
 
-    @FXML
-    private Button btnRetour;
-
-    @FXML
-    private TextField txtLien;
-
-    @FXML
-    private Button btnCopier;
-
-    @FXML
-    private VBox containerCategories;
-
-    @FXML
-    private Button btnCommencer;
+    @FXML private Button btnRetour;
+    @FXML private Label lblModeTitle;
+    @FXML private Label lblModeDescription;
+    @FXML private Spinner<Integer> spinnerMaxPlayers;
+    @FXML private TextField txtServerIP;
+    @FXML private Button btnCopier;
+    @FXML private VBox containerCategories;
+    @FXML private Button btnCommencer;
+    @FXML private Label lblCategoriesInfo;
 
     private List<String> categoriesSelectionnees = new ArrayList<>();
     private CategorieDAO categorieDAO = new CategorieDAO();
@@ -48,24 +41,95 @@ public class ParamPartieMultiController {
     private GameClient gameClient;
     private GameServer gameServer;
     private String roomId;
-
     private String gameMode = "MULTI";
 
     public void setGameMode(String mode) {
         this.gameMode = mode;
+        updateModeUI();
         System.out.println("Mode de jeu défini sur : " + mode);
     }
 
     @FXML
     public void initialize() {
-        toutesLesCategories = categorieDAO.getAll();
-        System.out.println("Catégories chargées depuis DAO : " + toutesLesCategories.size());
-        chargerCategoriesDynamiquement();
+        setupPlayerCountSpinner();
+        chargerCategoriesParLangue();
         initialiserReseau();
     }
 
     /**
-     * Crée les ToggleButtons (chips) dynamiquement à partir des catégories du DAO
+     * Setup spinner for max player count based on mode
+     */
+    private void setupPlayerCountSpinner() {
+        int minPlayers = gameMode.equals("BATAILLE_ROYALE") ? 4 : 2;
+        int maxPlayers = 10;
+        int defaultPlayers = gameMode.equals("BATAILLE_ROYALE") ? 4 : 4;
+
+        SpinnerValueFactory<Integer> valueFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(minPlayers, maxPlayers, defaultPlayers);
+
+        if (spinnerMaxPlayers != null) {
+            spinnerMaxPlayers.setValueFactory(valueFactory);
+            spinnerMaxPlayers.setEditable(true);
+        }
+    }
+
+    /**
+     * Update UI based on selected game mode
+     */
+    private void updateModeUI() {
+        if (lblModeTitle != null && lblModeDescription != null) {
+            switch (gameMode) {
+                case "MULTI" -> {
+                    lblModeTitle.setText("🎮 Mode Multijoueur");
+                    lblModeDescription.setText("2-10 joueurs • Catégories choisies");
+                }
+                case "BATAILLE_ROYALE" -> {
+                    lblModeTitle.setText("⚔️ Mode Battle Royale");
+                    lblModeDescription.setText("4-10 joueurs • Élimination progressive • Catégories choisies");
+                }
+                case "CHAOS" -> {
+                    lblModeTitle.setText("🌀 Mode Chaos");
+                    lblModeDescription.setText("2-10 joueurs • Catégories aléatoires • Événements surprise");
+                }
+            }
+        }
+    }
+
+    /**
+     * Load categories based on global language setting
+     */
+    private void chargerCategoriesParLangue() {
+        Langue langueActuelle = ParametresGenerauxController.langueGlobale;
+
+        if (gameMode.equals("CHAOS")) {
+            // Chaos mode: categories are random, inform user
+            if (lblCategoriesInfo != null) {
+                lblCategoriesInfo.setText("⚠️ Les catégories seront choisies aléatoirement");
+                lblCategoriesInfo.setVisible(true);
+            }
+            if (containerCategories != null) {
+                containerCategories.setVisible(false);
+            }
+            // Load all categories for later random selection
+            toutesLesCategories = categorieDAO.findActifByLangue(langueActuelle);
+            return;
+        }
+
+        // Normal mode: load and display categories
+        toutesLesCategories = categorieDAO.findActifByLangue(langueActuelle);
+
+        System.out.println("📚 Catégories chargées pour " + langueActuelle + ": " + toutesLesCategories.size());
+
+        if (toutesLesCategories.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Attention",
+                    "Aucune catégorie disponible pour la langue sélectionnée.");
+        }
+
+        chargerCategoriesDynamiquement();
+    }
+
+    /**
+     * Create ToggleButton chips dynamically from loaded categories
      */
     private void chargerCategoriesDynamiquement() {
         if (containerCategories == null) {
@@ -76,13 +140,12 @@ public class ParamPartieMultiController {
         containerCategories.getChildren().clear();
         checkboxMap.clear();
 
-        // Create a FlowPane for chip layout
         javafx.scene.layout.FlowPane flowPane = new javafx.scene.layout.FlowPane();
         flowPane.setHgap(10);
         flowPane.setVgap(10);
         flowPane.setAlignment(javafx.geometry.Pos.CENTER);
 
-        // Add "Select All" toggle button first
+        // Add "Select All" toggle button
         ToggleButton selectAllBtn = new ToggleButton("✨ Tout sélectionner");
         selectAllBtn.getStyleClass().addAll("category-chip", "category-select-all");
         selectAllBtn.selectedProperty().addListener((obs, oldVal, newVal) -> {
@@ -101,63 +164,34 @@ public class ParamPartieMultiController {
             chip.getStyleClass().add("category-chip");
             chip.selectedProperty().addListener((obs, oldVal, newVal) -> mettreAJourCategories());
 
-            // Store reference using a fake checkbox for the existing map
             CheckBox fakeCheckbox = new CheckBox();
             fakeCheckbox.selectedProperty().bindBidirectional(chip.selectedProperty());
             checkboxMap.put(cat.getNom(), fakeCheckbox);
 
             flowPane.getChildren().add(chip);
-            System.out.println("Chip créé : " + cat.getNom());
         }
 
         containerCategories.getChildren().add(flowPane);
     }
 
-    @FXML
-    public void handleRetour() {
-        retourMenu();
-    }
-
-    @FXML
-    public void handleCommencer() {
-        commencerPartie();
-    }
-
-    @FXML
-    public void handleCopier() {
-        copierLien();
-    }
-
     private void mettreAJourCategories() {
         categoriesSelectionnees.clear();
-
         for (Categorie cat : toutesLesCategories) {
             CheckBox checkbox = checkboxMap.get(cat.getNom());
             if (checkbox != null && checkbox.isSelected()) {
                 categoriesSelectionnees.add(cat.getNom());
             }
         }
-
         System.out.println("Catégories sélectionnées : " + categoriesSelectionnees);
     }
 
-    private void copierLien() {
-        if (txtLien == null) {
-            System.out.println("TextField txtLien not found!");
-            return;
-        }
-        String lien = txtLien.getText();
-        javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
-        javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-        content.putString(lien);
-        clipboard.setContent(content);
-        showAlert(Alert.AlertType.INFORMATION, "Succès", "Lien copié !");
-    }
-
+    /**
+     * Initialize network with mobile hotspot support
+     */
     private void initialiserReseau() {
         new Thread(() -> {
             try {
-                // 1. Démarrer le serveur dans son propre thread
+                // Start server
                 gameServer = new GameServer();
                 Thread serverThread = new Thread(() -> {
                     try {
@@ -169,11 +203,14 @@ public class ParamPartieMultiController {
                 serverThread.setDaemon(true);
                 serverThread.start();
 
-                // 2. Attendre que le serveur soit prêt (petit délai)
                 Thread.sleep(500);
 
-                // 3. Connecter le client avec tentatives de reconnexion
-                gameClient = new GameClient();
+                // Get local IP (mobile hotspot)
+                String localIP = NetworkUtils.getLocalIPAddress();
+                String serverAddress = NetworkUtils.formatIPPort(localIP, 8888);
+
+                // Connect client
+                gameClient = new GameClient(localIP, 8888);
                 int attempts = 5;
                 boolean connected = false;
                 while (attempts > 0 && !connected) {
@@ -183,7 +220,6 @@ public class ParamPartieMultiController {
                     } catch (IOException e) {
                         attempts--;
                         if (attempts > 0) {
-                            System.out.println("Tentative de connexion échouée, nouvel essai dans 500ms... (" + attempts + " essais restants)");
                             Thread.sleep(500);
                         } else {
                             throw e;
@@ -191,75 +227,108 @@ public class ParamPartieMultiController {
                     }
                 }
 
-                // 4. Créer la salle une fois connecté
+                // Create room
                 roomId = UUID.randomUUID().toString().substring(0, 8);
-                gameServer.createRoom(roomId, 4, ParametresGenerauxController.langueGlobale);
-                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.JOIN_ROOM, ParametresGenerauxController.pseudoGlobal, roomId));
+                int maxPlayers = spinnerMaxPlayers != null ? spinnerMaxPlayers.getValue() : 4;
+                gameServer.createRoom(roomId, maxPlayers, ParametresGenerauxController.langueGlobale);
 
-                // 5. Mettre à jour l'UI sur le thread JavaFX
+                gameClient.sendMessage(new NetworkMessage(
+                        NetworkMessage.Type.JOIN_ROOM,
+                        ParametresGenerauxController.pseudoGlobal,
+                        roomId
+                ));
+
+                // Update UI
                 javafx.application.Platform.runLater(() -> {
-                    if (txtLien != null) {
-                        txtLien.setText(roomId);
+                    if (txtServerIP != null) {
+                        txtServerIP.setText(serverAddress + " | Room: " + roomId);
                     }
-                    System.out.println("✅ Réseau initialisé et salle créée : " + roomId);
+                    System.out.println("✅ Réseau initialisé | IP: " + serverAddress + " | Room: " + roomId);
                 });
 
             } catch (Exception e) {
                 javafx.application.Platform.runLater(() -> {
-                    showAlert(Alert.AlertType.ERROR, "Erreur Réseau", 
-                        "Impossible d'initialiser le réseau après plusieurs tentatives : " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Erreur Réseau",
+                            "Impossible d'initialiser le réseau : " + e.getMessage());
                 });
                 e.printStackTrace();
             }
         }).start();
     }
 
-    /**
-     * Commence la partie multijoueur
-     * Redirige vers la salle d'attente
-     */
-    private void commencerPartie() {
-        if (categoriesSelectionnees.isEmpty()) {
+    @FXML
+    public void handleCommencer() {
+        // Validate categories (except for Chaos mode)
+        if (!gameMode.equals("CHAOS") && categoriesSelectionnees.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Erreur", "Sélectionnez au moins une catégorie !");
             return;
         }
 
-        System.out.println("✅ Début partie multijoueur");
-        System.out.println("   Catégories : " + categoriesSelectionnees);
+        // For Chaos mode, select random categories
+        if (gameMode.equals("CHAOS")) {
+            categoriesSelectionnees = selectRandomCategories(8);
+        }
 
+        System.out.println("✅ Début partie " + gameMode);
+        System.out.println("   Catégories : " + categoriesSelectionnees);
+        System.out.println("   Max joueurs : " + spinnerMaxPlayers.getValue());
+
+        navigateToWaitingRoom();
+    }
+
+    /**
+     * Select random categories for Chaos mode
+     */
+    private List<String> selectRandomCategories(int count) {
+        List<String> allCategories = new ArrayList<>();
+        toutesLesCategories.forEach(cat -> allCategories.add(cat.getNom()));
+
+        Collections.shuffle(allCategories);
+        return allCategories.subList(0, Math.min(count, allCategories.size()));
+    }
+
+    private void navigateToWaitingRoom() {
         try {
             FXMLLoader loader = new FXMLLoader(
                     HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
             Parent root = loader.load();
 
-            // Pass mode and network to ListeAttenteController
             ListeAttenteController controller = loader.getController();
             if (controller != null) {
                 controller.setGameMode(this.gameMode);
                 controller.setNetwork(gameClient, gameServer, roomId);
+                controller.setMaxPlayers(spinnerMaxPlayers.getValue());
+                controller.setCategories(categoriesSelectionnees); // Add this
             }
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             stage.getScene().setRoot(root);
-            stage.setTitle("Salle d'attente");
+            stage.setTitle("Salle d'attente - " + gameMode);
 
         } catch (IOException e) {
-            System.err.println("Erreur lors du chargement de partie_multi.fxml");
             e.printStackTrace();
         }
     }
 
-    private void retourMenu() {
+    @FXML
+    public void handleCopier() {
+        if (txtServerIP != null) {
+            javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
+            javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+            content.putString(txtServerIP.getText());
+            clipboard.setContent(content);
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Informations copiées !");
+        }
+    }
+
+    @FXML
+    public void handleRetour() {
         navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
     private void navigateTo(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
-            if (loader.getLocation() == null) {
-                System.err.println("FXML not found: " + fxmlPath);
-                return;
-            }
             Parent root = loader.load();
             Stage stage = (Stage) btnRetour.getScene().getWindow();
             stage.getScene().setRoot(root);

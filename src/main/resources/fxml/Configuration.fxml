@@ -63,6 +63,11 @@
                         </VBox>
 
                         <Button fx:id="btnEnregistrer" onAction="#handleEnregistrer" styleClass="btn-action" text="💾 ENREGISTRER" />
+                        <Label fx:id="lblSaveConfirmation" styleClass="label-success" text="" textFill="GREEN" visible="false">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
 
                     </children>
                 </VBox>

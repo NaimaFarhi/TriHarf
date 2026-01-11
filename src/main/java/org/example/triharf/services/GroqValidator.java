@@ -44,7 +44,7 @@ public class GroqValidator {
                                Character letter, Langue langue) {
         String langName = switch(langue) {
             case FRANCAIS -> "French";
-            case ENGLISH -> "English";
+            case ANGLAIS -> "English";
             case ARABE -> "Arabic";
         };
 

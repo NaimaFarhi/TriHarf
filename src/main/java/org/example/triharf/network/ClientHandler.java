@@ -68,7 +68,10 @@ public class ClientHandler implements Runnable {
     }
 
     private void cleanup() {
-        try { socket.close(); } catch (IOException e) {}
+        try {
+            socket.close();
+            server.handleClientDisconnect(clientId);
+        } catch (IOException e) {}
     }
 
     public String getClientId() { return clientId; }

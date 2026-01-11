@@ -3,7 +3,6 @@ package org.example.triharf.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
@@ -51,8 +50,13 @@ public class MenuPrincipalController {
         // Les actions des boutons
         btnSolo.setOnAction(e -> navigateTo("/fxml/param_partie_solo.fxml", "Paramètres - Mode Solo"));
         btnMultijoueur.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Multijoueur"));
-        btnBattleRoyale.setOnAction(e -> navigateTo("/fxml/param_partie_multi.fxml", "Paramètres - Battle Royale"));
-        btnChaos.setOnAction(e -> navigateTo("/fxml/param_partie_chaos.fxml", "Paramètres - Mode Chaos"));
+        btnBattleRoyale.setOnAction(e -> {
+            navigateToMultiParams("/fxml/param_partie_multi.fxml", "Paramètres - Battle Royale", "BATAILLE_ROYALE");
+        });
+
+        btnChaos.setOnAction(e -> {
+            navigateToMultiParams("/fxml/param_partie_multi.fxml", "Paramètres - Mode Chaos", "CHAOS");
+        });
 
         btnParametres.setOnAction(e -> navigateTo("/fxml/Configuration.fxml", "Paramètres"));
         if (btnRejoindre != null) {
@@ -60,6 +64,24 @@ public class MenuPrincipalController {
         }
 
         loadStatistics();
+    }
+
+    private void navigateToMultiParams(String fxmlPath, String title, String mode) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
+            Parent root = loader.load();
+
+            ParamPartieMultiController controller = loader.getController();
+            if (controller != null) {
+                controller.setGameMode(mode);
+            }
+
+            Stage stage = (Stage) btnSolo.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.setTitle(title);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadStatistics() {
@@ -153,7 +175,7 @@ public class MenuPrincipalController {
         new Thread(() -> {
             try {
                 // Initialiser le client et se connecter
-                org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient();
+                org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient("localhost", 8888);
                 
                 // Tentative de connexion
                 client.connect();
@@ -171,7 +193,7 @@ public class MenuPrincipalController {
                 // Naviguer sur le thread UI
                 javafx.application.Platform.runLater(() -> {
                     try {
-                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/salle_attente.fxml"));
                         Parent root = loader.load();
 
                         ListeAttenteController controller = loader.getController();

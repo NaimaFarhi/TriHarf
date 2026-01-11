@@ -1,6 +1,7 @@
 package org.example.triharf.dao;
 
 import org.example.triharf.config.HibernateUtil;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -82,10 +83,10 @@ public class CategorieDAO extends GenericDAO<Categorie> {
     }
 
     /**
-     * Récupère les catégories actives par langue
+     * Récupère les catégories actives par langue (accepts Langue enum)
      */
-    public List<Categorie> findActifByLangue(String langue) {
-        if (langue == null || langue.trim().isEmpty()) {
+    public List<Categorie> findActifByLangue(Langue langue) {
+        if (langue == null) {
             return List.of();
         }
 
@@ -93,7 +94,7 @@ public class CategorieDAO extends GenericDAO<Categorie> {
             Query<Categorie> query = session.createQuery(
                     "FROM Categorie WHERE langue = :langue AND actif = true ORDER BY nom",
                     Categorie.class);
-            query.setParameter("langue", langue);
+            query.setParameter("langue", langue); // Pass enum directly
             return query.getResultList();
         } catch (Exception e) {
             e.printStackTrace();

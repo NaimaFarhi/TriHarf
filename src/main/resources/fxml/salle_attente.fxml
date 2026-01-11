@@ -104,6 +104,9 @@
             <children>
                 <Button fx:id="btnQuitter" text="✕ QUITTER" onAction="#handleQuitter" styleClass="btn-terminate"/>
                 <Button fx:id="btnPret" text="✓ JE SUIS PRÊT" onAction="#handlePret" styleClass="btn-action" style="-fx-min-width: 200;"/>
+                <Button fx:id="btnCommencer" text="🎮 COMMENCER LA PARTIE"
+                        onAction="#handleCommencer" styleClass="btn-action"
+                        style="-fx-min-width: 250;" visible="false"/>
             </children>
         </HBox>
 

@@ -1,0 +1,73 @@
+﻿[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for org.example:TriHarf:jar:1.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.(groupId:artifactId)' must be unique but found duplicate declaration of plugin org.openjfx:javafx-maven-plugin @ line 163, column 21
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 183, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ------------------------< org.example:TriHarf >-------------------------
+[INFO] Building TriHarf 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ TriHarf ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 27 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ TriHarf ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 49 source files to C:\Users\USER\Documents\emsi_2025_2026\java\TriHarf\target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[2,20] module not found: javafx.controls
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[3,20] module not found: javafx.fxml
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[4,20] module not found: javafx.web
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[5,20] module not found: javafx.swing
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[6,20] module not found: javafx.media
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[8,28] module not found: org.controlsfx.controls
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[9,22] module not found: com.dlsc.formsfx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[10,25] module not found: net.synedra.validatorfx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[11,32] module not found: org.kordamp.ikonli.javafx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[12,37] module not found: org.kordamp.bootstrapfx.core
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[13,24] module not found: eu.hansolo.tilesfx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[14,29] module not found: com.almasb.fxgl.all
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[16,31] module not found: org.hibernate.orm.core
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[17,21] module not found: jakarta.persistence
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[20,24] module not found: com.google.gson
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[21,17] module not found: org.slf4j
+[INFO] 16 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.894 s
+[INFO] Finished at: 2026-01-09T17:32:03+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile (default-compile) on project TriHarf: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[2,20] module not found: javafx.controls
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[3,20] module not found: javafx.fxml
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[4,20] module not found: javafx.web
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[5,20] module not found: javafx.swing
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[6,20] module not found: javafx.media
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[8,28] module not found: org.controlsfx.controls
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[9,22] module not found: com.dlsc.formsfx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[10,25] module not found: net.synedra.validatorfx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[11,32] module not found: org.kordamp.ikonli.javafx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[12,37] module not found: org.kordamp.bootstrapfx.core
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[13,24] module not found: eu.hansolo.tilesfx
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[14,29] module not found: com.almasb.fxgl.all
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[16,31] module not found: org.hibernate.orm.core
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[17,21] module not found: jakarta.persistence
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[20,24] module not found: com.google.gson
+[ERROR] /C:/Users/USER/Documents/emsi_2025_2026/java/TriHarf/src/main/java/module-info.java:[21,17] module not found: org.slf4j
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -1,6 +1,7 @@
 package org.example.triharf.services;
 
 import org.example.triharf.dao.CategorieDAO;
+import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
 
 public class SetupService {
@@ -11,7 +12,7 @@ public class SetupService {
     public enum Language {
         FRENCH("fr"),
         ARABIC("ar"),
-        ENGLISH("en");
+        ANGLAIS("en");
 
         private final String code;
         Language(String code) { this.code = code; }
@@ -50,7 +51,7 @@ public class SetupService {
                     Categorie categorieFR = new Categorie();
                     categorieFR.setNom(nameFR);
                     categorieFR.setDescription("Catégorie: " + nameFR);
-                    categorieFR.setLangue("fr");
+                    categorieFR.setLangue(Langue.FRANCAIS);
                     categorieDAO.save(categorieFR);
                     System.out.println("✓ Catégorie (FR) ajoutée: " + nameFR);
 
@@ -58,7 +59,7 @@ public class SetupService {
                     Categorie categorieAR = new Categorie();
                     categorieAR.setNom(nameAR);
                     categorieAR.setDescription("الفئة: " + nameAR);
-                    categorieAR.setLangue("ar");
+                    categorieAR.setLangue(Langue.ARABE);
                     categorieDAO.save(categorieAR);
                     System.out.println("✓ Catégorie (AR) ajoutée: " + nameAR);
 
@@ -66,7 +67,7 @@ public class SetupService {
                     Categorie categorieEN = new Categorie();
                     categorieEN.setNom(nameEN);
                     categorieEN.setDescription("Category: " + nameEN);
-                    categorieEN.setLangue("en");
+                    categorieEN.setLangue(Langue.ANGLAIS);
                     categorieDAO.save(categorieEN);
                     System.out.println("✓ Catégorie (EN) ajoutée: " + nameEN);
                 }

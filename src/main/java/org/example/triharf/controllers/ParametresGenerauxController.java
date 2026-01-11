@@ -1,33 +1,26 @@
 package org.example.triharf.controllers;
 
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.enums.Langue;
-import org.example.triharf.services.GameSession;
-import org.example.triharf.services.SessionManager;
+import org.example.triharf.utils.PropertiesManager;
 
 import java.io.IOException;
 
-/**
- * Contrôleur pour les paramètres généraux (Configuration.fxml)
- */
 public class ParametresGenerauxController {
 
-    // Trigger recompile
-    // ================= STATIC SETTINGS =================
-    // Accessible depuis n'importe quel contrôleur
-    // ================= STATIC SETTINGS =================
-    // Accessible depuis n'importe quel contrôleur
     public static Langue langueGlobale = Langue.FRANCAIS;
-    public static String pseudoGlobal; // Initialisé dans le bloc static block ou via PropertiesManager
+    public static String pseudoGlobal;
 
     @FXML private Button btnRetour;
-    @FXML private Button btnJouer;
+    @FXML private Button btnEnregistrer;
 
     @FXML private RadioButton rbFrancais;
     @FXML private RadioButton rbArabe;
@@ -37,7 +30,7 @@ public class ParametresGenerauxController {
     @FXML private TextField txtPseudo;
     @FXML private CheckBox cbMute;
     @FXML private Slider sliderVolume;
-    // @FXML private Label labelVolume; // N'existe pas dans le FXML
+    @FXML private Label lblSaveConfirmation; // Add to FXML
 
     private String langueSelectionnee = "Français";
     private String pseudo = "";
@@ -45,43 +38,50 @@ public class ParametresGenerauxController {
     private boolean sonActive = true;
 
     static {
-        // Initialisation Pseudo Global (Persistance)
-        if (pseudoGlobal == null) {
-            String savedPseudo = org.example.triharf.utils.PropertiesManager.getProperty("player.pseudo");
-            if (savedPseudo != null && !savedPseudo.isBlank()) {
-                pseudoGlobal = savedPseudo;
-            } else {
-                pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
-                org.example.triharf.utils.PropertiesManager.setProperty("player.pseudo", pseudoGlobal);
-                org.example.triharf.utils.PropertiesManager.saveProperties();
-            }
+        // Generate random pseudo on first launch
+        String savedPseudo = PropertiesManager.getProperty("player.pseudo");
+        if (savedPseudo == null || savedPseudo.isBlank()) {
+            pseudoGlobal = "Joueur" + (int)(Math.random() * 9000 + 1000);
+            PropertiesManager.setProperty("player.pseudo", pseudoGlobal);
+            PropertiesManager.saveProperties();
+        } else {
+            pseudoGlobal = savedPseudo;
         }
+
+        // Load saved language
+        String savedLangue = PropertiesManager.getProperty("player.langue", "FRANCAIS");
+        langueGlobale = Langue.valueOf(savedLangue);
     }
 
     @FXML
     public void initialize() {
+        // Set confirmation label invisible initially
+        if (lblSaveConfirmation != null) {
+            lblSaveConfirmation.setVisible(false);
+        }
 
-        // Sélection par défaut
-        if (rbFrancais != null) rbFrancais.setSelected(true);
-        // labelVolume.setText((int) volume + "%"); // Retiré car pas de label
+        // Load saved language selection
+        switch (langueGlobale) {
+            case FRANCAIS -> rbFrancais.setSelected(true);
+            case ANGLAIS -> rbAnglais.setSelected(true);
+            case ARABE -> rbArabe.setSelected(true);
+        }
 
-        // Langue
+        // Language selection listener
         langueGroup.selectedToggleProperty().addListener((obs, old, selected) -> {
             if (selected == rbFrancais) langueSelectionnee = "Français";
             else if (selected == rbArabe) langueSelectionnee = "Arabe";
             else if (selected == rbAnglais) langueSelectionnee = "English";
         });
 
-        // Pseudo UI
+        // Pseudo field
         if (txtPseudo != null) {
-            // Afficher le pseudo global actuel
             txtPseudo.setText(pseudoGlobal);
             pseudo = pseudoGlobal;
-            
             txtPseudo.textProperty().addListener((obs, old, value) -> pseudo = value);
         }
 
-        // Son (cbMute = true => sonActive = false)
+        // Sound settings
         if (cbMute != null) {
             cbMute.selectedProperty().addListener((obs, old, isMuted) -> {
                 sonActive = !isMuted;
@@ -89,50 +89,49 @@ public class ParametresGenerauxController {
             });
         }
 
-        // Volume
         if (sliderVolume != null) {
             sliderVolume.valueProperty().addListener((obs, old, value) -> {
                 volume = value.doubleValue();
-                // if (labelVolume != null) labelVolume.setText((int) volume + "%");
             });
         }
     }
 
-    // ================= ACTIONS =================
-
     @FXML
-    public void handleJouer() {
-
+    public void handleEnregistrer() {
         sauvegarderParametres();
 
-        if (pseudo == null || pseudo.isBlank()) {
-            pseudo = pseudoGlobal; // Keep existing random pseudo instead of resetting to "Joueur"
+        // Update global variables
+        if (pseudo != null && !pseudo.isBlank()) {
+            pseudoGlobal = pseudo;
         }
-
-        // Mise à jour des globales
-        pseudoGlobal = pseudo;
         langueGlobale = getLangueEnum();
 
-        System.out.println("🎮 Paramètres Validés : " + pseudoGlobal + " | " + langueGlobale);
+        // Save language preference
+        PropertiesManager.setProperty("player.langue", langueGlobale.name());
+        PropertiesManager.saveProperties();
 
-        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
+        // Show confirmation message
+        showSaveConfirmation();
+
+        System.out.println("💾 Enregistrement terminé: " + pseudoGlobal + " / " + langueGlobale);
     }
 
     @FXML
     public void handleRetour() {
         navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
-    @FXML
-    public void handleEnregistrer() {
-        sauvegarderParametres();
-        
-        // Mise à jour des globales
-        pseudoGlobal = pseudo;
-        langueGlobale = getLangueEnum();
-        
-        System.out.println("💾 Enregistrement terminé: " + pseudoGlobal + " / " + langueGlobale);
+
+    private void showSaveConfirmation() {
+        if (lblSaveConfirmation != null) {
+            lblSaveConfirmation.setText("✅ Paramètres sauvegardés avec succès !");
+            lblSaveConfirmation.setVisible(true);
+
+            // Hide after 3 seconds
+            PauseTransition pause = new PauseTransition(Duration.seconds(3));
+            pause.setOnFinished(e -> lblSaveConfirmation.setVisible(false));
+            pause.play();
+        }
     }
-    // ================= LOGIQUE =================
 
     private void sauvegarderParametres() {
         System.out.println("✅ Paramètres sauvegardés :");
@@ -142,8 +141,8 @@ public class ParametresGenerauxController {
         System.out.println("- Volume : " + (int) volume + "%");
 
         if (pseudo != null && !pseudo.isBlank()) {
-            org.example.triharf.utils.PropertiesManager.setProperty("player.pseudo", pseudo);
-            org.example.triharf.utils.PropertiesManager.saveProperties();
+            PropertiesManager.setProperty("player.pseudo", pseudo);
+            PropertiesManager.saveProperties();
         }
     }
 
@@ -151,7 +150,7 @@ public class ParametresGenerauxController {
         return switch (langueSelectionnee) {
             case "Français" -> Langue.FRANCAIS;
             case "Arabe" -> Langue.ARABE;
-            case "English" -> Langue.ENGLISH;
+            case "English" -> Langue.ANGLAIS;
             default -> Langue.FRANCAIS;
         };
     }

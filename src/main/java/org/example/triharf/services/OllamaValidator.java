@@ -50,7 +50,7 @@ public class OllamaValidator {
     private String buildPrompt(String word, String categoryName, Character letter, Langue langue) {
         String langInstruction = switch(langue) {
             case FRANCAIS -> "Réponds en français. Le mot doit être français.";
-            case ENGLISH -> "Answer in English. The word must be English.";
+            case ANGLAIS -> "Answer in English. The word must be English.";
             case ARABE -> "أجب بالعربية. يجب أن تكون الكلمة عربية.";
         };
 

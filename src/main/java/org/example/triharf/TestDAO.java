@@ -19,7 +19,7 @@ public class TestDAO {
         System.out.println("✅ Catégorie: " + cat.getId());
 
         // Test Validation
-        var result = validator.validateMot("Apple", cat, 'A', Langue.ENGLISH);
+        var result = validator.validateMot("Apple", cat, 'A', Langue.ANGLAIS);
         System.out.println("✅ Validation: " + result.getMessage());
 
         System.out.println("✅ Sprint 1 - DAOs fonctionnels!");

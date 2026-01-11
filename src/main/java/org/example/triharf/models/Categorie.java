@@ -1,6 +1,8 @@
 package org.example.triharf.models;
 
 import jakarta.persistence.*;
+import org.example.triharf.enums.Langue;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,8 +22,9 @@ public class Categorie {
     @Column(nullable = false)
     private Boolean actif = true;
 
-    @Column(length = 50)
-    private String langue;
+    @Column(name = "langue")
+    @Enumerated(EnumType.ORDINAL)
+    private Langue langue;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -38,7 +41,7 @@ public class Categorie {
         this.nom = nom;
     }
 
-    public Categorie(String nom, String langue) {
+    public Categorie(String nom, Langue langue) {
         this.nom = nom;
         this.langue = langue;
     }
@@ -56,8 +59,8 @@ public class Categorie {
     public Boolean getActif() { return actif; }
     public void setActif(Boolean actif) { this.actif = actif; }
 
-    public String getLangue() { return langue; }
-    public void setLangue(String langue) { this.langue = langue; }
+    public Langue getLangue() { return langue; }
+    public void setLangue(Langue langue) { this.langue = langue; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 

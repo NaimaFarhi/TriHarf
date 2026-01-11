@@ -43,6 +43,31 @@ public class GameServer {
         threadPool.shutdown();
     }
 
+    public synchronized void startGame(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null && room.canStart()) {
+            room.setGameStarted(true);
+
+            Character letter = generateLetter();
+            room.setCurrentLetter(letter);
+
+            Map<String, Object> gameData = Map.of(
+                    "letter", letter.toString(),
+                    "duration", 180
+            );
+            broadcast(roomId, new NetworkMessage(
+                    NetworkMessage.Type.GAME_START,
+                    "SERVER",
+                    gameData
+            ));
+        }
+    }
+
+    private Character generateLetter() {
+        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        return letters.charAt(new Random().nextInt(letters.length()));
+    }
+
 
     // Create new game room
     public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue) {
@@ -126,6 +151,40 @@ public class GameServer {
                 ClientHandler client = clients.get(playerId);
                 if (client != null) client.sendMessage(message);
             });
+        }
+    }
+
+    // In ClientHandler cleanup or when client disconnects
+    public void handleClientDisconnect(String clientId) {
+        // Find which room this client was in
+        for (GameRoom room : rooms.values()) {
+            if (room.getPlayerIds().contains(clientId)) {
+                leaveRoom(clientId, room.getRoomId());
+
+                // Notify remaining players
+                broadcastPlayerStatus(room.getRoomId());
+                break;
+            }
+        }
+        clients.remove(clientId);
+    }
+
+    private void broadcastPlayerStatus(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null) {
+            List<String> playerStatusList = new ArrayList<>();
+            for (String pid : room.getPlayerIds()) {
+                String name = room.getPseudo(pid);
+                String status = room.getReadyPlayers().contains(pid) ? "PREST" : "ATTENTE";
+                playerStatusList.add(name + ":" + status);
+            }
+
+            NetworkMessage msg = new NetworkMessage(
+                    NetworkMessage.Type.PLAYER_JOINED,
+                    "SERVER",
+                    playerStatusList
+            );
+            broadcast(roomId, msg);
         }
     }
 }

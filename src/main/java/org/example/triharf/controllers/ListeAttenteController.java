@@ -3,7 +3,6 @@ package org.example.triharf.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -14,57 +13,74 @@ import org.example.triharf.network.GameServer;
 import org.example.triharf.network.NetworkMessage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Contrôleur pour la salle d'attente multijoueur (liste_attente.fxml)
- */
 public class ListeAttenteController {
 
-    @FXML
-    private Label lblPlayerCount;
-
-    @FXML
-    private Label lblMaxPlayers;
-
-    @FXML
-    private VBox vboxPlayers;
-
-    @FXML
-    private Label lblGameCode;
-
-    @FXML
-    private Button btnCopyCode;
-
-    @FXML
-    private Button btnQuitter;
-
-    @FXML
-    private Button btnPret;
-
-    @FXML
-    public void initialize() {
-        System.out.println("✅ ListeAttenteController initialisé");
-    }
+    @FXML private Label lblPlayerCount;
+    @FXML private Label lblMaxPlayers;
+    @FXML private VBox vboxPlayers;
+    @FXML private Label lblGameCode;
+    @FXML private Button btnCopyCode;
+    @FXML private Button btnQuitter;
+    @FXML private Button btnPret;
+    @FXML private Button btnCommencer; // Host only button
 
     private String gameMode = "MULTI";
     private GameClient gameClient;
     private GameServer gameServer;
     private String roomId;
+    private int maxPlayers = 4;
     private boolean isReady = false;
+    private boolean isHost = false;
+    private List<String> categories = new ArrayList<>();
+
+    @FXML
+    public void initialize() {
+        System.out.println("✅ ListeAttenteController initialisé");
+        // Hide start button initially
+        if (btnCommencer != null) btnCommencer.setVisible(false);
+    }
 
     public void setNetwork(GameClient client, GameServer server, String roomId) {
         this.gameClient = client;
         this.gameServer = server;
         this.roomId = roomId;
+        this.isHost = (server != null); // Host has server reference
 
         if (lblGameCode != null) {
             lblGameCode.setText(roomId);
         }
 
+        if (lblMaxPlayers != null) {
+            lblMaxPlayers.setText(String.valueOf(maxPlayers));
+        }
+
         if (gameClient != null) {
             gameClient.setMessageHandler(this::handleIncomingMessage);
         }
+
+        // Show start button only for host
+        if (btnCommencer != null && isHost) {
+            btnCommencer.setVisible(true);
+        }
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+        if (lblMaxPlayers != null) {
+            lblMaxPlayers.setText(String.valueOf(maxPlayers));
+        }
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+
+    public void setGameMode(String mode) {
+        this.gameMode = mode;
+        System.out.println("Mode de jeu (Attente) : " + mode);
     }
 
     private void handleIncomingMessage(NetworkMessage message) {
@@ -81,84 +97,87 @@ public class ListeAttenteController {
         });
     }
 
-    private void startGame() {
-        String targetFxml = "/fxml/partie_multi.fxml";
-        String title = "Mode Multijoueur";
-
-        if ("BATTLE".equals(gameMode)) {
-            targetFxml = "/fxml/partie_battle.fxml";
-            title = "Battle Royale";
-        }
-
-        navigateToMulti(targetFxml, title);
-    }
-
     private void updatePlayerList(List<String> playersStatus) {
         if (vboxPlayers != null) {
             vboxPlayers.getChildren().clear();
             for (String ps : playersStatus) {
                 String[] parts = ps.split(":");
-                String id = parts[0];
+                String name = parts[0];
                 String status = parts.length > 1 ? parts[1] : "ATTENTE";
                 String emoji = "PREST".equals(status) ? "✅" : "⏳";
-                vboxPlayers.getChildren().add(new Label(emoji + " " + id + " (" + status + ")"));
+                Label lbl = new Label(emoji + " " + name);
+                lbl.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
+                vboxPlayers.getChildren().add(lbl);
             }
         }
+
         if (lblPlayerCount != null) {
             lblPlayerCount.setText(String.valueOf(playersStatus.size()));
         }
-    }
 
-    public void setGameMode(String mode) {
-        this.gameMode = mode;
-        System.out.println("Mode de jeu (Attente) : " + mode);
+        // Enable start button when minimum players reached (host only)
+        if (btnCommencer != null && isHost) {
+            int minPlayers = gameMode.equals("BATAILLE_ROYALE") ? 4 : 2;
+            btnCommencer.setDisable(playersStatus.size() < minPlayers);
+        }
     }
 
     @FXML
     private void handlePret() {
         if (gameClient != null) {
-            isReady = !isReady; // Toggle
-            gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.PLAYER_READY, ParametresGenerauxController.pseudoGlobal, isReady));
-            
+            isReady = !isReady;
+            gameClient.sendMessage(new NetworkMessage(
+                    NetworkMessage.Type.PLAYER_READY,
+                    ParametresGenerauxController.pseudoGlobal,
+                    isReady
+            ));
+
             if (btnPret != null) {
-                btnPret.setText(isReady ? "PAS PRÊT" : "JE SUIS PRÊT");
+                btnPret.setText(isReady ? "❌ PAS PRÊT" : "✓ JE SUIS PRÊT");
+                btnPret.getStyleClass().clear();
+                btnPret.getStyleClass().add(isReady ? "btn-terminate" : "btn-action");
             }
-
-            // Si c'est l'hôte et qu'il est prêt, il peut décider de lancer (pour l'instant automatique s'il est prêt)
-            // Mais l'utilisateur a dit "kan je clique je suis pret tu dois afficher...", il n'a pas dit de lancer tout de suite.
-            // Cependant, il faut bien lancer la partie à un moment.
-            // On va laisser l'hôte lancer s'il est prêt.
-            if (gameServer != null && isReady) {
-                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.GAME_START, ParametresGenerauxController.pseudoGlobal, roomId));
-            }
-        }
-    }
-
-    private void navigateToMulti(String fxmlPath, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
-            Parent root = loader.load();
-
-            // Pass network to JeuMultiController
-            Object controller = loader.getController();
-            if (controller instanceof JeuMultiController) {
-                ((JeuMultiController) controller).setNetwork(gameClient, roomId);
-            }
-
-            Stage stage = (Stage) btnPret.getScene().getWindow();
-            stage.getScene().setRoot(root);
-            stage.setTitle(title);
-
-        } catch (IOException e) {
-            System.err.println("❌ Erreur navigation: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
     @FXML
+    private void handleCommencer() {
+        if (!isHost) return;
+
+        // Broadcast game start
+        gameServer.startGame(roomId);
+    }
+
+    private void startGame() {
+        String targetFxml = switch (gameMode) {
+            case "BATAILLE_ROYALE" -> "/fxml/partie_battle.fxml";
+            case "CHAOS" -> "/fxml/partie_chaos.fxml";
+            default -> "/fxml/partie_multi.fxml";
+        };
+
+        navigateToGame(targetFxml, "Partie - " + gameMode);
+    }
+
+    @FXML
     private void handleQuitter() {
-        System.out.println("❌ Joueur quitte la salle d'attente");
-        navigateTo("/fxml/main_menu.fxml", "TriHarf - Menu Principal");
+        // If host leaves, server stops and everyone gets kicked
+        if (isHost && gameServer != null) {
+            try {
+                gameServer.stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (gameClient != null) {
+            gameClient.sendMessage(new NetworkMessage(
+                    NetworkMessage.Type.DISCONNECT,
+                    ParametresGenerauxController.pseudoGlobal,
+                    roomId
+            ));
+        }
+
+        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
     @FXML
@@ -168,7 +187,27 @@ public class ListeAttenteController {
             javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
             content.putString(lblGameCode.getText());
             clipboard.setContent(content);
-            System.out.println("📋 Code copié: " + lblGameCode.getText());
+        }
+    }
+
+    private void navigateToGame(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof JeuMultiController) {
+                JeuMultiController mc = (JeuMultiController) controller;
+                mc.setNetwork(gameClient, roomId);
+                mc.setCategories(categories); // Add this
+            }
+
+            Stage stage = (Stage) btnPret.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.setTitle(title);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -176,13 +215,10 @@ public class ListeAttenteController {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
-
             Stage stage = (Stage) btnPret.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);
-
         } catch (IOException e) {
-            System.err.println("❌ Erreur navigation: " + e.getMessage());
             e.printStackTrace();
         }
     }

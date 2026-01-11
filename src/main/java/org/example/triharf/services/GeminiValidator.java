@@ -37,7 +37,7 @@ public class GeminiValidator {
     private String buildPrompt(String word, String categoryName, Character letter, Langue language) {
         String langName = switch(language) {
             case FRANCAIS -> "French";
-            case ENGLISH -> "English";
+            case ANGLAIS -> "English";
             case ARABE -> "Arabic";
         };
 

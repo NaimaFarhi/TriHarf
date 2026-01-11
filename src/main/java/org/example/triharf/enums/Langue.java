@@ -2,7 +2,7 @@ package org.example.triharf.enums;
 
 public enum Langue {
     FRANCAIS("fr"),
-    ENGLISH("en"),
+    ANGLAIS("en"),
     ARABE("ar");
 
     private String code;

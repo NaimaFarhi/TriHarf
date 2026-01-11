@@ -23,7 +23,7 @@ public class TestGameSession {
         scanner.nextLine();
 
         Langue langue = switch(langChoice) {
-            case 2 -> Langue.ENGLISH;
+            case 2 -> Langue.ANGLAIS;
             case 3 -> Langue.ARABE;
             default -> Langue.FRANCAIS;
         };
