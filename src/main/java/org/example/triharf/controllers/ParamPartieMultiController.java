@@ -290,7 +290,7 @@ public class ParamPartieMultiController {
     private void navigateToWaitingRoom() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/liste_attente.fxml"));
+                    HelloApplication.class.getResource("/fxml/salle_attente.fxml"));
             Parent root = loader.load();
 
             ListeAttenteController controller = loader.getController();
