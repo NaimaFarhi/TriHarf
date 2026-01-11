@@ -270,6 +270,11 @@ public class JeuMultiController {
         }
     }
 
+    @FXML
+    private void handleBack() {
+        retourMenu();
+    }
+
     /* =======================
        CHAT
        ======================= */
