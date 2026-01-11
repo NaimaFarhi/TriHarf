@@ -18,7 +18,7 @@
                 <HBox alignment="CENTER" prefHeight="70.0" styleClass="game-header" spacing="60.0">
                     <children>
                         <!-- Bouton flèche -->
-                        <Button fx:id="btnBack" text="←" onAction="#handleBack" styleClass="btn-back"/>
+                        <Button fx:id="btnBack" text="←" onAction="#handleRetour" styleClass="btn-back"/>
 
                         <!-- TIMER -->
                         <HBox alignment="CENTER" spacing="10.0" styleClass="info-box">
