@@ -5,14 +5,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.animation.Timeline;
-import javafx.animation.KeyFrame;
-import javafx.util.Duration;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
-import javafx.collections.FXCollections;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.services.GameEngine;
 import org.example.triharf.services.ResultsManager;
@@ -25,56 +22,28 @@ import org.example.triharf.network.NetworkMessage;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
-/**
- * JeuMultiController.java
- * Gère le jeu multijoueur
- * Lie GameEngine + ResultsManager + ValidationService + Réseau
- */
 public class JeuMultiController {
 
-    // ===== UI COMPONENTS =====
-    @FXML
-    private Button btnRetour;
+    // ===== UI COMPONENTS (MATCHING FXML) =====
+    @FXML private Button btnBack;
+    @FXML private Label lblTimer;
+    @FXML private Label lblJoueurs;
+    @FXML private Label lblLettre;
+    @FXML private VBox vboxPlayers;
+    @FXML private VBox vboxMessages;
+    @FXML private TextField tfMessage;
+    @FXML private Button btnSend;
 
-    @FXML
-    private Label labelTimer;
-
-    @FXML
-    private Label labelNbJoueurs;
-
-    @FXML
-    private Label lblLettre;
-
-    @FXML
-    private VBox containerCategories;
-
-    @FXML
-    private TableView<?> tableJoueurs;
-
-    @FXML
-    private TextArea chatArea;
-
-    @FXML
-    private TextField tfMessageChat;
-
-    @FXML
-    private Button btnEnvoyer;
-
-    @FXML
-    private Button btnTerminer;
-
-    // ===== SERVICES (Backend Layer - F) =====
+    // ===== SERVICES =====
     private GameEngine gameEngine;
     private ResultsManager resultsManager;
     private ValidationService validationService;
 
     // ===== STATE MANAGEMENT =====
     private Character lettreActuelle;
-    private int timeRemaining = 180; // 3 minutes
     private Timeline timeline;
-    private int nbJoueurs = 1; // Sera mis à jour via réseau
+    private int nbJoueurs = 1;
     private final Map<String, TextField> textFieldsParCategorie = new HashMap<>();
     private final Map<Categorie, String> reponses = new HashMap<>();
 
@@ -82,7 +51,6 @@ public class JeuMultiController {
     private List<String> categoriesNoms;
     private List<Categorie> categories;
     private String joueur = "Joueur_Multi";
-    private int difficulte = 1;
     private int gameDuration = 180;
     private org.example.triharf.enums.Langue langue = org.example.triharf.enums.Langue.FRANCAIS;
 
@@ -102,7 +70,17 @@ public class JeuMultiController {
     }
 
     private void handleNetworkMessage(NetworkMessage message) {
-        // Handle incoming data if needed
+        javafx.application.Platform.runLater(() -> {
+            // Handle incoming messages
+            if (message.getType() == NetworkMessage.Type.GAME_START) {
+                Map<String, Object> data = (Map<String, Object>) message.getData();
+                String letter = (String) data.get("letter");
+                if (letter != null && !letter.isEmpty()) {
+                    lettreActuelle = letter.charAt(0);
+                    afficherLettre();
+                }
+            }
+        });
     }
 
     /* =======================
@@ -111,7 +89,6 @@ public class JeuMultiController {
 
     public void setCategories(List<String> categoriesNoms) {
         this.categoriesNoms = categoriesNoms;
-        // Convertir les noms en objets Categorie
         this.categories = new ArrayList<>();
         for (String nom : categoriesNoms) {
             Categorie cat = categorieDAO.findByNom(nom);
@@ -120,14 +97,6 @@ public class JeuMultiController {
             }
         }
         System.out.println("✅ Catégories converties: " + categories.size());
-    }
-
-    public void setJoueur(String joueur) {
-        this.joueur = joueur;
-    }
-
-    public void setDifficulte(int difficulte) {
-        this.difficulte = difficulte;
     }
 
     /* =======================
@@ -141,10 +110,6 @@ public class JeuMultiController {
         this.gameEngine = new GameEngine();
         this.validationService = new ValidationService();
         this.resultsManager = new ResultsManager(gameDuration);
-
-        if (btnRetour != null) btnRetour.setOnAction(e -> retourMenu());
-        if (btnEnvoyer != null) btnEnvoyer.setOnAction(e -> envoyerMessage());
-        if (btnTerminer != null) btnTerminer.setOnAction(e -> handleTerminer());
     }
 
     /* =======================
@@ -158,7 +123,6 @@ public class JeuMultiController {
             return;
         }
 
-        // UTILISATION DES PARAMETRES GLOBAUX
         this.joueur = ParametresGenerauxController.pseudoGlobal;
         this.langue = ParametresGenerauxController.langueGlobale;
 
@@ -168,33 +132,14 @@ public class JeuMultiController {
         System.out.println("   Catégories: " + categories.size());
 
         try {
-            // ============================================
-            // 1️⃣ GÉNÉRER LETTRE
-            // ============================================
-            lettreActuelle = gameEngine.generateRandomLetter();
-            afficherLettre();
-
-            // ============================================
-            // 2️⃣ CRÉER UI DYNAMIQUE
-            // ============================================
+            // Create category input fields in player list area (temporary)
             creerChampsDynamiquement();
 
-            // ============================================
-            // 3️⃣ SETUP LISTENERS
-            // ============================================
-            ajouterListenersScore();
-
-            // ============================================
-            // 4️⃣ DÉMARRER TIMER
-            // ============================================
+            // Start timer
             gameEngine.setOnTimerUpdate(this::afficherTimer);
             gameEngine.setOnGameEnd(this::handleTerminerAuto);
             gameEngine.startTimer(gameDuration);
 
-            // ============================================
-            // 5️⃣ LIAISON RÉSEAU (TODO)
-            // ============================================
-            // connecterAuServeur();
             System.out.println("✅ Partie multijoueur démarrée");
 
         } catch (Exception e) {
@@ -208,38 +153,30 @@ public class JeuMultiController {
        ======================= */
 
     private void creerChampsDynamiquement() {
-        if (containerCategories == null) return;
+        if (vboxPlayers == null) return;
 
-        containerCategories.getChildren().clear();
+        vboxPlayers.getChildren().clear();
         textFieldsParCategorie.clear();
         reponses.clear();
 
         for (Categorie categorie : categories) {
             HBox ligne = new HBox(15);
             ligne.setPadding(new Insets(10));
-            ligne.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5;");
+            ligne.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-border-color: #555; -fx-border-radius: 5;");
 
             Label labelCategorie = new Label(categorie.getNom());
-            labelCategorie.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+            labelCategorie.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: white;");
             labelCategorie.setMinWidth(120);
 
             TextField textField = new TextField();
             textField.setPromptText("Entrez une réponse...");
-            textField.setPrefWidth(300);
+            textField.setPrefWidth(200);
 
             textFieldsParCategorie.put(categorie.getNom(), textField);
             reponses.put(categorie, "");
 
             ligne.getChildren().addAll(labelCategorie, textField);
-            containerCategories.getChildren().add(ligne);
-        }
-    }
-
-    private void ajouterListenersScore() {
-        for (TextField tf : textFieldsParCategorie.values()) {
-            tf.textProperty().addListener((obs, oldVal, newVal) -> {
-                // Update reponses
-            });
+            vboxPlayers.getChildren().add(ligne);
         }
     }
 
@@ -250,13 +187,12 @@ public class JeuMultiController {
     private void afficherLettre() {
         if (lblLettre != null) {
             lblLettre.setText(lettreActuelle.toString());
-            lblLettre.setStyle("-fx-font-size: 48; -fx-font-weight: bold; -fx-text-fill: #FF6B6B;");
         }
     }
 
     private void afficherTimer() {
-        if (labelTimer != null) {
-            labelTimer.setText(gameEngine.formatTime());
+        if (lblTimer != null) {
+            lblTimer.setText(gameEngine.formatTime());
         }
     }
 
@@ -280,22 +216,20 @@ public class JeuMultiController {
        ======================= */
 
     @FXML
-    private void envoyerMessage() {
-        if (tfMessageChat == null || chatArea == null) return;
+    private void handleSendMessage() {
+        if (tfMessage == null || vboxMessages == null) return;
 
-        String message = tfMessageChat.getText().trim();
+        String message = tfMessage.getText().trim();
         if (message.isEmpty()) return;
 
-        // Ajouter au chat local
-        String contenuChat = chatArea.getText();
-        chatArea.setText(contenuChat + "\n" + joueur + ": " + message);
-        tfMessageChat.clear();
+        // Add to local chat
+        Label msgLabel = new Label(joueur + ": " + message);
+        msgLabel.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+        vboxMessages.getChildren().add(msgLabel);
+        tfMessage.clear();
 
+        // TODO: Send to server
         System.out.println("📤 Message envoyé: " + message);
-        if (gameClient != null) {
-            // Re-using SUBMIT_ANSWER or a separate message type for chat?
-            // Let's use a generic message or just log for now if Type doesn't have CHAT
-        }
     }
 
     /* =======================
@@ -318,39 +252,29 @@ public class JeuMultiController {
 
             System.out.println("🏁 Partie multijoueur terminée");
 
-            // ============================================
-            // 1️⃣ VALIDER LES MOTS via ResultsManager
-            // ============================================
+            // Validate words
             resultsManager.validerMots(reponses, lettreActuelle, langue);
 
-            // ============================================
-            // 2️⃣ RÉCUPÉRER LES RÉSULTATS
-            // ============================================
+            // Get results
             List<ResultatPartie> resultats = resultsManager.getResultats();
             int scoreTotal = resultsManager.getScoreTotal();
             long dureePartie = resultsManager.getDureePartie();
 
             System.out.println("✅ Validation complète");
             System.out.println("   Score total: " + scoreTotal);
-            System.out.println("   Durée: " + dureePartie + "s");
 
-            // ============================================
-            // 3️⃣ ENVOYER RÉSULTATS AU SERVEUR
-            // ============================================
+            // Send to server
             if (gameClient != null) {
                 Map<String, String> data = new HashMap<>();
                 data.put("score", String.valueOf(scoreTotal));
-                // Add more data if needed
                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
             }
 
-            // ============================================
-            // 4️⃣ NAVIGUER VERS RÉSULTATS
-            // ============================================
+            // Navigate to results
             navigateToResults(resultats, scoreTotal, dureePartie);
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur lors de la fermeture: " + e.getMessage());
+            System.err.println("❌ Erreur: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -366,22 +290,13 @@ public class JeuMultiController {
             );
             Parent root = loader.load();
 
-            // Passer les données au ResultatsController
             ResultatsController resultatsController = loader.getController();
             resultatsController.displayResults(resultats, scoreTotal, dureePartie, joueur, lettreActuelle);
 
-            Stage stage = null;
-            if (btnTerminer != null && btnTerminer.getScene() != null) {
-                stage = (Stage) btnTerminer.getScene().getWindow();
-            } else if (btnRetour != null && btnRetour.getScene() != null) {
-                stage = (Stage) btnRetour.getScene().getWindow();
-            }
-
-            if (stage != null) {
-                stage.setTitle("Résultats Multijoueur");
-                stage.setScene(new Scene(root));
-                stage.show();
-            }
+            Stage stage = (Stage) btnBack.getScene().getWindow();
+            stage.setTitle("Résultats Multijoueur");
+            stage.setScene(new Scene(root));
+            stage.show();
 
         } catch (IOException e) {
             System.err.println("❌ Erreur navigation: " + e.getMessage());
@@ -400,7 +315,7 @@ public class JeuMultiController {
             );
             Parent root = loader.load();
 
-            Stage stage = (Stage) btnRetour.getScene().getWindow();
+            Stage stage = (Stage) btnBack.getScene().getWindow();
             stage.setTitle("Menu Principal");
             stage.setScene(new Scene(root));
             stage.show();
@@ -410,10 +325,6 @@ public class JeuMultiController {
         }
     }
 
-    /* =======================
-       UTILITAIRES
-       ======================= */
-
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -421,16 +332,4 @@ public class JeuMultiController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-    /* =======================
-       RÉSEAU (TODO)
-       ======================= */
-
-    // private void connecterAuServeur() {
-    //     // TODO: Connexion au GameServer
-    // }
-
-    // private void envoyerResultatsAuServeur(List<ResultatPartie> resultats, int score) {
-    //     // TODO: Envoyer résultats via GameClient
-    // }
 }
