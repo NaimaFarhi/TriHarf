@@ -87,10 +87,22 @@ public class ListeAttenteController {
         javafx.application.Platform.runLater(() -> {
             switch (message.getType()) {
                 case PLAYER_JOINED -> {
+                    @SuppressWarnings("unchecked")
                     List<String> players = (List<String>) message.getData();
                     updatePlayerList(players);
                 }
                 case GAME_START -> {
+                    // Extract categories from GAME_START message
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> data = (java.util.Map<String, Object>) message.getData();
+                    if (data != null) {
+                        @SuppressWarnings("unchecked")
+                        List<String> cats = (List<String>) data.get("categories");
+                        if (cats != null && !cats.isEmpty()) {
+                            this.categories = new ArrayList<>(cats);
+                            System.out.println("✅ Catégories reçues du serveur: " + cats.size());
+                        }
+                    }
                     startGame();
                 }
             }
