@@ -69,12 +69,14 @@
                         <HBox spacing="0.0" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 10;" alignment="CENTER_LEFT">
                             <children>
                                 <Label text="📝 RÉPONSES DES JOUEURS" styleClass="info-label" style="-fx-font-size: 16px;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="lblValidationStatus" text="" style="-fx-text-fill: #f39c12; -fx-font-size: 12px;"/>
                             </children>
                         </HBox>
 
                         <Separator styleClass="stats-separator" />
 
-                        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+                        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
                             <content>
                                 <VBox fx:id="vboxPlayers" spacing="0" style="-fx-padding: 0;">
                                     <!-- Header row with category names -->
@@ -84,6 +86,14 @@
                                 </VBox>
                             </content>
                         </ScrollPane>
+
+                        <!-- Bouton Valider -->
+                        <HBox alignment="CENTER" style="-fx-padding: 15; -fx-background-color: rgba(0,0,0,0.2);">
+                            <children>
+                                <Button fx:id="btnValider" text="✓ VALIDER MES RÉPONSES" onAction="#handleValider"
+                                        styleClass="btn-action" style="-fx-font-size: 14px; -fx-padding: 10 30;"/>
+                            </children>
+                        </HBox>
                     </children>
                 </VBox>
 

@@ -36,6 +36,8 @@ public class JeuMultiController {
     @FXML private VBox vboxMessages;
     @FXML private TextField tfMessage;
     @FXML private Button btnSend;
+    @FXML private Button btnValider;
+    @FXML private Label lblValidationStatus;
 
     // ===== SERVICES =====
     private GameEngine gameEngine;
@@ -55,6 +57,11 @@ public class JeuMultiController {
     private Map<String, HBox> playerRowMap = new HashMap<>();
     private static final double CATEGORY_WIDTH = 120.0;
     private static final double PLAYER_NAME_WIDTH = 100.0;
+
+    // ===== VALIDATION STATE =====
+    private boolean hasValidated = false;
+    private Set<String> validatedPlayers = new HashSet<>();
+    private boolean allPlayersValidated = false;
 
     // ===== INJECTED DATA =====
     private List<String> categoriesNoms;
@@ -135,6 +142,34 @@ public class JeuMultiController {
                     if (playerName != null && answers != null) {
                         updatePlayerAnswersDisplay(playerName, answers);
                     }
+                }
+                case VALIDATE_ANSWERS -> {
+                    // A player has validated their answers
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> validationData = (Map<String, Object>) message.getData();
+                    String playerName = (String) validationData.get("player");
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> answers = (Map<String, String>) validationData.get("answers");
+                    if (playerName != null) {
+                        validatedPlayers.add(playerName);
+                        // Store their answers for later display
+                        if (answers != null) {
+                            allPlayerAnswers.put(playerName, answers);
+                        }
+                        updateValidationStatus();
+                        // Mark this player's row as validated (show checkmark)
+                        markPlayerAsValidated(playerName);
+                    }
+                }
+                case ALL_VALIDATED -> {
+                    // All players have validated - reveal all answers
+                    @SuppressWarnings("unchecked")
+                    Map<String, Map<String, String>> allAnswers = (Map<String, Map<String, String>>) message.getData();
+                    if (allAnswers != null) {
+                        allPlayerAnswers.putAll(allAnswers);
+                    }
+                    allPlayersValidated = true;
+                    revealAllAnswers();
                 }
                 default -> {}
             }
@@ -449,6 +484,134 @@ public class JeuMultiController {
             ));
             System.out.println("📤 Chat envoyé: " + message);
         }
+    }
+
+    /* =======================
+       VALIDATION DES RÉPONSES
+       ======================= */
+
+    @FXML
+    private void handleValider() {
+        if (hasValidated) return; // Already validated
+
+        hasValidated = true;
+        validatedPlayers.add(joueur);
+
+        // Collect current answers
+        Map<String, String> myAnswers = new HashMap<>();
+        for (Categorie categorie : categories) {
+            TextField tf = textFieldsParCategorie.get(categorie.getNom());
+            if (tf != null) {
+                myAnswers.put(categorie.getNom(), tf.getText().trim());
+            }
+        }
+        allPlayerAnswers.put(joueur, myAnswers);
+
+        // Disable my input fields
+        disableMyInputs();
+
+        // Update button appearance
+        if (btnValider != null) {
+            btnValider.setText("✓ VALIDÉ");
+            btnValider.setDisable(true);
+            btnValider.setStyle("-fx-background-color: #27ae60; -fx-font-size: 14px; -fx-padding: 10 30;");
+        }
+
+        // Mark my row as validated
+        markPlayerAsValidated(joueur);
+
+        // Update status
+        updateValidationStatus();
+
+        // Send validation to server
+        if (gameClient != null) {
+            Map<String, Object> validationData = new HashMap<>();
+            validationData.put("player", joueur);
+            validationData.put("answers", myAnswers);
+            validationData.put("roomId", roomId);
+
+            gameClient.sendMessage(new NetworkMessage(
+                NetworkMessage.Type.VALIDATE_ANSWERS,
+                joueur,
+                validationData
+            ));
+            System.out.println("✅ Réponses validées et envoyées");
+        }
+    }
+
+    private void disableMyInputs() {
+        for (TextField tf : textFieldsParCategorie.values()) {
+            tf.setEditable(false);
+            tf.setStyle("-fx-font-size: 11; -fx-background-color: #444; -fx-text-fill: #aaa;");
+        }
+    }
+
+    private void updateValidationStatus() {
+        if (lblValidationStatus != null) {
+            int validated = validatedPlayers.size();
+            int total = playerList.size();
+            lblValidationStatus.setText(validated + "/" + total + " joueurs ont validé");
+
+            if (validated == total) {
+                lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px;");
+            }
+        }
+    }
+
+    private void markPlayerAsValidated(String playerName) {
+        HBox playerRow = playerRowMap.get(playerName);
+        if (playerRow == null) return;
+
+        // Update the player name label to show validated status
+        if (!playerRow.getChildren().isEmpty()) {
+            javafx.scene.Node firstNode = playerRow.getChildren().get(0);
+            if (firstNode instanceof Label nameLabel) {
+                String currentText = nameLabel.getText();
+                if (!currentText.contains("✓")) {
+                    nameLabel.setText("✓ " + currentText.replace("➤ ", ""));
+                    nameLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
+                }
+            }
+        }
+
+        // Change row style to indicate validated
+        playerRow.setStyle("-fx-background-color: rgba(39, 174, 96, 0.2); -fx-border-color: #27ae60; -fx-border-radius: 5; -fx-background-radius: 5;");
+    }
+
+    private void revealAllAnswers() {
+        System.out.println("🎉 Tous les joueurs ont validé - révélation des réponses!");
+
+        // Update status
+        if (lblValidationStatus != null) {
+            lblValidationStatus.setText("✓ Tous ont validé - Réponses révélées!");
+            lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
+        }
+
+        // Reveal answers for each player
+        for (String playerName : playerList) {
+            Map<String, String> answers = allPlayerAnswers.get(playerName);
+            if (answers != null && !playerName.equals(joueur)) {
+                // Update this player's row with their answers
+                HBox playerRow = playerRowMap.get(playerName);
+                if (playerRow != null) {
+                    int idx = 1; // Skip player name label
+                    for (Categorie cat : categories) {
+                        if (idx < playerRow.getChildren().size()) {
+                            javafx.scene.Node node = playerRow.getChildren().get(idx);
+                            if (node instanceof Label label) {
+                                String answer = answers.getOrDefault(cat.getNom(), "-");
+                                label.setText(answer.isEmpty() ? "-" : answer);
+                                label.setStyle("-fx-font-size: 11; -fx-text-fill: white;");
+                            }
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+
+        // Add system message to chat
+        addChatMessage("SYSTÈME", "Toutes les réponses ont été révélées!", false);
     }
 
     /* =======================

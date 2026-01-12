@@ -210,4 +210,42 @@ public class GameServer {
             broadcast(roomId, msg);
         }
     }
+
+    // Handle player validation
+    @SuppressWarnings("unchecked")
+    public void handleValidation(String roomId, String senderClientId, NetworkMessage message) {
+        GameRoom room = rooms.get(roomId);
+        if (room == null) return;
+
+        Map<String, Object> validationData = (Map<String, Object>) message.getData();
+        String playerPseudo = (String) validationData.get("player");
+        Map<String, String> answers = (Map<String, String>) validationData.get("answers");
+
+        // Store validation in room
+        room.validatePlayer(playerPseudo, answers);
+        System.out.println("✅ " + playerPseudo + " a validé ses réponses (" + room.getValidatedPlayers().size() + "/" + room.getPlayerIds().size() + ")");
+
+        // Broadcast validation to other players (excluding sender)
+        room.getPlayerIds().forEach(playerId -> {
+            if (!playerId.equals(senderClientId)) {
+                ClientHandler client = clients.get(playerId);
+                if (client != null) {
+                    client.sendMessage(message);
+                }
+            }
+        });
+
+        // Check if all players have validated
+        if (room.allPlayersValidated()) {
+            System.out.println("🎉 Tous les joueurs ont validé - envoi ALL_VALIDATED");
+
+            // Send ALL_VALIDATED with all answers to everyone
+            NetworkMessage allValidatedMsg = new NetworkMessage(
+                NetworkMessage.Type.ALL_VALIDATED,
+                "SERVER",
+                room.getValidatedAnswers()
+            );
+            broadcast(roomId, allValidatedMsg);
+        }
+    }
 }

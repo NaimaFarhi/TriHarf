@@ -12,7 +12,9 @@ public class NetworkMessage {
         GAME_END,
         DISCONNECT,
         CHAT,
-        PLAYER_ANSWERS
+        PLAYER_ANSWERS,
+        VALIDATE_ANSWERS,
+        ALL_VALIDATED
     }
 
     private Type type;
