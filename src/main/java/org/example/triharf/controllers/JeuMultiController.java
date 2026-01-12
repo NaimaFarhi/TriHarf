@@ -270,6 +270,17 @@ public class JeuMultiController {
         }
     }
 
+    public void setPlayerList(List<String> players) {
+        if (players != null && !players.isEmpty()) {
+            this.playerList = new ArrayList<>(players);
+            this.nbJoueurs = players.size();
+            System.out.println("✅ Liste des joueurs définie: " + players);
+            if (lblJoueurs != null) {
+                lblJoueurs.setText(String.valueOf(nbJoueurs));
+            }
+        }
+    }
+
     /* =======================
        INITIALIZATION
        ======================= */
