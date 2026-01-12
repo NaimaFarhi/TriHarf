@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.HashMap;
 
 public class GameServer {
     private static final int PORT = 8888;
@@ -51,11 +52,18 @@ public class GameServer {
             Character letter = generateLetter();
             room.setCurrentLetter(letter);
 
-            Map<String, Object> gameData = Map.of(
-                    "letter", letter.toString(),
-                    "duration", 180,
-                    "categories", room.getCategories()
-            );
+            // Get player pseudos list
+            List<String> playerPseudos = new ArrayList<>();
+            for (String pid : room.getPlayerIds()) {
+                playerPseudos.add(room.getPseudo(pid));
+            }
+
+            Map<String, Object> gameData = new HashMap<>();
+            gameData.put("letter", letter.toString());
+            gameData.put("duration", 180);
+            gameData.put("categories", room.getCategories());
+            gameData.put("players", playerPseudos);
+
             broadcast(roomId, new NetworkMessage(
                     NetworkMessage.Type.GAME_START,
                     "SERVER",
@@ -151,6 +159,20 @@ public class GameServer {
             room.getPlayerIds().forEach(playerId -> {
                 ClientHandler client = clients.get(playerId);
                 if (client != null) client.sendMessage(message);
+            });
+        }
+    }
+
+    // Broadcast chat message to all players except the sender
+    public void broadcastChat(String roomId, String senderClientId, NetworkMessage message) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null) {
+            room.getPlayerIds().forEach(playerId -> {
+                // Don't send back to the sender
+                if (!playerId.equals(senderClientId)) {
+                    ClientHandler client = clients.get(playerId);
+                    if (client != null) client.sendMessage(message);
+                }
             });
         }
     }

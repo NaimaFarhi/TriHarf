@@ -31,6 +31,8 @@ public class JeuMultiController {
     @FXML private Label lblJoueurs;
     @FXML private Label lblLettre;
     @FXML private VBox vboxPlayers;
+    @FXML private HBox hboxCategoryHeaders;
+    @FXML private VBox vboxPlayerRows;
     @FXML private VBox vboxMessages;
     @FXML private TextField tfMessage;
     @FXML private Button btnSend;
@@ -46,6 +48,13 @@ public class JeuMultiController {
     private int nbJoueurs = 1;
     private final Map<String, TextField> textFieldsParCategorie = new HashMap<>();
     private final Map<Categorie, String> reponses = new HashMap<>();
+
+    // ===== MULTIPLAYER STATE =====
+    private List<String> playerList = new ArrayList<>();
+    private Map<String, Map<String, String>> allPlayerAnswers = new HashMap<>();
+    private Map<String, HBox> playerRowMap = new HashMap<>();
+    private static final double CATEGORY_WIDTH = 120.0;
+    private static final double PLAYER_NAME_WIDTH = 100.0;
 
     // ===== INJECTED DATA =====
     private List<String> categoriesNoms;
@@ -71,28 +80,122 @@ public class JeuMultiController {
 
     private void handleNetworkMessage(NetworkMessage message) {
         javafx.application.Platform.runLater(() -> {
-            if (message.getType() == NetworkMessage.Type.GAME_START) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> data = (Map<String, Object>) message.getData();
+            switch (message.getType()) {
+                case GAME_START -> {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> data = (Map<String, Object>) message.getData();
 
-                // Get categories
-                @SuppressWarnings("unchecked")
-                List<String> cats = (List<String>) data.get("categories");
-                if (cats != null) {
-                    setCategories(cats);
-                    creerChampsDynamiquement();
+                    // Get categories
+                    @SuppressWarnings("unchecked")
+                    List<String> cats = (List<String>) data.get("categories");
+                    if (cats != null && !cats.isEmpty()) {
+                        setCategories(cats);
+                    }
+
+                    // Get letter
+                    String letter = (String) data.get("letter");
+                    if (letter != null && !letter.isEmpty()) {
+                        lettreActuelle = letter.charAt(0);
+                        afficherLettre();
+                    }
+
+                    // Get players list
+                    @SuppressWarnings("unchecked")
+                    List<String> players = (List<String>) data.get("players");
+                    if (players != null) {
+                        this.playerList = new ArrayList<>(players);
+                        updatePlayerCount();
+                    }
+
+                    demarrerPartie();
                 }
-
-                // Get letter
-                String letter = (String) data.get("letter");
-                if (letter != null) {
-                    lettreActuelle = letter.charAt(0);
-                    afficherLettre();
+                case CHAT -> {
+                    // Receive chat message from another player
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> chatData = (Map<String, String>) message.getData();
+                    String sender = chatData.get("sender");
+                    String chatMsg = chatData.get("message");
+                    addChatMessage(sender, chatMsg, false);
                 }
-
-                demarrerPartie();
+                case PLAYER_JOINED -> {
+                    // Update player list
+                    @SuppressWarnings("unchecked")
+                    List<String> players = (List<String>) message.getData();
+                    if (players != null) {
+                        updatePlayersFromStatus(players);
+                    }
+                }
+                case PLAYER_ANSWERS -> {
+                    // Receive other player's answers for display
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> answerData = (Map<String, Object>) message.getData();
+                    String playerName = (String) answerData.get("player");
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> answers = (Map<String, String>) answerData.get("answers");
+                    if (playerName != null && answers != null) {
+                        updatePlayerAnswersDisplay(playerName, answers);
+                    }
+                }
+                default -> {}
             }
         });
+    }
+
+    private void updatePlayersFromStatus(List<String> playersStatus) {
+        playerList.clear();
+        for (String ps : playersStatus) {
+            String[] parts = ps.split(":");
+            String name = parts[0];
+            playerList.add(name);
+        }
+        updatePlayerCount();
+        // Refresh player rows if game already started
+        if (categories != null && !categories.isEmpty()) {
+            creerChampsDynamiquement();
+        }
+    }
+
+    private void updatePlayerCount() {
+        nbJoueurs = playerList.size();
+        if (lblJoueurs != null) {
+            lblJoueurs.setText(String.valueOf(nbJoueurs));
+        }
+    }
+
+    private void addChatMessage(String sender, String message, boolean isLocal) {
+        if (vboxMessages == null) return;
+
+        Label msgLabel = new Label(sender + ": " + message);
+        String style = isLocal ?
+            "-fx-text-fill: #9b59b6; -fx-font-size: 12px; -fx-font-weight: bold;" :
+            "-fx-text-fill: white; -fx-font-size: 12px;";
+        msgLabel.setStyle(style);
+        msgLabel.setWrapText(true);
+        msgLabel.setMaxWidth(200);
+        vboxMessages.getChildren().add(msgLabel);
+
+        // Auto-scroll to bottom
+        if (vboxMessages.getParent() instanceof javafx.scene.control.ScrollPane scrollPane) {
+            scrollPane.setVvalue(1.0);
+        }
+    }
+
+    private void updatePlayerAnswersDisplay(String playerName, Map<String, String> answers) {
+        HBox playerRow = playerRowMap.get(playerName);
+        if (playerRow == null || playerName.equals(joueur)) return; // Don't update own row
+
+        // Update the labels in the player's row (skip first child which is player name)
+        int idx = 1;
+        for (Categorie cat : categories) {
+            if (idx < playerRow.getChildren().size()) {
+                javafx.scene.Node node = playerRow.getChildren().get(idx);
+                if (node instanceof Label label) {
+                    String answer = answers.getOrDefault(cat.getNom(), "...");
+                    label.setText(answer.isEmpty() ? "..." : answer);
+                }
+            }
+            idx++;
+        }
     }
 
     /* =======================
@@ -100,15 +203,28 @@ public class JeuMultiController {
        ======================= */
 
     public void setCategories(List<String> categoriesNoms) {
-        this.categoriesNoms = categoriesNoms;
+        if (categoriesNoms == null || categoriesNoms.isEmpty()) {
+            System.err.println("⚠️ Liste de catégories vide ou null");
+            return;
+        }
+
+        this.categoriesNoms = new ArrayList<>(categoriesNoms);
         this.categories = new ArrayList<>();
+
         for (String nom : categoriesNoms) {
             Categorie cat = categorieDAO.findByNom(nom);
             if (cat != null) {
                 this.categories.add(cat);
+                System.out.println("   ✓ Catégorie trouvée: " + nom);
+            } else {
+                // If not found in DB, create a temporary Categorie object for display
+                System.out.println("   ⚠️ Catégorie non trouvée en DB, création locale: " + nom);
+                Categorie tempCat = new Categorie(nom);
+                tempCat.setLangue(langue);
+                this.categories.add(tempCat);
             }
         }
-        System.out.println("✅ Catégories converties: " + categories.size());
+        System.out.println("✅ Catégories converties: " + categories.size() + " sur " + categoriesNoms.size());
     }
 
     /* =======================
@@ -131,12 +247,15 @@ public class JeuMultiController {
     public void demarrerPartie() {
         if (categories == null || categories.isEmpty()) {
             System.err.println("❌ ERREUR : Aucune catégorie reçue !");
+            System.err.println("   categoriesNoms: " + (categoriesNoms != null ? categoriesNoms.size() : "null"));
             showAlert("Erreur", "Aucune catégorie sélectionnée !");
             return;
         }
 
-        this.joueur = ParametresGenerauxController.pseudoGlobal;
-        this.langue = ParametresGenerauxController.langueGlobale;
+        // Set player name with fallback
+        String pseudoGlobal = ParametresGenerauxController.pseudoGlobal;
+        this.joueur = (pseudoGlobal != null && !pseudoGlobal.isEmpty()) ? pseudoGlobal : "Joueur_" + System.currentTimeMillis() % 1000;
+        this.langue = ParametresGenerauxController.langueGlobale != null ? ParametresGenerauxController.langueGlobale : org.example.triharf.enums.Langue.FRANCAIS;
 
         System.out.println("✅ Démarrage partie multijoueur");
         System.out.println("   Joueur: " + joueur);
@@ -165,31 +284,101 @@ public class JeuMultiController {
        ======================= */
 
     private void creerChampsDynamiquement() {
-        if (vboxPlayers == null) return;
+        if (vboxPlayerRows == null && vboxPlayers == null) return;
 
-        vboxPlayers.getChildren().clear();
         textFieldsParCategorie.clear();
         reponses.clear();
+        playerRowMap.clear();
 
-        for (Categorie categorie : categories) {
-            HBox ligne = new HBox(15);
-            ligne.setPadding(new Insets(10));
-            ligne.setStyle("-fx-background-color: rgba(255,255,255,0.1); -fx-border-color: #555; -fx-border-radius: 5;");
+        // Create header row with category names
+        if (hboxCategoryHeaders != null) {
+            hboxCategoryHeaders.getChildren().clear();
+            hboxCategoryHeaders.setSpacing(5);
 
-            Label labelCategorie = new Label(categorie.getNom());
-            labelCategorie.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: white;");
-            labelCategorie.setMinWidth(120);
+            // First column: "Joueur" header
+            Label playerHeader = new Label("Joueur");
+            playerHeader.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #9b59b6;");
+            playerHeader.setMinWidth(PLAYER_NAME_WIDTH);
+            playerHeader.setPrefWidth(PLAYER_NAME_WIDTH);
+            hboxCategoryHeaders.getChildren().add(playerHeader);
 
-            TextField textField = new TextField();
-            textField.setPromptText("Entrez une réponse...");
-            textField.setPrefWidth(200);
-
-            textFieldsParCategorie.put(categorie.getNom(), textField);
-            reponses.put(categorie, "");
-
-            ligne.getChildren().addAll(labelCategorie, textField);
-            vboxPlayers.getChildren().add(ligne);
+            // Category columns
+            for (Categorie categorie : categories) {
+                Label catLabel = new Label(categorie.getNom());
+                catLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #9b59b6;");
+                catLabel.setMinWidth(CATEGORY_WIDTH);
+                catLabel.setPrefWidth(CATEGORY_WIDTH);
+                catLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                hboxCategoryHeaders.getChildren().add(catLabel);
+            }
         }
+
+        // Use vboxPlayerRows if available, otherwise fallback to vboxPlayers
+        VBox targetVBox = vboxPlayerRows != null ? vboxPlayerRows : vboxPlayers;
+        targetVBox.getChildren().clear();
+
+        // Ensure current player is in the list
+        if (!playerList.contains(joueur)) {
+            playerList.add(0, joueur);
+        }
+
+        // Create a row for each player
+        for (String playerName : playerList) {
+            HBox playerRow = createPlayerRow(playerName);
+            targetVBox.getChildren().add(playerRow);
+            playerRowMap.put(playerName, playerRow);
+        }
+
+        System.out.println("✅ Table créée: " + categories.size() + " catégories, " + playerList.size() + " joueurs");
+    }
+
+    private HBox createPlayerRow(String playerName) {
+        boolean isCurrentPlayer = playerName.equals(joueur);
+
+        HBox row = new HBox(5);
+        row.setPadding(new Insets(8));
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        // Highlight current player's row
+        String bgColor = isCurrentPlayer ?
+            "-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5; -fx-background-radius: 5;" :
+            "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444; -fx-border-radius: 5; -fx-background-radius: 5;";
+        row.setStyle(bgColor);
+
+        // Player name label
+        Label nameLabel = new Label(isCurrentPlayer ? "➤ " + playerName : playerName);
+        nameLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: " + (isCurrentPlayer ? "#9b59b6" : "white") + ";");
+        nameLabel.setMinWidth(PLAYER_NAME_WIDTH);
+        nameLabel.setPrefWidth(PLAYER_NAME_WIDTH);
+        row.getChildren().add(nameLabel);
+
+        // Create input fields or display labels for each category
+        for (Categorie categorie : categories) {
+            if (isCurrentPlayer) {
+                // Current player gets editable text fields
+                TextField textField = new TextField();
+                textField.setPromptText(categorie.getNom().substring(0, Math.min(3, categorie.getNom().length())) + "...");
+                textField.setPrefWidth(CATEGORY_WIDTH);
+                textField.setMinWidth(CATEGORY_WIDTH);
+                textField.setStyle("-fx-font-size: 11;");
+
+                textFieldsParCategorie.put(categorie.getNom(), textField);
+                reponses.put(categorie, "");
+
+                row.getChildren().add(textField);
+            } else {
+                // Other players get read-only labels that will be updated via network
+                Label answerLabel = new Label("...");
+                answerLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #aaa;");
+                answerLabel.setMinWidth(CATEGORY_WIDTH);
+                answerLabel.setPrefWidth(CATEGORY_WIDTH);
+                answerLabel.setAlignment(javafx.geometry.Pos.CENTER);
+
+                row.getChildren().add(answerLabel);
+            }
+        }
+
+        return row;
     }
 
     /* =======================
@@ -234,14 +423,24 @@ public class JeuMultiController {
         String message = tfMessage.getText().trim();
         if (message.isEmpty()) return;
 
-        // Add to local chat
-        Label msgLabel = new Label(joueur + ": " + message);
-        msgLabel.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
-        vboxMessages.getChildren().add(msgLabel);
+        // Add to local chat (highlighted as own message)
+        addChatMessage(joueur, message, true);
         tfMessage.clear();
 
-        // TODO: Send to server
-        System.out.println("📤 Message envoyé: " + message);
+        // Send to server for broadcast to other players
+        if (gameClient != null) {
+            Map<String, String> chatData = new HashMap<>();
+            chatData.put("sender", joueur);
+            chatData.put("message", message);
+            chatData.put("roomId", roomId);
+
+            gameClient.sendMessage(new NetworkMessage(
+                NetworkMessage.Type.CHAT,
+                joueur,
+                chatData
+            ));
+            System.out.println("📤 Chat envoyé: " + message);
+        }
     }
 
     /* =======================

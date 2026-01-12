@@ -53,6 +53,12 @@ public class ClientHandler implements Runnable {
                     server.leaveRoom(clientId, currentRoomId);
                 }
             }
+            case CHAT -> {
+                // Broadcast chat message to all players in the room (except sender)
+                if (currentRoomId != null) {
+                    server.broadcastChat(currentRoomId, clientId, message);
+                }
+            }
         }
     }
 
