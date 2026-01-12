@@ -75,13 +75,6 @@ public class JeuMultiController {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> data = (Map<String, Object>) message.getData();
 
-                // Get letter
-                String letter = (String) data.get("letter");
-                if (letter != null) {
-                    lettreActuelle = letter.charAt(0);
-                    afficherLettre();
-                }
-
                 // Get categories
                 @SuppressWarnings("unchecked")
                 List<String> cats = (List<String>) data.get("categories");
@@ -89,6 +82,15 @@ public class JeuMultiController {
                     setCategories(cats);
                     creerChampsDynamiquement();
                 }
+
+                // Get letter
+                String letter = (String) data.get("letter");
+                if (letter != null) {
+                    lettreActuelle = letter.charAt(0);
+                    afficherLettre();
+                }
+
+                demarrerPartie();
             }
         });
     }
