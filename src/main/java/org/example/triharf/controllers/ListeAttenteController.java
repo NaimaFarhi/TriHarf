@@ -36,6 +36,7 @@ public class ListeAttenteController {
     private boolean isHost = false;
     private List<String> categories = new ArrayList<>();
     private String currentLetter = null;
+    private List<String> playerPseudos = new ArrayList<>();
 
     @FXML
     public void initialize() {
@@ -93,7 +94,7 @@ public class ListeAttenteController {
                     updatePlayerList(players);
                 }
                 case GAME_START -> {
-                    // Extract categories and letter from GAME_START message
+                    // Extract categories, letter, and players from GAME_START message
                     @SuppressWarnings("unchecked")
                     java.util.Map<String, Object> data = (java.util.Map<String, Object>) message.getData();
                     if (data != null) {
@@ -108,6 +109,13 @@ public class ListeAttenteController {
                         if (letter != null && !letter.isEmpty()) {
                             this.currentLetter = letter;
                             System.out.println("✅ Lettre reçue du serveur: " + letter);
+                        }
+                        // Extract players list
+                        @SuppressWarnings("unchecked")
+                        List<String> players = (List<String>) data.get("players");
+                        if (players != null && !players.isEmpty()) {
+                            this.playerPseudos = new ArrayList<>(players);
+                            System.out.println("✅ Joueurs reçus du serveur: " + players);
                         }
                     }
                     startGame();
@@ -222,8 +230,12 @@ public class ListeAttenteController {
                 if (currentLetter != null) {
                     mc.setLettre(currentLetter);
                 }
+                if (playerPseudos != null && !playerPseudos.isEmpty()) {
+                    mc.setPlayerList(playerPseudos);
+                }
                 System.out.println("📋 Catégories passées à JeuMultiController: " + categories);
                 System.out.println("📋 Lettre passée à JeuMultiController: " + currentLetter);
+                System.out.println("📋 Joueurs passés à JeuMultiController: " + playerPseudos);
                 // Start the game after setting up categories
                 mc.demarrerPartie();
             }
