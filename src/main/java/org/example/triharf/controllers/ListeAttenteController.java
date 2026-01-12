@@ -199,7 +199,8 @@ public class ListeAttenteController {
             if (controller instanceof JeuMultiController) {
                 JeuMultiController mc = (JeuMultiController) controller;
                 mc.setNetwork(gameClient, roomId);
-                mc.setCategories(categories); // Add this
+                mc.setCategories(categories);
+                mc.demarrerPartie();
             }
 
             Stage stage = (Stage) btnPret.getScene().getWindow();

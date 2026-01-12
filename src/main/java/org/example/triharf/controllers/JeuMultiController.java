@@ -73,6 +73,7 @@ public class JeuMultiController {
         javafx.application.Platform.runLater(() -> {
             // Handle incoming messages
             if (message.getType() == NetworkMessage.Type.GAME_START) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> data = (Map<String, Object>) message.getData();
                 String letter = (String) data.get("letter");
                 if (letter != null && !letter.isEmpty()) {
@@ -132,7 +133,7 @@ public class JeuMultiController {
         System.out.println("   Catégories: " + categories.size());
 
         try {
-            // Create category input fields in player list area (temporary)
+            // Create category input fields in player list area
             creerChampsDynamiquement();
 
             // Start timer
