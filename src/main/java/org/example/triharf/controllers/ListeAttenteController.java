@@ -35,6 +35,7 @@ public class ListeAttenteController {
     private boolean isReady = false;
     private boolean isHost = false;
     private List<String> categories = new ArrayList<>();
+    private String currentLetter = null;
 
     @FXML
     public void initialize() {
@@ -92,7 +93,7 @@ public class ListeAttenteController {
                     updatePlayerList(players);
                 }
                 case GAME_START -> {
-                    // Extract categories from GAME_START message
+                    // Extract categories and letter from GAME_START message
                     @SuppressWarnings("unchecked")
                     java.util.Map<String, Object> data = (java.util.Map<String, Object>) message.getData();
                     if (data != null) {
@@ -101,6 +102,12 @@ public class ListeAttenteController {
                         if (cats != null && !cats.isEmpty()) {
                             this.categories = new ArrayList<>(cats);
                             System.out.println("✅ Catégories reçues du serveur: " + cats.size());
+                        }
+                        // Extract letter
+                        String letter = (String) data.get("letter");
+                        if (letter != null && !letter.isEmpty()) {
+                            this.currentLetter = letter;
+                            System.out.println("✅ Lettre reçue du serveur: " + letter);
                         }
                     }
                     startGame();
@@ -212,6 +219,13 @@ public class ListeAttenteController {
                 JeuMultiController mc = (JeuMultiController) controller;
                 mc.setNetwork(gameClient, roomId);
                 mc.setCategories(categories);
+                if (currentLetter != null) {
+                    mc.setLettre(currentLetter);
+                }
+                System.out.println("📋 Catégories passées à JeuMultiController: " + categories);
+                System.out.println("📋 Lettre passée à JeuMultiController: " + currentLetter);
+                // Start the game after setting up categories
+                mc.demarrerPartie();
             }
 
             Stage stage = (Stage) btnPret.getScene().getWindow();

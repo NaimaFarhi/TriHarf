@@ -227,6 +227,14 @@ public class JeuMultiController {
         System.out.println("✅ Catégories converties: " + categories.size() + " sur " + categoriesNoms.size());
     }
 
+    public void setLettre(String letter) {
+        if (letter != null && !letter.isEmpty()) {
+            this.lettreActuelle = letter.charAt(0);
+            System.out.println("✅ Lettre définie: " + lettreActuelle);
+            afficherLettre();
+        }
+    }
+
     /* =======================
        INITIALIZATION
        ======================= */
