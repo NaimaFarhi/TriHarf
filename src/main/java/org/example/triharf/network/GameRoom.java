@@ -17,6 +17,9 @@ public class GameRoom {
 
     private List<String> categories;
 
+    // Validation tracking
+    private Set<String> validatedPlayers = new HashSet<>();
+    private Map<String, Map<String, String>> validatedAnswers = new HashMap<>();
 
     public GameRoom(String roomId, int maxPlayers, Langue langue) {
         this.roomId = roomId;
@@ -128,6 +131,35 @@ public class GameRoom {
     }
     public List<String> getCategories() {
         return categories;
+    }
+
+    // Validation methods
+    public void validatePlayer(String playerPseudo, Map<String, String> answers) {
+        validatedPlayers.add(playerPseudo);
+        validatedAnswers.put(playerPseudo, answers);
+    }
+
+    public boolean hasPlayerValidated(String playerPseudo) {
+        return validatedPlayers.contains(playerPseudo);
+    }
+
+    public boolean allPlayersValidated() {
+        // Check if all players have validated
+        for (String playerId : playerIds) {
+            String pseudo = getPseudo(playerId);
+            if (!validatedPlayers.contains(pseudo)) {
+                return false;
+            }
+        }
+        return !playerIds.isEmpty();
+    }
+
+    public Set<String> getValidatedPlayers() {
+        return validatedPlayers;
+    }
+
+    public Map<String, Map<String, String>> getValidatedAnswers() {
+        return validatedAnswers;
     }
 
 }

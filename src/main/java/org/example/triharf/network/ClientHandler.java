@@ -59,6 +59,12 @@ public class ClientHandler implements Runnable {
                     server.broadcastChat(currentRoomId, clientId, message);
                 }
             }
+            case VALIDATE_ANSWERS -> {
+                // Player validated their answers
+                if (currentRoomId != null) {
+                    server.handleValidation(currentRoomId, clientId, message);
+                }
+            }
         }
     }
 
