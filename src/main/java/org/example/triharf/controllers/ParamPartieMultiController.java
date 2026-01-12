@@ -231,7 +231,7 @@ public class ParamPartieMultiController {
                 roomId = UUID.randomUUID().toString().substring(0, 8);
                 int maxPlayers = spinnerMaxPlayers != null ? spinnerMaxPlayers.getValue() : 4;
                 gameServer.createRoom(roomId, maxPlayers, ParametresGenerauxController.langueGlobale);
-                gameServer.getRoom(roomId).setCategories(categoriesSelectionnees);
+
 
                 gameClient.sendMessage(new NetworkMessage(
                         NetworkMessage.Type.JOIN_ROOM,
@@ -268,6 +268,10 @@ public class ParamPartieMultiController {
         // For Chaos mode, select random categories
         if (gameMode.equals("CHAOS")) {
             categoriesSelectionnees = selectRandomCategories(8);
+        }
+        // UPDATE categories in room BEFORE navigating
+        if (gameServer != null && roomId != null) {
+            gameServer.getRoom(roomId).setCategories(categoriesSelectionnees);
         }
 
         System.out.println("✅ Début partie " + gameMode);
