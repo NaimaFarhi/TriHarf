@@ -15,6 +15,9 @@ public class GameRoom {
     private Set<String> readyPlayers;
     private Map<String, String> playerPseudos;
 
+    private List<String> categories;
+
+
     public GameRoom(String roomId, int maxPlayers, Langue langue) {
         this.roomId = roomId;
         this.maxPlayers = maxPlayers;
@@ -120,10 +123,11 @@ public class GameRoom {
         return playerIds.size() >= 2;
     }
 
-    // Add methods:
-    // - addPlayer(String playerId)
-    // - removePlayer(String playerId)
-    // - submitAnswer(String playerId, Categorie cat, String word)
-    // - isFull()
-    // - canStart() // returns true if enough players
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+    public List<String> getCategories() {
+        return categories;
+    }
+
 }

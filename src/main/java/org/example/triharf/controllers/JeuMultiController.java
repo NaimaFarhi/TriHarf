@@ -71,14 +71,23 @@ public class JeuMultiController {
 
     private void handleNetworkMessage(NetworkMessage message) {
         javafx.application.Platform.runLater(() -> {
-            // Handle incoming messages
             if (message.getType() == NetworkMessage.Type.GAME_START) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> data = (Map<String, Object>) message.getData();
+
+                // Get letter
                 String letter = (String) data.get("letter");
-                if (letter != null && !letter.isEmpty()) {
+                if (letter != null) {
                     lettreActuelle = letter.charAt(0);
                     afficherLettre();
+                }
+
+                // Get categories
+                @SuppressWarnings("unchecked")
+                List<String> cats = (List<String>) data.get("categories");
+                if (cats != null) {
+                    setCategories(cats);
+                    creerChampsDynamiquement();
                 }
             }
         });

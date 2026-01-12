@@ -1,6 +1,7 @@
 package org.example.triharf.dao;
 
 import org.example.triharf.config.HibernateUtil;
+import org.example.triharf.controllers.ParametresGenerauxController;
 import org.example.triharf.enums.Langue;
 import org.example.triharf.models.Categorie;
 import org.hibernate.Session;
@@ -26,8 +27,11 @@ public class CategorieDAO extends GenericDAO<Categorie> {
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<Categorie> query = session.createQuery(
-                    "FROM Categorie WHERE nom = :nom", Categorie.class);
+                    "FROM Categorie WHERE nom = :nom AND langue = :langue",
+                    Categorie.class
+            );
             query.setParameter("nom", nom);
+            query.setParameter("langue", ParametresGenerauxController.langueGlobale);
             return query.uniqueResult();
         } catch (Exception e) {
             e.printStackTrace();

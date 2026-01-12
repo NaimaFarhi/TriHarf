@@ -53,7 +53,8 @@ public class GameServer {
 
             Map<String, Object> gameData = Map.of(
                     "letter", letter.toString(),
-                    "duration", 180
+                    "duration", 180,
+                    "categories", room.getCategories()
             );
             broadcast(roomId, new NetworkMessage(
                     NetworkMessage.Type.GAME_START,

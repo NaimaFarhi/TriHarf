@@ -231,6 +231,7 @@ public class ParamPartieMultiController {
                 roomId = UUID.randomUUID().toString().substring(0, 8);
                 int maxPlayers = spinnerMaxPlayers != null ? spinnerMaxPlayers.getValue() : 4;
                 gameServer.createRoom(roomId, maxPlayers, ParametresGenerauxController.langueGlobale);
+                gameServer.getRoom(roomId).setCategories(categoriesSelectionnees);
 
                 gameClient.sendMessage(new NetworkMessage(
                         NetworkMessage.Type.JOIN_ROOM,
