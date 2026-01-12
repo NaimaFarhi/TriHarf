@@ -10,7 +10,9 @@ public class NetworkMessage {
         GAME_START,
         SUBMIT_ANSWER,
         GAME_END,
-        DISCONNECT
+        DISCONNECT,
+        CHAT,
+        PLAYER_ANSWERS
     }
 
     private Type type;
