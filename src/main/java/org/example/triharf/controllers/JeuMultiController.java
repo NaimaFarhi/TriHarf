@@ -57,6 +57,11 @@ public class JeuMultiController {
     private Map<String, HBox> playerRowMap = new HashMap<>();
     private static final double CATEGORY_WIDTH = 120.0;
     private static final double PLAYER_NAME_WIDTH = 100.0;
+    private static final double SCORE_WIDTH = 60.0;
+
+    // Store score labels for each player to update later
+    private Map<String, Label> playerScoreLabels = new HashMap<>();
+    private Map<String, Map<String, Label>> playerPointsLabels = new HashMap<>(); // player -> category -> points label
 
     // ===== VALIDATION STATE =====
     private boolean hasValidated = false;
@@ -343,6 +348,8 @@ public class JeuMultiController {
         textFieldsParCategorie.clear();
         reponses.clear();
         playerRowMap.clear();
+        playerScoreLabels.clear();
+        playerPointsLabels.clear();
 
         // Create header row with category names
         if (hboxCategoryHeaders != null) {
@@ -365,6 +372,14 @@ public class JeuMultiController {
                 catLabel.setAlignment(javafx.geometry.Pos.CENTER);
                 hboxCategoryHeaders.getChildren().add(catLabel);
             }
+
+            // Score column header
+            Label scoreHeader = new Label("Score");
+            scoreHeader.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
+            scoreHeader.setMinWidth(SCORE_WIDTH);
+            scoreHeader.setPrefWidth(SCORE_WIDTH);
+            scoreHeader.setAlignment(javafx.geometry.Pos.CENTER);
+            hboxCategoryHeaders.getChildren().add(scoreHeader);
         }
 
         // Use vboxPlayerRows if available, otherwise fallback to vboxPlayers
@@ -406,31 +421,67 @@ public class JeuMultiController {
         nameLabel.setPrefWidth(PLAYER_NAME_WIDTH);
         row.getChildren().add(nameLabel);
 
+        // Initialize points labels map for this player
+        playerPointsLabels.putIfAbsent(playerName, new HashMap<>());
+
         // Create input fields or display labels for each category
         for (Categorie categorie : categories) {
+            // Container for answer + points (split 2/3 + 1/3)
+            HBox cellContainer = new HBox(2);
+            cellContainer.setMinWidth(CATEGORY_WIDTH);
+            cellContainer.setPrefWidth(CATEGORY_WIDTH);
+            cellContainer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
             if (isCurrentPlayer) {
-                // Current player gets editable text fields
+                // Current player gets editable text fields (takes ~80% width)
                 TextField textField = new TextField();
                 textField.setPromptText(categorie.getNom().substring(0, Math.min(3, categorie.getNom().length())) + "...");
-                textField.setPrefWidth(CATEGORY_WIDTH);
-                textField.setMinWidth(CATEGORY_WIDTH);
-                textField.setStyle("-fx-font-size: 11;");
+                textField.setPrefWidth(CATEGORY_WIDTH * 0.75);
+                textField.setMinWidth(CATEGORY_WIDTH * 0.75);
+                textField.setStyle("-fx-font-size: 10;");
 
                 textFieldsParCategorie.put(categorie.getNom(), textField);
                 reponses.put(categorie, "");
 
-                row.getChildren().add(textField);
-            } else {
-                // Other players get read-only labels that will be updated via network
-                Label answerLabel = new Label("...");
-                answerLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #aaa;");
-                answerLabel.setMinWidth(CATEGORY_WIDTH);
-                answerLabel.setPrefWidth(CATEGORY_WIDTH);
-                answerLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                // Points label (hidden until validation)
+                Label pointsLabel = new Label("");
+                pointsLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #f39c12; -fx-font-weight: bold;");
+                pointsLabel.setMinWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setPrefWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                playerPointsLabels.get(playerName).put(categorie.getNom(), pointsLabel);
 
-                row.getChildren().add(answerLabel);
+                cellContainer.getChildren().addAll(textField, pointsLabel);
+            } else {
+                // Other players get read-only labels
+                Label answerLabel = new Label("...");
+                answerLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #aaa;");
+                answerLabel.setMinWidth(CATEGORY_WIDTH * 0.75);
+                answerLabel.setPrefWidth(CATEGORY_WIDTH * 0.75);
+                answerLabel.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+                // Points label (hidden until all validate)
+                Label pointsLabel = new Label("");
+                pointsLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #f39c12; -fx-font-weight: bold;");
+                pointsLabel.setMinWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setPrefWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                playerPointsLabels.get(playerName).put(categorie.getNom(), pointsLabel);
+
+                cellContainer.getChildren().addAll(answerLabel, pointsLabel);
             }
+
+            row.getChildren().add(cellContainer);
         }
+
+        // Score cell at the end
+        Label scoreLabel = new Label("-");
+        scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
+        scoreLabel.setMinWidth(SCORE_WIDTH);
+        scoreLabel.setPrefWidth(SCORE_WIDTH);
+        scoreLabel.setAlignment(javafx.geometry.Pos.CENTER);
+        playerScoreLabels.put(playerName, scoreLabel);
+        row.getChildren().add(scoreLabel);
 
         return row;
     }
@@ -594,35 +645,120 @@ public class JeuMultiController {
 
         // Update status
         if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Tous ont validé - Réponses révélées!");
+            lblValidationStatus.setText("✓ Tous ont validé - Calcul des scores...");
             lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
         }
 
-        // Reveal answers for each player
+        // Calculate and display scores for each player
         for (String playerName : playerList) {
             Map<String, String> answers = allPlayerAnswers.get(playerName);
-            if (answers != null && !playerName.equals(joueur)) {
-                // Update this player's row with their answers
-                HBox playerRow = playerRowMap.get(playerName);
-                if (playerRow != null) {
-                    int idx = 1; // Skip player name label
-                    for (Categorie cat : categories) {
-                        if (idx < playerRow.getChildren().size()) {
-                            javafx.scene.Node node = playerRow.getChildren().get(idx);
-                            if (node instanceof Label label) {
-                                String answer = answers.getOrDefault(cat.getNom(), "-");
-                                label.setText(answer.isEmpty() ? "-" : answer);
-                                label.setStyle("-fx-font-size: 11; -fx-text-fill: white;");
-                            }
+            if (answers == null) continue;
+
+            int totalScore = 0;
+            HBox playerRow = playerRowMap.get(playerName);
+            boolean isCurrentPlayer = playerName.equals(joueur);
+
+            int cellIndex = 1; // Start after player name label
+
+            // Calculate points for each category
+            for (Categorie cat : categories) {
+                String answer = answers.getOrDefault(cat.getNom(), "");
+                int points = calculateWordPoints(answer, cat, playerName);
+                totalScore += points;
+
+                // Update the points label for this category
+                Map<String, Label> playerPoints = playerPointsLabels.get(playerName);
+                if (playerPoints != null) {
+                    Label pointsLabel = playerPoints.get(cat.getNom());
+                    if (pointsLabel != null) {
+                        if (points > 0) {
+                            pointsLabel.setText("+" + points);
+                            pointsLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #27ae60; -fx-font-weight: bold;");
+                        } else {
+                            pointsLabel.setText("0");
+                            pointsLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #e74c3c; -fx-font-weight: bold;");
                         }
-                        idx++;
+                    }
+                }
+
+                // Update answer display for other players (not current player)
+                if (!isCurrentPlayer && playerRow != null && cellIndex < playerRow.getChildren().size() - 1) {
+                    javafx.scene.Node node = playerRow.getChildren().get(cellIndex);
+                    if (node instanceof HBox cellContainer && !cellContainer.getChildren().isEmpty()) {
+                        javafx.scene.Node firstChild = cellContainer.getChildren().get(0);
+                        if (firstChild instanceof Label answerLabel) {
+                            answerLabel.setText(answer.isEmpty() ? "-" : answer);
+                            answerLabel.setStyle("-fx-font-size: 10; -fx-text-fill: white;");
+                        }
+                    }
+                }
+
+                cellIndex++;
+            }
+
+            // Update total score label
+            Label scoreLabel = playerScoreLabels.get(playerName);
+            if (scoreLabel != null) {
+                scoreLabel.setText(String.valueOf(totalScore));
+                scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
+            }
+
+            System.out.println("📊 Score de " + playerName + ": " + totalScore);
+        }
+
+        // Update status
+        if (lblValidationStatus != null) {
+            lblValidationStatus.setText("✓ Scores calculés!");
+        }
+
+        // Add system message to chat
+        addChatMessage("SYSTÈME", "Toutes les réponses ont été révélées et les scores calculés!", false);
+    }
+
+    private int calculateWordPoints(String word, Categorie categorie, String playerName) {
+        if (word == null || word.trim().isEmpty()) {
+            return 0;
+        }
+
+        word = word.trim();
+
+        // Check if word starts with the correct letter
+        if (lettreActuelle != null && !word.toUpperCase().startsWith(lettreActuelle.toString().toUpperCase())) {
+            return 0;
+        }
+
+        // Base points for a valid word
+        int points = 10;
+
+        // Bonus for longer words
+        if (word.length() > 5) {
+            points += 2;
+        }
+        if (word.length() > 8) {
+            points += 3;
+        }
+
+        // Check if word is unique among all players
+        boolean isUnique = true;
+        for (String otherPlayer : playerList) {
+            if (!otherPlayer.equals(playerName)) {
+                Map<String, String> otherAnswers = allPlayerAnswers.get(otherPlayer);
+                if (otherAnswers != null) {
+                    String otherWord = otherAnswers.get(categorie.getNom());
+                    if (otherWord != null && otherWord.equalsIgnoreCase(word)) {
+                        isUnique = false;
+                        break;
                     }
                 }
             }
         }
 
-        // Add system message to chat
-        addChatMessage("SYSTÈME", "Toutes les réponses ont été révélées!", false);
+        // Bonus for unique answers
+        if (isUnique) {
+            points += 5;
+        }
+
+        return points;
     }
 
     /* =======================
