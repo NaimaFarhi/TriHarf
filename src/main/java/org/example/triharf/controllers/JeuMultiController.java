@@ -90,6 +90,8 @@ public class JeuMultiController {
     private Set<String> validatedPlayers = new HashSet<>();
     private boolean allPlayersValidated = false;
     private Map<String, Integer> playerFinalScores = new HashMap<>(); // Store final scores for results page
+    private Map<String, Integer> cumulativeScores = new HashMap<>(); // Track scores across all rounds
+    private Set<Character> usedLetters = new HashSet<>(); // Track used letters to avoid repeats
 
     // ===== INJECTED DATA =====
     private List<String> categoriesNoms;
@@ -381,8 +383,17 @@ public class JeuMultiController {
         System.out.println("   Joueur: " + joueur);
         System.out.println("   Langue: " + langue);
         System.out.println("   Catégories: " + categories.size());
+        System.out.println("   Manches: " + currentRound + "/" + totalRounds);
 
         try {
+            // Track the first letter as used
+            if (lettreActuelle != null) {
+                usedLetters.add(lettreActuelle);
+            }
+
+            // Update round display
+            updateRoundDisplay();
+
             // Create category input fields in player list area
             creerChampsDynamiquement();
 
@@ -391,12 +402,90 @@ public class JeuMultiController {
             gameEngine.setOnGameEnd(this::handleTerminerAuto);
             gameEngine.startTimer(gameDuration);
 
-            System.out.println("✅ Partie multijoueur démarrée");
+            System.out.println("✅ Partie multijoueur démarrée - Manche " + currentRound);
 
         } catch (Exception e) {
             System.err.println("❌ Erreur lors du démarrage: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Start the next round after current round is completed
+     */
+    private void startNextRound() {
+        System.out.println("🔄 Démarrage de la manche " + (currentRound + 1) + "/" + totalRounds);
+
+        // Increment round counter
+        currentRound++;
+        updateRoundDisplay();
+
+        // Generate new letter (avoiding already used ones)
+        Character newLetter = generateNewLetter();
+        usedLetters.add(newLetter);
+        lettreActuelle = newLetter;
+        afficherLettre();
+
+        // Reset validation state for new round
+        hasValidated = false;
+        validatedPlayers.clear();
+        allPlayersValidated = false;
+        allPlayerAnswers.clear();
+        reponses.clear();
+
+        // Hide results button
+        if (btnVoirResultats != null) {
+            btnVoirResultats.setVisible(false);
+            btnVoirResultats.setManaged(false);
+            // Reset the action to show results (in case it was changed to startNextRound)
+            btnVoirResultats.setOnAction(e -> handleVoirResultats());
+        }
+
+        // Re-enable validate button
+        if (btnValider != null) {
+            btnValider.setText("✓ VALIDER MES RÉPONSES");
+            btnValider.setDisable(false);
+            btnValider.setStyle("-fx-font-size: 13px; -fx-padding: 8 25;");
+        }
+
+        // Clear status
+        if (lblValidationStatus != null) {
+            lblValidationStatus.setText("");
+        }
+
+        // Rebuild the player rows to clear answers
+        creerChampsDynamiquement();
+
+        // Start new timer
+        gameEngine.setOnTimerUpdate(this::afficherTimer);
+        gameEngine.setOnGameEnd(this::handleTerminerAuto);
+        gameEngine.startTimer(gameDuration);
+
+        addChatMessage("SYSTÈME", "🔄 Manche " + currentRound + " commencée! Nouvelle lettre: " + lettreActuelle,
+                false);
+        System.out.println("✅ Manche " + currentRound + " démarrée avec lettre " + lettreActuelle);
+    }
+
+    /**
+     * Generate a new random letter that hasn't been used yet
+     */
+    private Character generateNewLetter() {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        List<Character> availableLetters = new ArrayList<>();
+
+        for (char c : alphabet.toCharArray()) {
+            if (!usedLetters.contains(c)) {
+                availableLetters.add(c);
+            }
+        }
+
+        if (availableLetters.isEmpty()) {
+            // All letters used, reset and pick random
+            usedLetters.clear();
+            return alphabet.charAt(new Random().nextInt(alphabet.length()));
+        }
+
+        return availableLetters.get(new Random().nextInt(availableLetters.size()));
     }
 
     /*
@@ -867,33 +956,66 @@ public class JeuMultiController {
                 }
             }
 
-            // Store final score for results page
+            // Add round score to cumulative total
+            int previousCumulative = cumulativeScores.getOrDefault(playerName, 0);
+            cumulativeScores.put(playerName, previousCumulative + totalScore);
+
+            // Store current round score for display
             playerFinalScores.put(playerName, totalScore);
 
-            // Update total score label
+            // Update total score label (show cumulative)
             Label scoreLabel = playerScoreLabels.get(playerName);
             if (scoreLabel != null) {
-                scoreLabel.setText(String.valueOf(totalScore));
+                int cumulativeTotal = cumulativeScores.get(playerName);
+                scoreLabel.setText(String.valueOf(cumulativeTotal));
                 scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
             }
 
-            System.out.println("📊 Score de " + playerName + ": " + totalScore);
+            System.out.println("📊 Score manche " + currentRound + " de " + playerName + ": " + totalScore +
+                    " (Total: " + cumulativeScores.get(playerName) + ")");
         }
 
-        // Update status
-        if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Scores calculés! Cliquez pour voir les résultats");
-            lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
-        }
+        // Check if this was the last round
+        if (currentRound >= totalRounds) {
+            // Final round - show results
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ Partie terminée! Cliquez pour voir les résultats");
+                lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
 
-        // Show the results button
-        if (btnVoirResultats != null) {
-            btnVoirResultats.setVisible(true);
-            btnVoirResultats.setManaged(true);
-        }
+            // Show the results button
+            if (btnVoirResultats != null) {
+                btnVoirResultats.setText("🏆 VOIR LES RÉSULTATS FINAUX");
+                btnVoirResultats.setVisible(true);
+                btnVoirResultats.setManaged(true);
+            }
 
-        // Add system message to chat
-        addChatMessage("SYSTÈME", "Partie terminée! Cliquez sur 'VOIR LES RÉSULTATS' pour le classement.", false);
+            // Copy cumulative scores to final scores for results page
+            playerFinalScores.clear();
+            playerFinalScores.putAll(cumulativeScores);
+
+            // Add system message to chat
+            addChatMessage("SYSTÈME",
+                    "Partie terminée après " + totalRounds + " manches! Cliquez pour voir le classement final.", false);
+        } else {
+            // More rounds to play - show next round button
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ Manche " + currentRound + "/" + totalRounds
+                        + " terminée! Préparez-vous pour la suivante...");
+                lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+
+            // Change button to start next round
+            if (btnVoirResultats != null) {
+                btnVoirResultats.setText("▶ MANCHE SUIVANTE");
+                btnVoirResultats.setOnAction(e -> startNextRound());
+                btnVoirResultats.setVisible(true);
+                btnVoirResultats.setManaged(true);
+            }
+
+            addChatMessage("SYSTÈME",
+                    "Manche " + currentRound + " terminée! Prochaine manche dans quelques secondes...", false);
+        }
     }
 
     private boolean isAnswerUnique(String answer, String categoryName, String playerName) {
