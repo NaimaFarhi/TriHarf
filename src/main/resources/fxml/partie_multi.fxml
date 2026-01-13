@@ -88,10 +88,13 @@
                         </ScrollPane>
 
                         <!-- Bouton Valider -->
-                        <HBox alignment="CENTER" style="-fx-padding: 15; -fx-background-color: rgba(0,0,0,0.2);">
+                        <HBox alignment="CENTER" spacing="15" style="-fx-padding: 15; -fx-background-color: rgba(0,0,0,0.2);">
                             <children>
                                 <Button fx:id="btnValider" text="✓ VALIDER MES RÉPONSES" onAction="#handleValider"
                                         styleClass="btn-action" style="-fx-font-size: 14px; -fx-padding: 10 30;"/>
+                                <Button fx:id="btnVoirResultats" text="🏆 VOIR LES RÉSULTATS" onAction="#handleVoirResultats"
+                                        styleClass="btn-action" style="-fx-font-size: 14px; -fx-padding: 10 30; -fx-background-color: #f39c12;"
+                                        visible="false" managed="false"/>
                             </children>
                         </HBox>
                     </children>
