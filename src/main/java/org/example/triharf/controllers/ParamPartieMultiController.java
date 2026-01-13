@@ -280,7 +280,7 @@ public class ParamPartieMultiController {
                 // Update UI
                 javafx.application.Platform.runLater(() -> {
                     if (txtServerIP != null) {
-                        txtServerIP.setText(serverAddress + " | Room: " + roomId);
+                        txtServerIP.setText("Code: " + roomId);
                     }
                     System.out.println("✅ Réseau initialisé | IP: " + serverAddress + " | Room: " + roomId);
                 });

@@ -113,6 +113,24 @@ public class JeuMultiController {
     private GameClient gameClient;
     private String roomId;
     private boolean isHost = false;
+    private String gameMode = "MULTI";
+    private Set<String> eliminatedPlayers = new HashSet<>();
+
+    public void setGameMode(String mode) {
+        this.gameMode = mode;
+        System.out.println("Mode de jeu défini dans JeuMultiController: " + mode);
+        updateUIForMode();
+    }
+
+    private void updateUIForMode() {
+        if ("BATAILLE_ROYALE".equals(gameMode)) {
+            // Apply Red Theme for Battle Royale
+            if (hboxCategoryHeaders != null) {
+                hboxCategoryHeaders.setStyle("-fx-border-color: #c0392b; -fx-border-width: 0 0 2 0;");
+            }
+            // Add other theme adjustments here
+        }
+    }
 
     public void setIsHost(boolean isHost) {
         this.isHost = isHost;
@@ -227,6 +245,10 @@ public class JeuMultiController {
                 case SHOW_RESULTS -> {
                     navigateToMultiplayerResults();
                 }
+                case PLAYER_ELIMINATED -> {
+                    String eliminatedPlayer = (String) message.getData();
+                    handlePlayerEliminated(eliminatedPlayer);
+                }
                 default -> {
                 }
             }
@@ -235,11 +257,71 @@ public class JeuMultiController {
 
     private void handleNextRoundAction() {
         if (isHost) {
+            // Battle Royale Logic: Eliminate lowest score before next round
+            if ("BATAILLE_ROYALE".equals(gameMode)) {
+                String playerToEliminate = findLowestScoringPlayer();
+                if (playerToEliminate != null) {
+                    System.out.println("💀 Élimination de: " + playerToEliminate);
+                    if (gameClient != null) {
+                        gameClient.sendMessage(
+                                new NetworkMessage(NetworkMessage.Type.PLAYER_ELIMINATED, joueur, playerToEliminate));
+                    }
+                    // Wait a moment for elimination message to propagate before sending next round?
+                    // For now, send immediately, clients handle ordering usually fine or closely.
+                }
+            }
+
             if (gameClient != null) {
                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, roomId));
             }
         } else {
             showAlert("Attente de l'hôte", "Seul l'hôte peut lancer la manche suivante.");
+        }
+    }
+
+    private String findLowestScoringPlayer() {
+        String lowestPlayer = null;
+        int minScore = Integer.MAX_VALUE;
+
+        // Ensure we have scores for all active players
+        for (String p : playerList) {
+            if (eliminatedPlayers.contains(p))
+                continue;
+
+            int score = cumulativeScores.getOrDefault(p, 0);
+            if (score < minScore) {
+                minScore = score;
+                lowestPlayer = p;
+            } else if (score == minScore) {
+                // Tie-breaker? For now, random or first found.
+                // Maybe keep the one who joined first? Or random?
+                // Current logic: First found keeps lowest.
+            }
+        }
+        return lowestPlayer;
+    }
+
+    private void handlePlayerEliminated(String pName) {
+        eliminatedPlayers.add(pName);
+        System.out.println("💀 JOUEUR ÉLIMINÉ: " + pName);
+
+        // Show notification
+        addChatMessage("SYSTÈME", "💀 " + pName + " a été éliminé !", false);
+
+        // Update UI
+        HBox row = playerRowMap.get(pName);
+        if (row != null) {
+            row.setDisable(true);
+            row.setStyle("-fx-background-color: rgba(231, 76, 60, 0.3); -fx-opacity: 0.6;");
+            // Add skull icon or label change?
+        }
+
+        // Check if I am eliminated
+        if (pName.equals(joueur)) {
+            showAlert("ÉLIMINÉ", "Vous avez été éliminé du Battle Royale !");
+            disableMyInputs();
+            if (btnValider != null)
+                btnValider.setDisable(true);
         }
     }
 
@@ -481,11 +563,17 @@ public class JeuMultiController {
             btnVoirResultats.setOnAction(e -> handleVoirResultats());
         }
 
-        // Re-enable validate button
+        // Re-enable validate button only if NOT eliminated
         if (btnValider != null) {
-            btnValider.setText("✓ VALIDER MES RÉPONSES");
-            btnValider.setDisable(false);
-            btnValider.setStyle("-fx-font-size: 13px; -fx-padding: 8 25;");
+            if (eliminatedPlayers.contains(joueur)) {
+                btnValider.setText("💀 ÉLIMINÉ");
+                btnValider.setDisable(true);
+                btnValider.setStyle("-fx-background-color: #c0392b; -fx-font-size: 13px; -fx-padding: 8 25;");
+            } else {
+                btnValider.setText("✓ VALIDER MES RÉPONSES");
+                btnValider.setDisable(false);
+                btnValider.setStyle("-fx-font-size: 13px; -fx-padding: 8 25;");
+            }
         }
 
         // Clear status
@@ -605,6 +693,13 @@ public class JeuMultiController {
         String bgColor = isCurrentPlayer
                 ? "-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5; -fx-background-radius: 5;"
                 : "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444; -fx-border-radius: 5; -fx-background-radius: 5;";
+
+        // Apply eliminated style if applicable
+        if (eliminatedPlayers.contains(playerName)) {
+            bgColor = "-fx-background-color: rgba(231, 76, 60, 0.3); -fx-border-color: #c0392b; -fx-border-radius: 5; -fx-opacity: 0.6;";
+            row.setDisable(true);
+        }
+
         row.setStyle(bgColor);
 
         // Player name label

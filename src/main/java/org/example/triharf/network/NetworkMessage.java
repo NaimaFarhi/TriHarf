@@ -16,7 +16,8 @@ public class NetworkMessage {
         VALIDATE_ANSWERS,
         ALL_VALIDATED,
         NEXT_ROUND,
-        SHOW_RESULTS
+        SHOW_RESULTS,
+        PLAYER_ELIMINATED
     }
 
     private Type type;

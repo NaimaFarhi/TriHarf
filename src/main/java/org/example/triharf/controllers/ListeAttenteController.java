@@ -226,14 +226,13 @@ public class ListeAttenteController {
     }
 
     private void startGame() {
-        String targetFxml = switch (gameMode) {
-            case "BATAILLE_ROYALE" -> "/fxml/partie_battle.fxml";
-            case "CHAOS" -> "/fxml/partie_chaos.fxml";
-            default -> "/fxml/partie_multi.fxml";
-        };
-
+        // Use standard multiplayer view for everything, adjusting internally based on
+        // mode
+        String targetFxml = "/fxml/partie_multi.fxml";
         navigateToGame(targetFxml, "Partie - " + gameMode);
     }
+
+    // ... handleQuitter, handleCopyCode ...
 
     @FXML
     private void handleQuitter() {
@@ -278,6 +277,10 @@ public class ListeAttenteController {
                 mc.setIsHost(isHost);
                 mc.setCategories(categories);
                 mc.setRoundConfig(totalRounds, roundDuration);
+
+                // Set Game Mode
+                mc.setGameMode(gameMode);
+
                 if (currentLetter != null) {
                     mc.setLettre(currentLetter);
                 }

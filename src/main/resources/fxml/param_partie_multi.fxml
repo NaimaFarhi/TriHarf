@@ -81,7 +81,7 @@
                                     <HBox spacing="8.0" alignment="CENTER_LEFT">
                                         <children>
                                             <Label text="🔗" style="-fx-font-size: 18px;" textFill="white"/>
-                                            <Label text="Connexion:" styleClass="label-bright"/>
+                                            <Label text="Code Partie:" styleClass="label-bright"/>
                                         </children>
                                     </HBox>
                                     <HBox spacing="8.0" alignment="CENTER_LEFT">

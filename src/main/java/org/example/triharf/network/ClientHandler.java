@@ -65,10 +65,13 @@ public class ClientHandler implements Runnable {
                     server.handleValidation(currentRoomId, clientId, message);
                 }
             }
-            case NEXT_ROUND, SHOW_RESULTS -> {
+            case NEXT_ROUND, SHOW_RESULTS, PLAYER_ELIMINATED -> {
                 if (currentRoomId != null) {
                     server.broadcast(currentRoomId, message);
                 }
+            }
+            default -> {
+                // Ignore other messages that shouldn't be sent by clients
             }
         }
     }

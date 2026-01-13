@@ -8,7 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.services.StatisticsService;
-import org.example.triharf.utils.NetworkUtils;
+import org.example.triharf.network.NetworkDiscovery;
 
 import java.io.IOException;
 import java.util.Random;
@@ -169,11 +169,10 @@ public class MenuPrincipalController {
 
     @FXML
     private void handleRejoindre() {
-        if (tfCodePartie == null || tfServerIP == null)
+        if (tfCodePartie == null)
             return;
 
         final String code = tfCodePartie.getText().trim();
-        final String manualIP = tfServerIP.getText().trim();
 
         if (code.isEmpty()) {
             showAlert("Erreur", "Veuillez entrer le code de la partie");
@@ -185,32 +184,19 @@ public class MenuPrincipalController {
 
         new Thread(() -> {
             try {
-                String serverIP;
-                int port;
+                // Always use auto-discovery
+                javafx.application.Platform.runLater(() -> btnRejoindre.setText("Recherche..."));
 
-                if (manualIP.isEmpty()) {
-                    // Start discovery
-                    javafx.application.Platform.runLater(() -> btnRejoindre.setText("Recherche..."));
+                String discovered = org.example.triharf.network.NetworkDiscovery.discoverServer(2500); // 2.5s timeout
 
-                    String discovered = org.example.triharf.network.NetworkDiscovery.discoverServer(2500); // 2.5s
-                                                                                                           // timeout
-
-                    if (discovered == null) {
-                        throw new IOException("Serveur introuvable sur le réseau local.");
-                    }
-                    serverIP = discovered;
-                    port = 8888; // Default port
-                } else {
-                    // Use manual IP
-                    String[] parts = NetworkUtils.parseHostPort(manualIP);
-                    if (parts == null) {
-                        throw new IOException("Format IP invalide. (Attendu: IP:PORT ou IP)");
-                    }
-                    serverIP = parts[0];
-                    port = Integer.parseInt(parts[1]);
+                if (discovered == null) {
+                    throw new IOException("Serveur introuvable sur le réseau local.");
                 }
 
-                System.out.println("Tentative de connexion à " + serverIP + ":" + port);
+                String serverIP = discovered;
+                int port = 8888;
+
+                System.out.println("Partie trouvée à " + serverIP + ":" + port);
 
                 org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient(serverIP,
                         port);
