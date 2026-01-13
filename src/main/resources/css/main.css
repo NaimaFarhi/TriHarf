@@ -381,18 +381,112 @@
    RESULTS SCREEN STYLES
    ========================================= */
 
-.results-header-defeat {
-    -fx-background-color: linear-gradient(to right, rgba(231, 76, 60, 0.2), rgba(192, 57, 43, 0.2));
-    -fx-padding: 20;
-    -fx-border-color: #e74c3c;
-    -fx-border-width: 0 0 2 0;
+/* Victory Header - Gold/Purple gradient */
+.results-header-victory {
+    -fx-background-color: linear-gradient(to bottom, rgba(155, 89, 182, 0.3), rgba(142, 68, 173, 0.15), transparent);
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
 }
 
+/* Defeat Header - Red gradient */
+.results-header-defeat {
+    -fx-background-color: linear-gradient(to bottom, rgba(231, 76, 60, 0.3), rgba(192, 57, 43, 0.15), transparent);
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.results-title {
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0, 0, 2);
+}
+
+/* Main Score Card */
+.score-card {
+    -fx-background-color: linear-gradient(to bottom, rgba(40, 40, 60, 0.9), rgba(30, 30, 46, 0.95));
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(255, 215, 0, 0.3);
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-padding: 35 50;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 20, 0, 0, 5);
+}
+
+.score-value {
+    -fx-text-fill: #ffd700;
+    -fx-font-size: 72px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 215, 0, 0.4), 15, 0.3, 0, 0);
+}
+
+.result-message {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* Details Container */
+.details-container {
+    -fx-background-color: linear-gradient(to bottom, rgba(40, 40, 60, 0.8), rgba(30, 30, 46, 0.9));
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(155, 89, 182, 0.25);
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 15, 0, 0, 5);
+}
+
+/* Bottom Action Bar */
+.bottom-action-bar {
+    -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.2));
+    -fx-padding: 25;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Retry Button - Gradient Blue */
+.btn-retry {
+    -fx-background-color: linear-gradient(to right, #4facfe, #00f2fe);
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(79, 172, 254, 0.4), 10, 0.3, 0, 0);
+}
+
+.btn-retry:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(79, 172, 254, 0.6), 15, 0.5, 0, 0);
+}
+
+/* Menu Button - Subtle outline */
+.btn-menu {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 25;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-radius: 25;
+    -fx-border-width: 2;
+    -fx-cursor: hand;
+}
+
+.btn-menu:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-border-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.3, 0, 0);
+}
+
+/* Legacy support */
 .score-display {
-    -fx-text-fill: #e74c3c;
+    -fx-text-fill: #ffd700;
     -fx-font-weight: bold;
     -fx-font-size: 56px;
-    -fx-effect: dropshadow(gaussian, rgba(231, 76, 60, 0.5), 10, 0.5, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(255, 215, 0, 0.5), 10, 0.5, 0, 0);
 }
 
 /* ============================================
@@ -542,5 +636,55 @@
     -fx-padding: 4 10;
     -fx-font-size: 12px;
     -fx-text-fill: #9b59b6;
+    -fx-font-weight: bold;
+}
+
+/* ============================================
+   MULTIPLAYER RESULTS - PODIUM & LEADERBOARD
+   ============================================ */
+
+.podium-name {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.podium-name-gold {
+    -fx-text-fill: #ffd700;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 215, 0, 0.4), 10, 0.5, 0, 0);
+}
+
+.podium-bar-gold {
+    -fx-background-color: linear-gradient(to top, #ffd700, #f1c40f);
+    -fx-background-radius: 10 10 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 5);
+    -fx-padding: 10;
+}
+
+.podium-bar-silver {
+    -fx-background-color: linear-gradient(to top, #bdc3c7, #ecf0f1);
+    -fx-background-radius: 10 10 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 5);
+    -fx-padding: 10;
+}
+
+.podium-bar-bronze {
+    -fx-background-color: linear-gradient(to top, #cd7f32, #d35400);
+    -fx-background-radius: 10 10 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 5);
+    -fx-padding: 10;
+}
+
+.podium-rank {
+    -fx-text-fill: rgba(0, 0, 0, 0.5);
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+}
+
+.podium-score {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
