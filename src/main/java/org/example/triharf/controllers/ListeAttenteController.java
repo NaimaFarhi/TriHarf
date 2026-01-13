@@ -18,14 +18,22 @@ import java.util.List;
 
 public class ListeAttenteController {
 
-    @FXML private Label lblPlayerCount;
-    @FXML private Label lblMaxPlayers;
-    @FXML private VBox vboxPlayers;
-    @FXML private Label lblGameCode;
-    @FXML private Button btnCopyCode;
-    @FXML private Button btnQuitter;
-    @FXML private Button btnPret;
-    @FXML private Button btnCommencer; // Host only button
+    @FXML
+    private Label lblPlayerCount;
+    @FXML
+    private Label lblMaxPlayers;
+    @FXML
+    private VBox vboxPlayers;
+    @FXML
+    private Label lblGameCode;
+    @FXML
+    private Button btnCopyCode;
+    @FXML
+    private Button btnQuitter;
+    @FXML
+    private Button btnPret;
+    @FXML
+    private Button btnCommencer; // Host only button
 
     private String gameMode = "MULTI";
     private GameClient gameClient;
@@ -37,12 +45,15 @@ public class ListeAttenteController {
     private List<String> categories = new ArrayList<>();
     private String currentLetter = null;
     private List<String> playerPseudos = new ArrayList<>();
+    private int totalRounds = 3;
+    private int roundDuration = 120;
 
     @FXML
     public void initialize() {
         System.out.println("✅ ListeAttenteController initialisé");
         // Hide start button initially
-        if (btnCommencer != null) btnCommencer.setVisible(false);
+        if (btnCommencer != null)
+            btnCommencer.setVisible(false);
     }
 
     public void setNetwork(GameClient client, GameServer server, String roomId) {
@@ -85,6 +96,12 @@ public class ListeAttenteController {
         System.out.println("Mode de jeu (Attente) : " + mode);
     }
 
+    public void setRoundConfig(int totalRounds, int roundDuration) {
+        this.totalRounds = totalRounds;
+        this.roundDuration = roundDuration;
+        System.out.println("✅ Configuration manches: " + totalRounds + " manches, " + roundDuration + "s chacune");
+    }
+
     private void handleIncomingMessage(NetworkMessage message) {
         javafx.application.Platform.runLater(() -> {
             switch (message.getType()) {
@@ -119,6 +136,9 @@ public class ListeAttenteController {
                         }
                     }
                     startGame();
+                }
+                // Ignore other message types in this context
+                default -> {
                 }
             }
         });
@@ -156,8 +176,7 @@ public class ListeAttenteController {
             gameClient.sendMessage(new NetworkMessage(
                     NetworkMessage.Type.PLAYER_READY,
                     ParametresGenerauxController.pseudoGlobal,
-                    isReady
-            ));
+                    isReady));
 
             if (btnPret != null) {
                 btnPret.setText(isReady ? "❌ PAS PRÊT" : "✓ JE SUIS PRÊT");
@@ -169,7 +188,8 @@ public class ListeAttenteController {
 
     @FXML
     private void handleCommencer() {
-        if (!isHost) return;
+        if (!isHost)
+            return;
 
         // Broadcast game start
         gameServer.startGame(roomId);
@@ -200,8 +220,7 @@ public class ListeAttenteController {
             gameClient.sendMessage(new NetworkMessage(
                     NetworkMessage.Type.DISCONNECT,
                     ParametresGenerauxController.pseudoGlobal,
-                    roomId
-            ));
+                    roomId));
         }
 
         navigateTo("/fxml/main_menu.fxml", "Menu Principal");
@@ -227,6 +246,7 @@ public class ListeAttenteController {
                 JeuMultiController mc = (JeuMultiController) controller;
                 mc.setNetwork(gameClient, roomId);
                 mc.setCategories(categories);
+                mc.setRoundConfig(totalRounds, roundDuration);
                 if (currentLetter != null) {
                     mc.setLettre(currentLetter);
                 }
@@ -236,6 +256,7 @@ public class ListeAttenteController {
                 System.out.println("📋 Catégories passées à JeuMultiController: " + categories);
                 System.out.println("📋 Lettre passée à JeuMultiController: " + currentLetter);
                 System.out.println("📋 Joueurs passés à JeuMultiController: " + playerPseudos);
+                System.out.println("📋 Configuration manches: " + totalRounds + "/" + roundDuration + "s");
                 // Start the game after setting up categories
                 mc.demarrerPartie();
             }
