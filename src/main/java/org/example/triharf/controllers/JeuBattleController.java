@@ -74,6 +74,7 @@ public class JeuBattleController {
     private int nbJoueurs = 1; // Sera mis à jour via réseau
     private final Map<String, TextField> textFieldsParCategorie = new HashMap<>();
     private final Map<Categorie, String> reponses = new HashMap<>();
+    private Map<String, Integer> playerFinalScores = new HashMap<>(); // For multiplayer results
 
     // ===== INJECTED DATA =====
     private List<String> categoriesNoms;
@@ -312,19 +313,23 @@ public class JeuBattleController {
             // ============================================
             // 1️⃣ VALIDER
             // ============================================
-            resultsManager.validerMots(reponses, lettreActuelle, langue); // 👈 CORRECTION: Ajout du 3ème paramètre
+            resultsManager.validerMots(reponses, lettreActuelle, langue);
 
             // ============================================
             // 2️⃣ RÉSULTATS
             // ============================================
-            List<ResultatPartie> resultats = resultsManager.getResultats();
             int scoreTotal = resultsManager.getScoreTotal();
-            long dureePartie = resultsManager.getDureePartie();
+
+            // Store score for multiplayer results
+            playerFinalScores.clear();
+            playerFinalScores.put(joueur, scoreTotal);
+
+            System.out.println("✅ Score Battle: " + scoreTotal);
 
             // ============================================
-            // 3️⃣ NAVIGUER
+            // 3️⃣ NAVIGUER vers résultats multijoueur
             // ============================================
-            navigateToResults(resultats, scoreTotal, dureePartie);
+            navigateToMultiplayerResults();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -337,15 +342,17 @@ public class JeuBattleController {
      * =======================
      */
 
-    private void navigateToResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie) {
+    private void navigateToMultiplayerResults() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/Resultats.fxml"));
+                    HelloApplication.class.getResource("/fxml/resultats_multi.fxml"));
             Parent root = loader.load();
 
-            // Passer les données au ResultatsController
-            ResultatsController resultatsController = loader.getController();
-            resultatsController.displayResults(resultats, scoreTotal, dureePartie, joueur, lettreActuelle);
+            Object controller = loader.getController();
+            if (controller instanceof ResultatsMultiController) {
+                ResultatsMultiController rc = (ResultatsMultiController) controller;
+                rc.displayRanking(playerFinalScores, joueur, lettreActuelle);
+            }
 
             Stage stage = null;
             if (btnTerminer != null && btnTerminer.getScene() != null) {
@@ -361,6 +368,8 @@ public class JeuBattleController {
 
         } catch (IOException e) {
             e.printStackTrace();
+            // Fallback to menu
+            retourMenu();
         }
     }
 
