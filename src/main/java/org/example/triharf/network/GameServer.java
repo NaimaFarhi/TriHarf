@@ -60,15 +60,15 @@ public class GameServer {
 
             Map<String, Object> gameData = new HashMap<>();
             gameData.put("letter", letter.toString());
-            gameData.put("duration", 180);
+            gameData.put("duration", room.getRoundDuration());
+            gameData.put("totalRounds", room.getTotalRounds());
             gameData.put("categories", room.getCategories());
             gameData.put("players", playerPseudos);
 
             broadcast(roomId, new NetworkMessage(
                     NetworkMessage.Type.GAME_START,
                     "SERVER",
-                    gameData
-            ));
+                    gameData));
         }
     }
 
@@ -76,7 +76,6 @@ public class GameServer {
         String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         return letters.charAt(new Random().nextInt(letters.length()));
     }
-
 
     // Create new game room
     public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue) {
@@ -106,8 +105,7 @@ public class GameServer {
         NetworkMessage msg = new NetworkMessage(
                 NetworkMessage.Type.PLAYER_JOINED,
                 "SERVER",
-                playerStatusList
-        );
+                playerStatusList);
         broadcast(roomId, msg);
         return true;
     }
@@ -116,7 +114,7 @@ public class GameServer {
         GameRoom room = rooms.get(roomId);
         if (room != null) {
             room.setPlayerReady(clientId, ready);
-            
+
             // Map player names to status
             List<String> playerStatusList = new ArrayList<>();
             for (String pid : room.getPlayerIds()) {
@@ -128,8 +126,7 @@ public class GameServer {
             NetworkMessage msg = new NetworkMessage(
                     NetworkMessage.Type.PLAYER_JOINED,
                     "SERVER",
-                    playerStatusList
-            );
+                    playerStatusList);
             broadcast(roomId, msg);
         }
     }
@@ -158,7 +155,8 @@ public class GameServer {
         if (room != null) {
             room.getPlayerIds().forEach(playerId -> {
                 ClientHandler client = clients.get(playerId);
-                if (client != null) client.sendMessage(message);
+                if (client != null)
+                    client.sendMessage(message);
             });
         }
     }
@@ -171,7 +169,8 @@ public class GameServer {
                 // Don't send back to the sender
                 if (!playerId.equals(senderClientId)) {
                     ClientHandler client = clients.get(playerId);
-                    if (client != null) client.sendMessage(message);
+                    if (client != null)
+                        client.sendMessage(message);
                 }
             });
         }
@@ -205,8 +204,7 @@ public class GameServer {
             NetworkMessage msg = new NetworkMessage(
                     NetworkMessage.Type.PLAYER_JOINED,
                     "SERVER",
-                    playerStatusList
-            );
+                    playerStatusList);
             broadcast(roomId, msg);
         }
     }
@@ -215,7 +213,8 @@ public class GameServer {
     @SuppressWarnings("unchecked")
     public void handleValidation(String roomId, String senderClientId, NetworkMessage message) {
         GameRoom room = rooms.get(roomId);
-        if (room == null) return;
+        if (room == null)
+            return;
 
         Map<String, Object> validationData = (Map<String, Object>) message.getData();
         String playerPseudo = (String) validationData.get("player");
@@ -223,7 +222,8 @@ public class GameServer {
 
         // Store validation in room
         room.validatePlayer(playerPseudo, answers);
-        System.out.println("✅ " + playerPseudo + " a validé ses réponses (" + room.getValidatedPlayers().size() + "/" + room.getPlayerIds().size() + ")");
+        System.out.println("✅ " + playerPseudo + " a validé ses réponses (" + room.getValidatedPlayers().size() + "/"
+                + room.getPlayerIds().size() + ")");
 
         // Broadcast validation to other players (excluding sender)
         room.getPlayerIds().forEach(playerId -> {
@@ -241,10 +241,9 @@ public class GameServer {
 
             // Send ALL_VALIDATED with all answers to everyone
             NetworkMessage allValidatedMsg = new NetworkMessage(
-                NetworkMessage.Type.ALL_VALIDATED,
-                "SERVER",
-                room.getValidatedAnswers()
-            );
+                    NetworkMessage.Type.ALL_VALIDATED,
+                    "SERVER",
+                    room.getValidatedAnswers());
             broadcast(roomId, allValidatedMsg);
         }
     }

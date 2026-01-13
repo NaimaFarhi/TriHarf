@@ -150,6 +150,15 @@ public class JeuMultiController {
                         updatePlayerCount();
                     }
 
+                    // Get round configuration
+                    Object durationObj = data.get("duration");
+                    Object roundsObj = data.get("totalRounds");
+                    if (durationObj instanceof Number && roundsObj instanceof Number) {
+                        int duration = ((Number) durationObj).intValue();
+                        int rounds = ((Number) roundsObj).intValue();
+                        setRoundConfig(rounds, duration);
+                    }
+
                     demarrerPartie();
                 }
                 case CHAT -> {

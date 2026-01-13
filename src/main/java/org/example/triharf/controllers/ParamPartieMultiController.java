@@ -310,6 +310,11 @@ public class ParamPartieMultiController {
         // UPDATE categories in room BEFORE navigating
         if (gameServer != null && roomId != null) {
             gameServer.getRoom(roomId).setCategories(categoriesSelectionnees);
+            // Set round configuration
+            int nbRounds = spinnerNbRounds != null ? spinnerNbRounds.getValue() : 3;
+            int duration = spinnerRoundDuration != null ? spinnerRoundDuration.getValue() : 120;
+            gameServer.getRoom(roomId).setRoundConfig(nbRounds, duration);
+            System.out.println("   Manches: " + nbRounds + " x " + duration + "s");
         }
 
         System.out.println("✅ Début partie " + gameMode);

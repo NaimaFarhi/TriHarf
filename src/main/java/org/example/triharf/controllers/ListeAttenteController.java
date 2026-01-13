@@ -74,6 +74,11 @@ public class ListeAttenteController {
             gameClient.setMessageHandler(this::handleIncomingMessage);
         }
 
+        // Initialize player count (host is already connected)
+        if (lblPlayerCount != null) {
+            lblPlayerCount.setText("1");
+        }
+
         // Show start button only for host
         if (btnCommencer != null && isHost) {
             btnCommencer.setVisible(true);
@@ -133,6 +138,17 @@ public class ListeAttenteController {
                         if (players != null && !players.isEmpty()) {
                             this.playerPseudos = new ArrayList<>(players);
                             System.out.println("✅ Joueurs reçus du serveur: " + players);
+                        }
+                        // Extract round configuration
+                        Object durationObj = data.get("duration");
+                        if (durationObj instanceof Number) {
+                            this.roundDuration = ((Number) durationObj).intValue();
+                            System.out.println("✅ Durée manche reçue: " + roundDuration + "s");
+                        }
+                        Object roundsObj = data.get("totalRounds");
+                        if (roundsObj instanceof Number) {
+                            this.totalRounds = ((Number) roundsObj).intValue();
+                            System.out.println("✅ Nombre de manches reçu: " + totalRounds);
                         }
                     }
                     startGame();
