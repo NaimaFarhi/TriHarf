@@ -282,6 +282,17 @@ public class JeuMultiController {
     private String findLowestScoringPlayer() {
         String lowestPlayer = null;
         int minScore = Integer.MAX_VALUE;
+        int activeCount = 0;
+
+        // Count active players first
+        for (String p : playerList) {
+            if (!eliminatedPlayers.contains(p))
+                activeCount++;
+        }
+
+        // Don't eliminate if only 1 (or 0) players left (Winner)
+        if (activeCount <= 1)
+            return null;
 
         // Ensure we have scores for all active players
         for (String p : playerList) {

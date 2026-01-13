@@ -194,7 +194,7 @@ public class ListeAttenteController {
 
         // Enable start button when minimum players reached (host only)
         if (btnCommencer != null && isHost) {
-            int minPlayers = gameMode.equals("BATAILLE_ROYALE") ? 4 : 2;
+            int minPlayers = gameMode.equals("BATAILLE_ROYALE") ? 2 : 2;
             btnCommencer.setDisable(playersStatus.size() < minPlayers);
         }
     }
