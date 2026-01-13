@@ -41,8 +41,10 @@ public class MenuPrincipalController {
 
     @FXML
     private javafx.scene.control.Button btnRejoindre;
-    @FXML private TextField tfServerIP; // Add this field
-    @FXML private TextField tfCodePartie;
+    @FXML
+    private TextField tfServerIP; // Add this field
+    @FXML
+    private TextField tfCodePartie;
 
     private StatisticsService statisticsService = new org.example.triharf.services.StatisticsService();
 
@@ -93,7 +95,7 @@ public class MenuPrincipalController {
 
         // Fetch Global Stats
         java.util.Map<String, Object> stats = statisticsService.getGlobalStats(joueur);
-        
+
         if (lblParties != null) {
             lblParties.setText(String.valueOf(stats.getOrDefault("totalParties", 0)));
         }
@@ -101,9 +103,10 @@ public class MenuPrincipalController {
             lblBestScore.setText(String.valueOf(stats.getOrDefault("meilleurScore", 0)));
         }
         if (lblVictoires != null) {
-            // "Victoires" logic: strictly speaking, we don't have a "Win/Loss" in Solo yet, 
+            // "Victoires" logic: strictly speaking, we don't have a "Win/Loss" in Solo yet,
             // but we can simulate it or calculate "Success Rate" instead.
-            // For now, let's display success rate as "Victoires" or just hide/change label meaning?
+            // For now, let's display success rate as "Victoires" or just hide/change label
+            // meaning?
             // The FXML says "Victoires", let's map it to Success Rate or Wins if available.
             // StatisticsService has getGlobalSuccessRate.
             double successRate = statisticsService.getGlobalSuccessRate(joueur);
@@ -114,27 +117,26 @@ public class MenuPrincipalController {
         if (vboxRecords != null) {
             vboxRecords.getChildren().clear();
             var catStats = statisticsService.getStatsByCategorie(joueur);
-            
+
             // Sort by success rate descending
             catStats.entrySet().stream()
-                .sorted((e1, e2) -> {
-                    double r1 = (double) ((java.util.Map) e1.getValue()).get("tauxReussite");
-                    double r2 = (double) ((java.util.Map) e2.getValue()).get("tauxReussite");
-                    return Double.compare(r2, r1);
-                })
-                .limit(5)
-                .forEach(entry -> {
-                    String catName = entry.getKey();
-                    java.util.Map val = (java.util.Map) entry.getValue();
-                    double rate = (double) val.get("tauxReussite");
-                    int reussies = (int) val.get("reussies");
-                    
-                    javafx.scene.control.Label lbl = new javafx.scene.control.Label(
-                        String.format("%s: %.0f%% (%d mots)", catName, rate, reussies)
-                    );
-                    lbl.setStyle("-fx-text-fill: #555; -fx-font-size: 14px;");
-                    vboxRecords.getChildren().add(lbl);
-                });
+                    .sorted((e1, e2) -> {
+                        double r1 = (double) ((java.util.Map) e1.getValue()).get("tauxReussite");
+                        double r2 = (double) ((java.util.Map) e2.getValue()).get("tauxReussite");
+                        return Double.compare(r2, r1);
+                    })
+                    .limit(5)
+                    .forEach(entry -> {
+                        String catName = entry.getKey();
+                        java.util.Map val = (java.util.Map) entry.getValue();
+                        double rate = (double) val.get("tauxReussite");
+                        int reussies = (int) val.get("reussies");
+
+                        javafx.scene.control.Label lbl = new javafx.scene.control.Label(
+                                String.format("%s: %.0f%% (%d mots)", catName, rate, reussies));
+                        lbl.setStyle("-fx-text-fill: #555; -fx-font-size: 14px;");
+                        vboxRecords.getChildren().add(lbl);
+                    });
         }
     }
 
@@ -167,32 +169,51 @@ public class MenuPrincipalController {
 
     @FXML
     private void handleRejoindre() {
-        if (tfCodePartie == null || tfServerIP == null) return;
+        if (tfCodePartie == null || tfServerIP == null)
+            return;
 
         final String code = tfCodePartie.getText().trim();
-        final String serverIPPort = tfServerIP.getText().trim();
+        final String manualIP = tfServerIP.getText().trim();
 
-        if (code.isEmpty() || serverIPPort.isEmpty()) {
-            showAlert("Erreur", "Veuillez entrer l'IP du serveur et le code de la partie");
+        if (code.isEmpty()) {
+            showAlert("Erreur", "Veuillez entrer le code de la partie");
             return;
         }
 
-        // Parse IP:PORT
-        String[] parts = NetworkUtils.parseHostPort(serverIPPort);
-        if (parts == null) {
-            showAlert("Erreur", "Format IP invalide. Utilisez: 192.168.x.x:8888");
-            return;
-        }
-
-        String serverIP = parts[0];
-        int port = Integer.parseInt(parts[1]);
-
-        if (btnRejoindre != null) btnRejoindre.setDisable(true);
+        if (btnRejoindre != null)
+            btnRejoindre.setDisable(true);
 
         new Thread(() -> {
             try {
-                org.example.triharf.network.GameClient client =
-                        new org.example.triharf.network.GameClient(serverIP, port);
+                String serverIP;
+                int port;
+
+                if (manualIP.isEmpty()) {
+                    // Start discovery
+                    javafx.application.Platform.runLater(() -> btnRejoindre.setText("Recherche..."));
+
+                    String discovered = org.example.triharf.network.NetworkDiscovery.discoverServer(2500); // 2.5s
+                                                                                                           // timeout
+
+                    if (discovered == null) {
+                        throw new IOException("Serveur introuvable sur le réseau local.");
+                    }
+                    serverIP = discovered;
+                    port = 8888; // Default port
+                } else {
+                    // Use manual IP
+                    String[] parts = NetworkUtils.parseHostPort(manualIP);
+                    if (parts == null) {
+                        throw new IOException("Format IP invalide. (Attendu: IP:PORT ou IP)");
+                    }
+                    serverIP = parts[0];
+                    port = Integer.parseInt(parts[1]);
+                }
+
+                System.out.println("Tentative de connexion à " + serverIP + ":" + port);
+
+                org.example.triharf.network.GameClient client = new org.example.triharf.network.GameClient(serverIP,
+                        port);
 
                 client.connect();
 
@@ -203,8 +224,7 @@ public class MenuPrincipalController {
                 client.sendMessage(new org.example.triharf.network.NetworkMessage(
                         org.example.triharf.network.NetworkMessage.Type.JOIN_ROOM,
                         pseudo,
-                        code
-                ));
+                        code));
 
                 javafx.application.Platform.runLater(() -> {
                     try {
@@ -228,13 +248,17 @@ public class MenuPrincipalController {
 
             } catch (IOException e) {
                 javafx.application.Platform.runLater(() -> {
-                    if (btnRejoindre != null) btnRejoindre.setDisable(false);
+                    if (btnRejoindre != null) {
+                        btnRejoindre.setDisable(false);
+                        btnRejoindre.setText("REJOINDRE LA PARTIE");
+                    }
                     showAlert("Erreur de connexion",
-                            "Impossible de rejoindre. Vérifiez l'IP et le code.");
+                            e.getMessage());
                 });
             }
         }).start();
     }
+
     private void showAlert(String title, String content) {
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
         alert.setTitle(title);

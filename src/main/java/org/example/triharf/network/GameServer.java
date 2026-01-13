@@ -23,10 +23,16 @@ public class GameServer {
         this.running = false;
     }
 
+    private NetworkDiscovery discovery;
+
     public void start() throws IOException {
         serverSocket = new ServerSocket(PORT);
         running = true;
         System.out.println("Server started on port " + PORT);
+
+        // Start UDP Discovery
+        discovery = new NetworkDiscovery();
+        discovery.startBroadcasting(PORT);
 
         while (running) {
             Socket clientSocket = serverSocket.accept();
@@ -40,7 +46,12 @@ public class GameServer {
 
     public void stop() throws IOException {
         running = false;
-        serverSocket.close();
+        if (discovery != null) {
+            discovery.stopBroadcasting();
+        }
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            serverSocket.close();
+        }
         threadPool.shutdown();
     }
 

@@ -177,7 +177,7 @@
 
                                 <VBox spacing="5.0">
                                     <children>
-                                        <TextField fx:id="tfServerIP" promptText="IP Serveur (ex: 192.168.1.1)" />
+                                        <TextField fx:id="tfServerIP" promptText="IP Serveur (vide = auto-détection)" />
                                         <TextField fx:id="tfCodePartie" promptText="Code Partie" />
                                     </children>
                                 </VBox>
