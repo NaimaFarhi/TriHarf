@@ -1081,28 +1081,24 @@ public class JeuMultiController {
 
     @FXML
     private void handleTerminer() {
-        terminerPartie();
+        // This is usually the "Surrender" or "Finish early" debug button
+        // In multiplayer, it should just validate what we have
+        handleValider();
     }
 
     private void handleTerminerAuto() {
-        // Timer ended - auto-validate this player's answers
-        System.out.println("⏰ Temps écoulé - validation automatique des réponses");
+        System.out.println("⏰ Temps écoulé ! Validation automatique...");
 
-        if (!hasValidated) {
-            // Auto-validate by calling the validation method
-            handleValider();
-        }
+        javafx.application.Platform.runLater(() -> {
+            if (!hasValidated) {
+                handleValider();
+            }
+        });
     }
 
     private void terminerPartie() {
-        // This is now only called for manual termination
-        // The flow goes through handleValider() -> server validation -> score
-        // calculation
-        System.out.println("🏁 Tentative de terminer la partie manuellement");
-
-        if (!hasValidated) {
-            handleValider();
-        }
+        // Deprecated method - redirecting to handleValider
+        handleValider();
     }
 
     /*
