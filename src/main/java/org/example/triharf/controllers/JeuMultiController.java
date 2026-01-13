@@ -37,6 +37,7 @@ public class JeuMultiController {
     @FXML private TextField tfMessage;
     @FXML private Button btnSend;
     @FXML private Button btnValider;
+    @FXML private Button btnVoirResultats;
     @FXML private Label lblValidationStatus;
 
     // ===== SERVICES =====
@@ -67,6 +68,7 @@ public class JeuMultiController {
     private boolean hasValidated = false;
     private Set<String> validatedPlayers = new HashSet<>();
     private boolean allPlayersValidated = false;
+    private Map<String, Integer> playerFinalScores = new HashMap<>(); // Store final scores for results page
 
     // ===== INJECTED DATA =====
     private List<String> categoriesNoms;
@@ -643,11 +645,23 @@ public class JeuMultiController {
     private void revealAllAnswers() {
         System.out.println("🎉 Tous les joueurs ont validé - révélation des réponses!");
 
+        // Stop the timer
+        if (gameEngine != null) {
+            gameEngine.stopTimer();
+        }
+        if (lblTimer != null) {
+            lblTimer.setText("TERMINÉ");
+            lblTimer.setStyle("-fx-text-fill: #27ae60;");
+        }
+
         // Update status
         if (lblValidationStatus != null) {
             lblValidationStatus.setText("✓ Tous ont validé - Calcul des scores...");
             lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
         }
+
+        // Clear previous scores
+        playerFinalScores.clear();
 
         // Calculate and display scores for each player
         for (String playerName : playerList) {
@@ -696,6 +710,9 @@ public class JeuMultiController {
                 cellIndex++;
             }
 
+            // Store final score for results page
+            playerFinalScores.put(playerName, totalScore);
+
             // Update total score label
             Label scoreLabel = playerScoreLabels.get(playerName);
             if (scoreLabel != null) {
@@ -708,11 +725,17 @@ public class JeuMultiController {
 
         // Update status
         if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Scores calculés!");
+            lblValidationStatus.setText("✓ Scores calculés! Cliquez pour voir les résultats");
+        }
+
+        // Show the results button
+        if (btnVoirResultats != null) {
+            btnVoirResultats.setVisible(true);
+            btnVoirResultats.setManaged(true);
         }
 
         // Add system message to chat
-        addChatMessage("SYSTÈME", "Toutes les réponses ont été révélées et les scores calculés!", false);
+        addChatMessage("SYSTÈME", "Partie terminée! Cliquez sur 'VOIR LES RÉSULTATS' pour le classement.", false);
     }
 
     private int calculateWordPoints(String word, Categorie categorie, String playerName) {
@@ -759,6 +782,34 @@ public class JeuMultiController {
         }
 
         return points;
+    }
+
+    @FXML
+    private void handleVoirResultats() {
+        navigateToMultiplayerResults();
+    }
+
+    private void navigateToMultiplayerResults() {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/resultats_multi.fxml"));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof ResultatsMultiController) {
+                ResultatsMultiController rc = (ResultatsMultiController) controller;
+                rc.displayRanking(playerFinalScores, joueur, lettreActuelle);
+            }
+
+            Stage stage = (Stage) btnVoirResultats.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.setTitle("Résultats - Classement");
+
+        } catch (IOException e) {
+            System.err.println("Erreur navigation vers résultats: " + e.getMessage());
+            e.printStackTrace();
+            // Fallback to menu if results page doesn't exist
+            retourMenu();
+        }
     }
 
     /* =======================
