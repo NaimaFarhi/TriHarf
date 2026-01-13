@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.effect.*?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="600.0" prefWidth="900.0" spacing="0.0"
+      styleClass="root-vbox"
+      stylesheets="@../css/main.css"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.triharf.controllers.ResultatsMultiController">
+
+    <!-- Header Section -->
+    <VBox alignment="CENTER" prefHeight="140.0" spacing="10.0" styleClass="results-header-victory" style="-fx-padding: 20;">
+        <children>
+            <Label text="🏆" style="-fx-font-size: 48px;">
+                <effect>
+                    <DropShadow color="rgba(255, 215, 0, 0.6)" radius="20" spread="0.3"/>
+                </effect>
+            </Label>
+            <Label text="CLASSEMENT FINAL" styleClass="results-title"/>
+        </children>
+    </VBox>
+
+    <!-- Main Content Area -->
+    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane" style="-fx-background: transparent; -fx-background-color: transparent;">
+        <content>
+            <VBox alignment="TOP_CENTER" spacing="30.0" style="-fx-padding: 20 40;">
+                
+                <!-- Podium Section (Top 3) -->
+                <HBox fx:id="podiumContainer" alignment="BOTTOM_CENTER" spacing="20.0" prefHeight="250.0" style="-fx-padding: 0 0 20 0;">
+                    <!-- 2nd Place -->
+                    <VBox alignment="BOTTOM_CENTER" spacing="5">
+                        <Label fx:id="lblName2" text="Joueur 2" styleClass="podium-name"/>
+                        <VBox alignment="BOTTOM_CENTER" styleClass="podium-bar-silver" prefWidth="100" prefHeight="130">
+                            <children>
+                                <Label text="2" styleClass="podium-rank"/>
+                                <Label fx:id="lblScore2" text="850" styleClass="podium-score"/>
+                            </children>
+                        </VBox>
+                         <Label text="🥈" style="-fx-font-size: 24px;"/>
+                    </VBox>
+
+                    <!-- 1st Place (Center, Taller) -->
+                    <VBox alignment="BOTTOM_CENTER" spacing="5">
+                        <Label text="👑" style="-fx-font-size: 32px;"/>
+                        <Label fx:id="lblName1" text="Joueur 1" styleClass="podium-name-gold"/>
+                        <VBox alignment="BOTTOM_CENTER" styleClass="podium-bar-gold" prefWidth="120" prefHeight="180">
+                            <children>
+                                <Label text="1" styleClass="podium-rank"/>
+                                <Label fx:id="lblScore1" text="1200" styleClass="podium-score"/>
+                            </children>
+                        </VBox>
+                    </VBox>
+
+                    <!-- 3rd Place -->
+                    <VBox alignment="BOTTOM_CENTER" spacing="5">
+                        <Label fx:id="lblName3" text="Joueur 3" styleClass="podium-name"/>
+                        <VBox alignment="BOTTOM_CENTER" styleClass="podium-bar-bronze" prefWidth="100" prefHeight="100">
+                            <children>
+                                <Label text="3" styleClass="podium-rank"/>
+                                <Label fx:id="lblScore3" text="620" styleClass="podium-score"/>
+                            </children>
+                        </VBox>
+                        <Label text="🥉" style="-fx-font-size: 24px;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Divider -->
+                <Region style="-fx-background-color: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent); -fx-pref-height: 1; -fx-pref-width: 400;"/>
+
+                <!-- Remaining Players List (Horizontal) -->
+                <ScrollPane vbarPolicy="NEVER" hbarPolicy="AS_NEEDED" fitToHeight="true" style="-fx-background: transparent; -fx-background-color: transparent;">
+                    <content>
+                        <HBox fx:id="listContainer" spacing="15.0" alignment="CENTER" style="-fx-padding: 10;">
+                            <!-- Dynamic Cards will be added here -->
+                        </HBox>
+                    </content>
+                </ScrollPane>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- Bottom Action Bar -->
+    <HBox alignment="CENTER" spacing="25" styleClass="bottom-action-bar">
+        <children>
+            <Button fx:id="btnRevanche" onAction="#handleRevanche" styleClass="btn-retry" text="🔄 REVANCHE" prefWidth="200" prefHeight="50"/>
+            <Button fx:id="btnMenu" onAction="#handleMenu" styleClass="btn-menu" text="🏠 MENU PRINCIPAL" prefWidth="200" prefHeight="50"/>
+        </children>
+    </HBox>
+
+</VBox>

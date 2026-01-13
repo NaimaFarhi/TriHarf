@@ -86,10 +86,10 @@
 
     <!-- Contenu principal -->
     <center>
-        <HBox spacing="15.0" style="-fx-padding: 20;">
+        <HBox spacing="15.0" style="-fx-padding: 20;" HBox.hgrow="ALWAYS">
             <children>
                 <!-- Tableau des joueurs -->
-                <VBox spacing="0.0" prefWidth="650.0" styleClass="content-panel" style="-fx-padding: 0;">
+                <VBox spacing="0.0" HBox.hgrow="ALWAYS" styleClass="content-panel" style="-fx-padding: 0;">
                     <children>
                         <HBox fx:id="hboxTableHeader" spacing="0.0" style="-fx-background-color: rgba(231, 76, 60, 0.1); -fx-padding: 10;" alignment="CENTER_LEFT">
                             <children>
@@ -102,7 +102,7 @@
 
                         <Separator styleClass="stats-separator" />
 
-                        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
                             <content>
                                 <VBox fx:id="vboxPlayers" spacing="5" style="-fx-padding: 5;">
                                     <!-- Joueurs dynamiques -->
@@ -113,7 +113,7 @@
                 </VBox>
 
                 <!-- Barre de chat -->
-                <VBox spacing="0.0" prefWidth="220.0" styleClass="content-panel" style="-fx-padding: 0;">
+                <VBox spacing="0.0" minWidth="220.0" maxWidth="280.0" styleClass="content-panel" style="-fx-padding: 0;">
                     <children>
                         <HBox alignment="CENTER" style="-fx-background-color: rgba(231, 76, 60, 0.1); -fx-padding: 12; -fx-background-radius: 12 12 0 0;">
                             <children>
@@ -121,7 +121,7 @@
                             </children>
                         </HBox>
 
-                        <ScrollPane fitToWidth="true" prefHeight="440.0" styleClass="scroll-pane">
+                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
                             <content>
                                 <VBox fx:id="vboxMessages" spacing="10.0" style="-fx-padding: 10;">
                                     <!-- Messages dynamiques -->
@@ -130,7 +130,7 @@
                         </ScrollPane>
 
                         <HBox spacing="5.0" style="-fx-padding: 10; -fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 0 0 12 12;" alignment="CENTER">
-                            <TextField fx:id="tfMessage" promptText="Écrivez un message..." prefWidth="150.0"/>
+                            <TextField fx:id="tfMessage" promptText="Écrivez un message..." HBox.hgrow="ALWAYS"/>
                             <Button fx:id="btnSend" text="➤" styleClass="btn-secondary"/>
                         </HBox>
                     </children>

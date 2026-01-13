@@ -4,8 +4,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -58,7 +61,7 @@ public class ResultatsController {
      * Reçoit les données de JeuSoloController et les affiche
      */
     public void displayResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie, String joueur,
-                               Character lettre) {
+            Character lettre) {
 
         if (resultats == null || resultats.isEmpty()) {
             System.err.println("❌ Résultats vides!");
@@ -95,8 +98,10 @@ public class ResultatsController {
     /**
      * Message personnalisé selon le score
      */
-    @FXML private Label lblTitre;
-    @FXML private Label lblEmoji;
+    @FXML
+    private Label lblTitre;
+    @FXML
+    private Label lblEmoji;
 
     private org.example.triharf.utils.SoundManager soundManager = new org.example.triharf.utils.SoundManager();
 
@@ -134,67 +139,173 @@ public class ResultatsController {
     }
 
     /**
-     * Affiche les détails du récapitulatif
+     * Affiche les détails du récapitulatif avec un design amélioré
      */
     private void afficherDetailsRecapitulatif() {
-        if (vboxDetails == null) return;
+        if (vboxDetails == null)
+            return;
 
         vboxDetails.getChildren().clear();
+        vboxDetails.setSpacing(15);
 
         long nbValides = resultats.stream().filter(ResultatPartie::isValide).count();
         long nbRejetes = resultats.size() - nbValides;
 
-        // Lettre
-        Label lblLettreDetail = new Label("Lettre : " + lettre);
-        lblLettreDetail.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;");
-        vboxDetails.getChildren().add(lblLettreDetail);
+        // ===== STATS GRID (Letter, Duration, Valid, Rejected) =====
+        HBox statsGrid = new HBox(15);
+        statsGrid.setAlignment(javafx.geometry.Pos.CENTER);
+        statsGrid.setStyle("-fx-padding: 10 0 20 0;");
 
-        // Durée
-        Label lblDureeDetail = new Label("Durée : " + dureePartie + " secondes");
-        lblDureeDetail.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f8c8d;");
-        vboxDetails.getChildren().add(lblDureeDetail);
+        // Stat Card: Letter
+        VBox letterCard = createStatCard("🔤", "LETTRE", String.valueOf(lettre), "#9b59b6");
 
-        // Résumé
-        Label lblMotsValides = new Label("✓ Mots valides : " + nbValides + "/" + resultats.size());
-        lblMotsValides.setStyle("-fx-font-size: 12px; -fx-text-fill: #27ae60;");
-        vboxDetails.getChildren().add(lblMotsValides);
+        // Stat Card: Duration
+        String durationText = dureePartie >= 60
+                ? String.format("%dm %ds", dureePartie / 60, dureePartie % 60)
+                : dureePartie + "s";
+        VBox durationCard = createStatCard("⏱️", "DURÉE", durationText, "#3498db");
 
+        // Stat Card: Valid Words
+        VBox validCard = createStatCard("✓", "VALIDES", nbValides + "/" + resultats.size(), "#27ae60");
+
+        // Stat Card: Rejected Words (only if there are rejections)
         if (nbRejetes > 0) {
-            Label lblMotsRejetes = new Label("✗ Mots rejetés : " + nbRejetes);
-            lblMotsRejetes.setStyle("-fx-font-size: 12px; -fx-text-fill: #e74c3c;");
-            vboxDetails.getChildren().add(lblMotsRejetes);
+            VBox rejectedCard = createStatCard("✗", "REJETÉS", String.valueOf(nbRejetes), "#e74c3c");
+            statsGrid.getChildren().addAll(letterCard, durationCard, validCard, rejectedCard);
+        } else {
+            statsGrid.getChildren().addAll(letterCard, durationCard, validCard);
         }
 
-        // Détail des réponses
-        Label titleCategories = new Label("Détail des réponses :");
-        titleCategories.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #34495e; -fx-padding: 15 0 10 0;");
-        vboxDetails.getChildren().add(titleCategories);
+        vboxDetails.getChildren().add(statsGrid);
+
+        // ===== DIVIDER =====
+        HBox divider = new HBox();
+        divider.setAlignment(javafx.geometry.Pos.CENTER);
+        Region dividerLine = new Region();
+        dividerLine.setStyle(
+                "-fx-background-color: linear-gradient(to right, transparent, rgba(155, 89, 182, 0.4), transparent); -fx-pref-height: 1; -fx-pref-width: 300;");
+        divider.getChildren().add(dividerLine);
+        vboxDetails.getChildren().add(divider);
+
+        // ===== RESPONSES SECTION TITLE =====
+        HBox titleBox = new HBox(8);
+        titleBox.setAlignment(javafx.geometry.Pos.CENTER);
+        titleBox.setStyle("-fx-padding: 15 0 10 0;");
+        Label titleIcon = new Label("📋");
+        titleIcon.setStyle("-fx-font-size: 16px;");
+        Label titleCategories = new Label("DÉTAIL DES RÉPONSES");
+        titleCategories.setStyle(
+                "-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #a0a0b0; -fx-letter-spacing: 1px;");
+        titleBox.getChildren().addAll(titleIcon, titleCategories);
+        vboxDetails.getChildren().add(titleBox);
+
+        // ===== RESULTS LIST =====
+        VBox resultsList = new VBox(8);
+        resultsList.setStyle("-fx-padding: 5 0;");
 
         for (ResultatPartie resultat : resultats) {
-            HBox ligneResultat = new HBox(10);
-            ligneResultat.setPadding(new Insets(8, 0, 8, 0));
-            ligneResultat.setStyle("-fx-border-color: #ecf0f1; -fx-border-width: 0 0 1 0;");
-
-            String statut = resultat.isValide() ? "✓" : "✗";
-            String couleur = resultat.isValide() ? "#27ae60" : "#e74c3c";
-            Label lblStatut = new Label(statut);
-            lblStatut.setStyle("-fx-font-weight: bold; -fx-text-fill: " + couleur + "; -fx-font-size: 14px;");
-            lblStatut.setPrefWidth(20);
-
-            Label lblCategorie = new Label(resultat.getCategorie());
-            lblCategorie.setPrefWidth(100);
-            lblCategorie.setStyle("-fx-font-size: 11px;");
-
-            Label lblMot = new Label(resultat.getMot().isEmpty() ? "-" : resultat.getMot());
-            lblMot.setPrefWidth(150);
-            lblMot.setStyle("-fx-font-size: 11px; -fx-text-fill: #34495e;");
-
-            Label lblPts = new Label(resultat.getPoints() + " pts");
-            lblPts.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;");
-
-            ligneResultat.getChildren().addAll(lblStatut, lblCategorie, lblMot, lblPts);
-            vboxDetails.getChildren().add(ligneResultat);
+            HBox resultItem = createResultItem(resultat);
+            resultsList.getChildren().add(resultItem);
         }
+
+        vboxDetails.getChildren().add(resultsList);
+    }
+
+    /**
+     * Creates a styled stat card with icon, label, and value
+     */
+    private VBox createStatCard(String icon, String label, String value, String accentColor) {
+        VBox card = new VBox(5);
+        card.setAlignment(javafx.geometry.Pos.CENTER);
+        card.setStyle(String.format(
+                "-fx-background-color: rgba(255, 255, 255, 0.05); " +
+                        "-fx-background-radius: 12; " +
+                        "-fx-border-color: %s; " +
+                        "-fx-border-radius: 12; " +
+                        "-fx-border-width: 2; " +
+                        "-fx-padding: 15 25; " +
+                        "-fx-min-width: 100;",
+                accentColor + "66" // Add transparency to border
+        ));
+
+        Label iconLabel = new Label(icon);
+        iconLabel.setStyle("-fx-font-size: 24px;");
+
+        Label valueLabel = new Label(value);
+        valueLabel.setStyle(String.format(
+                "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: %s;",
+                accentColor));
+
+        Label labelText = new Label(label);
+        labelText.setStyle("-fx-font-size: 10px; -fx-text-fill: #888; -fx-font-weight: bold;");
+
+        card.getChildren().addAll(iconLabel, valueLabel, labelText);
+        return card;
+    }
+
+    /**
+     * Creates a styled result item row
+     */
+    private HBox createResultItem(ResultatPartie resultat) {
+        HBox item = new HBox(15);
+        item.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        item.setPadding(new Insets(12, 15, 12, 15));
+
+        boolean isValid = resultat.isValide();
+        String bgColor = isValid ? "rgba(39, 174, 96, 0.1)" : "rgba(231, 76, 60, 0.1)";
+        String borderColor = isValid ? "rgba(39, 174, 96, 0.3)" : "rgba(231, 76, 60, 0.3)";
+        String statusColor = isValid ? "#27ae60" : "#e74c3c";
+
+        item.setStyle(String.format(
+                "-fx-background-color: %s; " +
+                        "-fx-background-radius: 10; " +
+                        "-fx-border-color: %s; " +
+                        "-fx-border-radius: 10; " +
+                        "-fx-border-width: 1;",
+                bgColor, borderColor));
+
+        // Status indicator (circle with checkmark or X)
+        Label statusIndicator = new Label(isValid ? "✓" : "✗");
+        statusIndicator.setStyle(String.format(
+                "-fx-font-size: 16px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-text-fill: %s; " +
+                        "-fx-background-color: %s; " +
+                        "-fx-background-radius: 15; " +
+                        "-fx-min-width: 30; " +
+                        "-fx-min-height: 30; " +
+                        "-fx-alignment: center;",
+                statusColor, statusColor + "22"));
+        statusIndicator.setAlignment(javafx.geometry.Pos.CENTER);
+        statusIndicator.setMinWidth(30);
+        statusIndicator.setMinHeight(30);
+
+        // Category name
+        Label categoryLabel = new Label(resultat.getCategorie());
+        categoryLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white;");
+        categoryLabel.setPrefWidth(120);
+
+        // Word/Answer
+        String motText = resultat.getMot().isEmpty() ? "—" : resultat.getMot();
+        Label motLabel = new Label(motText);
+        motLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #ccc;");
+        HBox.setHgrow(motLabel, javafx.scene.layout.Priority.ALWAYS);
+
+        // Points badge
+        int points = resultat.getPoints();
+        Label pointsBadge = new Label("+" + points);
+        String pointsColor = points > 0 ? "#ffd700" : "#888";
+        pointsBadge.setStyle(String.format(
+                "-fx-font-size: 14px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-text-fill: %s; " +
+                        "-fx-background-color: rgba(255, 215, 0, 0.15); " +
+                        "-fx-background-radius: 12; " +
+                        "-fx-padding: 4 12;",
+                pointsColor));
+
+        item.getChildren().addAll(statusIndicator, categoryLabel, motLabel, pointsBadge);
+        return item;
     }
 
     @FXML

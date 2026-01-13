@@ -15,7 +15,7 @@
     <top>
         <VBox spacing="0">
             <children>
-                <HBox alignment="CENTER" prefHeight="70.0" styleClass="game-header" spacing="60.0" style="-fx-border-color: #c0392b; -fx-background-color: rgba(192, 57, 43, 0.2);">
+                <HBox alignment="CENTER" prefHeight="70.0" styleClass="game-header" spacing="40.0" style="-fx-border-color: #c0392b; -fx-background-color: rgba(192, 57, 43, 0.2);">
                     <children>
                         <!-- Bouton flèche -->
                         <Button fx:id="btnBack" text="←" styleClass="btn-back"/>
@@ -30,6 +30,16 @@
                             </children>
                         </HBox>
 
+                        <!-- LETTRE À TROUVER -->
+                        <VBox alignment="CENTER" spacing="2">
+                            <children>
+                                <Label text="Lettre" styleClass="info-label" style="-fx-font-size: 10px;" />
+                                <Label fx:id="lblLettre" text="" style="-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b); -fx-background-radius: 30; -fx-text-fill: white; -fx-padding: 5 15; -fx-font-weight: bold;">
+                                    <font><Font size="28.0"/></font>
+                                </Label>
+                            </children>
+                        </VBox>
+
                         <Label text="BATTLE ROYALE" styleClass="header-title" style="-fx-text-fill: #e74c3c;" />
 
                         <!-- JOUEURS -->
@@ -42,29 +52,17 @@
                     </children>
                 </HBox>
 
-                <!-- Bande avec la lettre -->
-                <HBox alignment="CENTER" prefHeight="80.0" style="-fx-background-color: rgba(192, 57, 43, 0.1); -fx-padding: 15;">
-                    <children>
-                        <VBox alignment="CENTER" spacing="5">
-                            <children>
-                                <Label text="Lettre à trouver" styleClass="info-label" style="-fx-font-size: 14px;" />
-                                <Label fx:id="lblLettre" text="" styleClass="letter-circle" style="-fx-background-color: #c0392b;">
-                                    <font><Font size="42.0"/></font>
-                                </Label>
-                            </children>
-                        </VBox>
-                    </children>
-                </HBox>
+
             </children>
         </VBox>
     </top>
 
     <!-- Contenu principal -->
     <center>
-        <HBox spacing="15.0" style="-fx-padding: 20;">
+        <HBox spacing="15.0" style="-fx-padding: 20;" HBox.hgrow="ALWAYS">
             <children>
                 <!-- Tableau des joueurs -->
-                <VBox spacing="0.0" prefWidth="650.0" styleClass="content-panel" style="-fx-padding: 0;">
+                <VBox spacing="0.0" HBox.hgrow="ALWAYS" styleClass="content-panel" style="-fx-padding: 0;">
                     <children>
                         <HBox fx:id="hboxTableHeader" spacing="0.0" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 10;" alignment="CENTER_LEFT">
                             <children>
@@ -84,7 +82,7 @@
                 </VBox>
 
                 <!-- Chat / Log -->
-                <VBox spacing="0.0" prefWidth="220.0" styleClass="content-panel" style="-fx-padding: 0;">
+                <VBox spacing="0.0" minWidth="220.0" maxWidth="280.0" styleClass="content-panel" style="-fx-padding: 0;">
                     <children>
                         <HBox alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 12; -fx-background-radius: 12 12 0 0;">
                             <children>
@@ -92,14 +90,14 @@
                             </children>
                         </HBox>
 
-                        <ScrollPane fitToWidth="true" prefHeight="440.0" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
                             <content>
                                 <VBox fx:id="vboxMessages" spacing="10.0" style="-fx-padding: 10;"/>
                             </content>
                         </ScrollPane>
 
                         <HBox spacing="5.0" style="-fx-padding: 10; -fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 0 0 12 12;" alignment="CENTER">
-                            <TextField fx:id="tfMessageChat" promptText="Écrivez un message..." prefWidth="150.0" onAction="#handleSendMessage" />
+                            <TextField fx:id="tfMessageChat" promptText="Écrivez un message..." HBox.hgrow="ALWAYS" onAction="#handleSendMessage" />
                             <Button fx:id="btnEnvoyer" text="➤" onAction="#handleSendMessage" styleClass="btn-secondary"/>
                         </HBox>
                     </children>

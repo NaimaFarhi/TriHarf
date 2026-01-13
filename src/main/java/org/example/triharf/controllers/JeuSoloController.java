@@ -29,11 +29,16 @@ import java.util.*;
 public class JeuSoloController {
 
     // ================= UI =================
-    @FXML private Label lblTimer;
-    @FXML private Label lblLettre;
-    @FXML private FlowPane containerCategories;
-    @FXML private Button btnTerminer;
-    @FXML private Button btnRetour;
+    @FXML
+    private Label lblTimer;
+    @FXML
+    private Label lblLettre;
+    @FXML
+    private FlowPane containerCategories;
+    @FXML
+    private Button btnTerminer;
+    @FXML
+    private Button btnRetour;
 
     // ================= STATE =================
     private GameSession gameSession;
@@ -87,8 +92,10 @@ public class JeuSoloController {
         }
 
         // Fallback: Si pas injectés, on prend les globaux
-        if (joueur == null) joueur = ParametresGenerauxController.pseudoGlobal;
-        if (langue == null) langue = ParametresGenerauxController.langueGlobale;
+        if (joueur == null)
+            joueur = ParametresGenerauxController.pseudoGlobal;
+        if (langue == null)
+            langue = ParametresGenerauxController.langueGlobale;
 
         gameSession = new GameSession(joueur, langue);
 
@@ -96,7 +103,7 @@ public class JeuSoloController {
         int dureeSecondes = switch (difficulte) {
             case 0 -> 180; // 3 min
             case 1 -> 120; // 2 min
-            case 2 -> 60;  // 1 min
+            case 2 -> 60; // 1 min
             default -> 120;
         };
 
@@ -106,9 +113,7 @@ public class JeuSoloController {
         lblLettre.setText(gameSession.getLettre().toString());
 
         // Timer
-        gameSession.getGameEngine().setOnTimerUpdate(() ->
-                lblTimer.setText(gameSession.getGameEngine().formatTime())
-        );
+        gameSession.getGameEngine().setOnTimerUpdate(() -> lblTimer.setText(gameSession.getGameEngine().formatTime()));
 
         gameSession.getGameEngine().setOnGameEnd(this::terminerPartie);
 
@@ -121,15 +126,75 @@ public class JeuSoloController {
         containerCategories.getChildren().clear();
         champsParCategorie.clear();
 
+        // Array of accent colors for variety
+        String[] accentColors = {
+                "#9b59b6", "#3498db", "#e74c3c", "#2ecc71",
+                "#f39c12", "#1abc9c", "#e91e63", "#00bcd4"
+        };
+
+        int colorIndex = 0;
         for (Categorie categorie : categories) {
+            String accentColor = accentColors[colorIndex % accentColors.length];
+            colorIndex++;
 
-            VBox box = new VBox(8);
-            box.setPadding(new Insets(10));
-            box.setPrefWidth(180);
+            VBox box = new VBox(12);
+            box.setPadding(new Insets(18));
+            box.setPrefWidth(200);
+            box.setMinWidth(180);
+            box.setStyle(String.format(
+                    "-fx-background-color: rgba(40, 40, 60, 0.8); " +
+                            "-fx-background-radius: 15; " +
+                            "-fx-border-color: %s55; " +
+                            "-fx-border-radius: 15; " +
+                            "-fx-border-width: 2; " +
+                            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 3);",
+                    accentColor));
 
-            Label label = new Label(categorie.getNom());
+            // Category label with icon
+            Label label = new Label("📁 " + categorie.getNom());
+            label.setStyle(String.format(
+                    "-fx-font-size: 14px; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-text-fill: %s;",
+                    accentColor));
+
+            // Text field with dark styling
             TextField tf = new TextField();
-            tf.setPromptText("Mot...");
+            tf.setPromptText("Entrez un mot...");
+            tf.setStyle(
+                    "-fx-background-color: rgba(0, 0, 0, 0.3); " +
+                            "-fx-text-fill: white; " +
+                            "-fx-prompt-text-fill: #777; " +
+                            "-fx-background-radius: 8; " +
+                            "-fx-border-color: rgba(255, 255, 255, 0.15); " +
+                            "-fx-border-radius: 8; " +
+                            "-fx-padding: 10; " +
+                            "-fx-font-size: 14px;");
+
+            // Add focus effect
+            tf.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (isFocused) {
+                    tf.setStyle(
+                            "-fx-background-color: rgba(0, 0, 0, 0.4); " +
+                                    "-fx-text-fill: white; " +
+                                    "-fx-prompt-text-fill: #888; " +
+                                    "-fx-background-radius: 8; " +
+                                    "-fx-border-color: " + accentColor + "; " +
+                                    "-fx-border-radius: 8; " +
+                                    "-fx-padding: 10; " +
+                                    "-fx-font-size: 14px;");
+                } else {
+                    tf.setStyle(
+                            "-fx-background-color: rgba(0, 0, 0, 0.3); " +
+                                    "-fx-text-fill: white; " +
+                                    "-fx-prompt-text-fill: #777; " +
+                                    "-fx-background-radius: 8; " +
+                                    "-fx-border-color: rgba(255, 255, 255, 0.15); " +
+                                    "-fx-border-radius: 8; " +
+                                    "-fx-padding: 10; " +
+                                    "-fx-font-size: 14px;");
+                }
+            });
 
             champsParCategorie.put(categorie, tf);
 
@@ -148,7 +213,8 @@ public class JeuSoloController {
     private boolean partieTerminee = false;
 
     private synchronized void terminerPartie() {
-        if (partieTerminee) return;
+        if (partieTerminee)
+            return;
         partieTerminee = true;
 
         // Récupération réponses UI → GameSession
@@ -158,8 +224,7 @@ public class JeuSoloController {
 
         gameSession.terminerPartie();
 
-        List<ResultatPartie> resultats =
-                gameSession.getResultsManager().getResultats();
+        List<ResultatPartie> resultats = gameSession.getResultsManager().getResultats();
 
         int score = gameSession.getResultsManager().getScoreTotal();
         long duree = gameSession.getResultsManager().getDureePartie();
@@ -172,12 +237,10 @@ public class JeuSoloController {
     private void navigateToResults(
             List<ResultatPartie> resultats,
             int score,
-            long duree
-    ) {
+            long duree) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/Resultats.fxml")
-            );
+                    HelloApplication.class.getResource("/fxml/Resultats.fxml"));
             Parent root = loader.load();
 
             ResultatsController controller = loader.getController();
@@ -186,8 +249,7 @@ public class JeuSoloController {
                     score,
                     duree,
                     joueur,
-                    gameSession.getLettre()
-            );
+                    gameSession.getLettre());
 
             Stage stage = (Stage) btnTerminer.getScene().getWindow();
             if (stage == null && btnRetour.getScene() != null) {
@@ -204,7 +266,6 @@ public class JeuSoloController {
         }
     }
 
-
     private int difficulte = 1;
 
     public void setDifficulte(int difficulte) {
@@ -212,12 +273,10 @@ public class JeuSoloController {
         System.out.println("🎯 Difficulté reçue: " + difficulte);
     }
 
-
     private void retourMenu() {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/main_menu.fxml")
-            );
+                    HelloApplication.class.getResource("/fxml/main_menu.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();
