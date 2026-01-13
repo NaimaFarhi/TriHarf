@@ -776,7 +776,8 @@ public class JeuMultiController {
         }
 
         // Score cell at the end
-        Label scoreLabel = new Label("-");
+        int currentScore = cumulativeScores.getOrDefault(playerName, 0);
+        Label scoreLabel = new Label(String.valueOf(currentScore));
         scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
         scoreLabel.setMinWidth(SCORE_WIDTH);
         scoreLabel.setPrefWidth(SCORE_WIDTH);
