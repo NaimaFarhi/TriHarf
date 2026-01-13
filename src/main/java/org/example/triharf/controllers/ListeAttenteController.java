@@ -116,10 +116,15 @@ public class ListeAttenteController {
                     updatePlayerList(players);
                 }
                 case GAME_START -> {
+                    // Log raw GAME_START data for debugging
+                    System.out.println("🔔 GAME_START reçu (ListeAttenteController)");
+
                     // Extract categories, letter, and players from GAME_START message
                     @SuppressWarnings("unchecked")
                     java.util.Map<String, Object> data = (java.util.Map<String, Object>) message.getData();
                     if (data != null) {
+                        System.out.println("📦 GAME_START data keys: " + data.keySet());
+
                         @SuppressWarnings("unchecked")
                         List<String> cats = (List<String>) data.get("categories");
                         if (cats != null && !cats.isEmpty()) {
@@ -141,14 +146,23 @@ public class ListeAttenteController {
                         }
                         // Extract round configuration
                         Object durationObj = data.get("duration");
+                        Object roundsObj = data.get("totalRounds");
+                        System.out.println("📊 duration raw value: " + durationObj + " (type: "
+                                + (durationObj != null ? durationObj.getClass().getName() : "null") + ")");
+                        System.out.println("📊 totalRounds raw value: " + roundsObj + " (type: "
+                                + (roundsObj != null ? roundsObj.getClass().getName() : "null") + ")");
+
                         if (durationObj instanceof Number) {
                             this.roundDuration = ((Number) durationObj).intValue();
                             System.out.println("✅ Durée manche reçue: " + roundDuration + "s");
+                        } else {
+                            System.out.println("⚠️ duration n'est pas un Number, utilisant défaut: " + roundDuration);
                         }
-                        Object roundsObj = data.get("totalRounds");
                         if (roundsObj instanceof Number) {
                             this.totalRounds = ((Number) roundsObj).intValue();
                             System.out.println("✅ Nombre de manches reçu: " + totalRounds);
+                        } else {
+                            System.out.println("⚠️ totalRounds n'est pas un Number, utilisant défaut: " + totalRounds);
                         }
                     }
                     startGame();

@@ -1085,41 +1085,23 @@ public class JeuMultiController {
     }
 
     private void handleTerminerAuto() {
-        terminerPartie();
+        // Timer ended - auto-validate this player's answers
+        System.out.println("⏰ Temps écoulé - validation automatique des réponses");
+
+        if (!hasValidated) {
+            // Auto-validate by calling the validation method
+            handleValider();
+        }
     }
 
     private void terminerPartie() {
-        try {
-            gameEngine.stopTimer();
-            recupererReponses();
+        // This is now only called for manual termination
+        // The flow goes through handleValider() -> server validation -> score
+        // calculation
+        System.out.println("🏁 Tentative de terminer la partie manuellement");
 
-            System.out.println("🏁 Partie multijoueur terminée");
-
-            // Validate words
-            resultsManager.validerMots(reponses, lettreActuelle, langue);
-
-            // Get results
-            int scoreTotal = resultsManager.getScoreTotal();
-
-            System.out.println("✅ Validation complète");
-            System.out.println("   Score total: " + scoreTotal);
-
-            // Store score for multiplayer results
-            playerFinalScores.put(joueur, scoreTotal);
-
-            // Send to server
-            if (gameClient != null) {
-                Map<String, String> data = new HashMap<>();
-                data.put("score", String.valueOf(scoreTotal));
-                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
-            }
-
-            // Navigate to multiplayer results
-            navigateToMultiplayerResults();
-
-        } catch (Exception e) {
-            System.err.println("❌ Erreur: " + e.getMessage());
-            e.printStackTrace();
+        if (!hasValidated) {
+            handleValider();
         }
     }
 
