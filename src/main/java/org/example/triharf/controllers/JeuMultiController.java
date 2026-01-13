@@ -19,9 +19,13 @@ import org.example.triharf.models.ResultatPartie;
 import org.example.triharf.dao.CategorieDAO;
 import org.example.triharf.network.GameClient;
 import org.example.triharf.network.NetworkMessage;
+import org.example.triharf.services.GroqValidator;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class JeuMultiController {
 
@@ -79,6 +83,10 @@ public class JeuMultiController {
 
     // ===== DAO =====
     private CategorieDAO categorieDAO = new CategorieDAO();
+
+    // ===== GROQ VALIDATOR =====
+    private GroqValidator groqValidator = new GroqValidator();
+    private ExecutorService validationExecutor = Executors.newFixedThreadPool(4);
 
     // ===== NETWORK =====
     private GameClient gameClient;
@@ -656,28 +664,122 @@ public class JeuMultiController {
 
         // Update status
         if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Tous ont validé - Calcul des scores...");
-            lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
+            lblValidationStatus.setText("✓ Tous ont validé - Validation avec IA en cours...");
+            lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
         }
 
         // Clear previous scores
         playerFinalScores.clear();
 
-        // Calculate and display scores for each player
+        // First reveal all answers (display them)
+        revealAnswersDisplay();
+
+        // Then validate with Groq asynchronously
+        validateWithGroqAsync();
+    }
+
+    private void revealAnswersDisplay() {
+        // Display all answers first (before validation)
         for (String playerName : playerList) {
             Map<String, String> answers = allPlayerAnswers.get(playerName);
             if (answers == null) continue;
 
-            int totalScore = 0;
             HBox playerRow = playerRowMap.get(playerName);
             boolean isCurrentPlayer = playerName.equals(joueur);
 
             int cellIndex = 1; // Start after player name label
 
-            // Calculate points for each category
             for (Categorie cat : categories) {
                 String answer = answers.getOrDefault(cat.getNom(), "");
-                int points = calculateWordPoints(answer, cat, playerName);
+
+                // Update answer display for other players (not current player)
+                if (!isCurrentPlayer && playerRow != null && cellIndex < playerRow.getChildren().size() - 1) {
+                    javafx.scene.Node node = playerRow.getChildren().get(cellIndex);
+                    if (node instanceof HBox cellContainer && !cellContainer.getChildren().isEmpty()) {
+                        javafx.scene.Node firstChild = cellContainer.getChildren().get(0);
+                        if (firstChild instanceof Label answerLabel) {
+                            answerLabel.setText(answer.isEmpty() ? "-" : answer);
+                            answerLabel.setStyle("-fx-font-size: 10; -fx-text-fill: white;");
+                        }
+                    }
+                }
+
+                cellIndex++;
+            }
+        }
+    }
+
+    private void validateWithGroqAsync() {
+        // Collect all validation tasks
+        List<CompletableFuture<Void>> validationTasks = new ArrayList<>();
+
+        // Map to store validation results: player -> category -> response
+        Map<String, Map<String, GroqValidator.MultiplayerValidationResponse>> validationResults =
+            Collections.synchronizedMap(new HashMap<>());
+
+        for (String playerName : playerList) {
+            Map<String, String> answers = allPlayerAnswers.get(playerName);
+            if (answers == null) continue;
+
+            validationResults.put(playerName, Collections.synchronizedMap(new HashMap<>()));
+
+            for (Categorie cat : categories) {
+                String answer = answers.getOrDefault(cat.getNom(), "");
+                final String pName = playerName;
+                final String catName = cat.getNom();
+
+                CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
+                    GroqValidator.MultiplayerValidationResponse response =
+                        groqValidator.validateWordMultiplayer(answer, catName, lettreActuelle, langue, pName);
+                    validationResults.get(pName).put(catName, response);
+                    System.out.println("✅ Validated " + pName + "/" + catName + ": " + answer +
+                        " → valid=" + response.isValid() + ", score=" + response.getScore());
+                }, validationExecutor);
+
+                validationTasks.add(task);
+            }
+        }
+
+        // When all validations complete, update UI
+        CompletableFuture.allOf(validationTasks.toArray(new CompletableFuture[0]))
+            .thenRunAsync(() -> {
+                javafx.application.Platform.runLater(() -> {
+                    applyValidationResults(validationResults);
+                });
+            }, validationExecutor);
+    }
+
+    private void applyValidationResults(Map<String, Map<String, GroqValidator.MultiplayerValidationResponse>> validationResults) {
+        System.out.println("📊 Applying validation results...");
+
+        for (String playerName : playerList) {
+            Map<String, GroqValidator.MultiplayerValidationResponse> playerResults = validationResults.get(playerName);
+            Map<String, String> answers = allPlayerAnswers.get(playerName);
+            if (playerResults == null || answers == null) continue;
+
+            int totalScore = 0;
+
+            for (Categorie cat : categories) {
+                GroqValidator.MultiplayerValidationResponse response = playerResults.get(cat.getNom());
+                String answer = answers.getOrDefault(cat.getNom(), "");
+
+                int points = 0;
+                if (response != null) {
+                    if (response.isValid()) {
+                        // Check uniqueness among other players
+                        boolean isUnique = isAnswerUnique(answer, cat.getNom(), playerName);
+
+                        if (isUnique) {
+                            // Valid and unique: 10 + rarity bonus
+                            points = 10 + response.getRarity();
+                        } else {
+                            // Valid but duplicate: 5 points
+                            points = 5;
+                        }
+                    }
+                    // Invalid = 0 points (already set)
+                }
+
                 totalScore += points;
 
                 // Update the points label for this category
@@ -694,20 +796,6 @@ public class JeuMultiController {
                         }
                     }
                 }
-
-                // Update answer display for other players (not current player)
-                if (!isCurrentPlayer && playerRow != null && cellIndex < playerRow.getChildren().size() - 1) {
-                    javafx.scene.Node node = playerRow.getChildren().get(cellIndex);
-                    if (node instanceof HBox cellContainer && !cellContainer.getChildren().isEmpty()) {
-                        javafx.scene.Node firstChild = cellContainer.getChildren().get(0);
-                        if (firstChild instanceof Label answerLabel) {
-                            answerLabel.setText(answer.isEmpty() ? "-" : answer);
-                            answerLabel.setStyle("-fx-font-size: 10; -fx-text-fill: white;");
-                        }
-                    }
-                }
-
-                cellIndex++;
             }
 
             // Store final score for results page
@@ -726,6 +814,7 @@ public class JeuMultiController {
         // Update status
         if (lblValidationStatus != null) {
             lblValidationStatus.setText("✓ Scores calculés! Cliquez pour voir les résultats");
+            lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
         }
 
         // Show the results button
@@ -738,50 +827,21 @@ public class JeuMultiController {
         addChatMessage("SYSTÈME", "Partie terminée! Cliquez sur 'VOIR LES RÉSULTATS' pour le classement.", false);
     }
 
-    private int calculateWordPoints(String word, Categorie categorie, String playerName) {
-        if (word == null || word.trim().isEmpty()) {
-            return 0;
-        }
+    private boolean isAnswerUnique(String answer, String categoryName, String playerName) {
+        if (answer == null || answer.trim().isEmpty()) return false;
 
-        word = word.trim();
-
-        // Check if word starts with the correct letter
-        if (lettreActuelle != null && !word.toUpperCase().startsWith(lettreActuelle.toString().toUpperCase())) {
-            return 0;
-        }
-
-        // Base points for a valid word
-        int points = 10;
-
-        // Bonus for longer words
-        if (word.length() > 5) {
-            points += 2;
-        }
-        if (word.length() > 8) {
-            points += 3;
-        }
-
-        // Check if word is unique among all players
-        boolean isUnique = true;
         for (String otherPlayer : playerList) {
             if (!otherPlayer.equals(playerName)) {
                 Map<String, String> otherAnswers = allPlayerAnswers.get(otherPlayer);
                 if (otherAnswers != null) {
-                    String otherWord = otherAnswers.get(categorie.getNom());
-                    if (otherWord != null && otherWord.equalsIgnoreCase(word)) {
-                        isUnique = false;
-                        break;
+                    String otherAnswer = otherAnswers.get(categoryName);
+                    if (otherAnswer != null && otherAnswer.trim().equalsIgnoreCase(answer.trim())) {
+                        return false;
                     }
                 }
             }
         }
-
-        // Bonus for unique answers
-        if (isUnique) {
-            points += 5;
-        }
-
-        return points;
+        return true;
     }
 
     @FXML
@@ -836,12 +896,13 @@ public class JeuMultiController {
             resultsManager.validerMots(reponses, lettreActuelle, langue);
 
             // Get results
-            List<ResultatPartie> resultats = resultsManager.getResultats();
             int scoreTotal = resultsManager.getScoreTotal();
-            long dureePartie = resultsManager.getDureePartie();
 
             System.out.println("✅ Validation complète");
             System.out.println("   Score total: " + scoreTotal);
+
+            // Store score for multiplayer results
+            playerFinalScores.put(joueur, scoreTotal);
 
             // Send to server
             if (gameClient != null) {
@@ -850,8 +911,8 @@ public class JeuMultiController {
                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
             }
 
-            // Navigate to results
-            navigateToResults(resultats, scoreTotal, dureePartie);
+            // Navigate to multiplayer results
+            navigateToMultiplayerResults();
 
         } catch (Exception e) {
             System.err.println("❌ Erreur: " + e.getMessage());
@@ -862,27 +923,6 @@ public class JeuMultiController {
     /* =======================
        NAVIGATION
        ======================= */
-
-    private void navigateToResults(List<ResultatPartie> resultats, int scoreTotal, long dureePartie) {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/Resultats.fxml")
-            );
-            Parent root = loader.load();
-
-            ResultatsController resultatsController = loader.getController();
-            resultatsController.displayResults(resultats, scoreTotal, dureePartie, joueur, lettreActuelle);
-
-            Stage stage = (Stage) btnBack.getScene().getWindow();
-            stage.setTitle("Résultats Multijoueur");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            System.err.println("❌ Erreur navigation: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
     private void retourMenu() {
         if (timeline != null) {
