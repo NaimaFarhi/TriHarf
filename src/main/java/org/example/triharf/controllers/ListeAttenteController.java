@@ -275,6 +275,7 @@ public class ListeAttenteController {
             if (controller instanceof JeuMultiController) {
                 JeuMultiController mc = (JeuMultiController) controller;
                 mc.setNetwork(gameClient, roomId);
+                mc.setIsHost(isHost);
                 mc.setCategories(categories);
                 mc.setRoundConfig(totalRounds, roundDuration);
                 if (currentLetter != null) {

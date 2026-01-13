@@ -65,11 +65,17 @@ public class ClientHandler implements Runnable {
                     server.handleValidation(currentRoomId, clientId, message);
                 }
             }
+            case NEXT_ROUND, SHOW_RESULTS -> {
+                if (currentRoomId != null) {
+                    server.broadcast(currentRoomId, message);
+                }
+            }
         }
     }
 
     private void handleSubmitAnswer(NetworkMessage message) {
-        if (currentRoomId == null) return;
+        if (currentRoomId == null)
+            return;
 
         @SuppressWarnings("unchecked")
         Map<String, String> answerData = (Map<String, String>) message.getData();
@@ -83,8 +89,11 @@ public class ClientHandler implements Runnable {
         try {
             socket.close();
             server.handleClientDisconnect(clientId);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 
-    public String getClientId() { return clientId; }
+    public String getClientId() {
+        return clientId;
+    }
 }

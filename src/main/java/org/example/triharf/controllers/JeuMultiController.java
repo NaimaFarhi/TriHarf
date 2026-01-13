@@ -112,6 +112,11 @@ public class JeuMultiController {
     // ===== NETWORK =====
     private GameClient gameClient;
     private String roomId;
+    private boolean isHost = false;
+
+    public void setIsHost(boolean isHost) {
+        this.isHost = isHost;
+    }
 
     public void setNetwork(GameClient client, String roomId) {
         this.gameClient = client;
@@ -216,10 +221,36 @@ public class JeuMultiController {
                     allPlayersValidated = true;
                     revealAllAnswers();
                 }
+                case NEXT_ROUND -> {
+                    startNextRound();
+                }
+                case SHOW_RESULTS -> {
+                    navigateToMultiplayerResults();
+                }
                 default -> {
                 }
             }
         });
+    }
+
+    private void handleNextRoundAction() {
+        if (isHost) {
+            if (gameClient != null) {
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, roomId));
+            }
+        } else {
+            showAlert("Attente de l'hôte", "Seul l'hôte peut lancer la manche suivante.");
+        }
+    }
+
+    private void handleShowResultsAction() {
+        if (isHost) {
+            if (gameClient != null) {
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SHOW_RESULTS, joueur, roomId));
+            }
+        } else {
+            showAlert("Attente de l'hôte", "Seul l'hôte peut afficher les résultats.");
+        }
     }
 
     private void updatePlayersFromStatus(List<String> playersStatus) {
@@ -997,6 +1028,7 @@ public class JeuMultiController {
                 btnVoirResultats.setText("🏆 VOIR LES RÉSULTATS FINAUX");
                 btnVoirResultats.setVisible(true);
                 btnVoirResultats.setManaged(true);
+                btnVoirResultats.setOnAction(e -> handleShowResultsAction());
             }
 
             // Copy cumulative scores to final scores for results page
@@ -1017,14 +1049,14 @@ public class JeuMultiController {
             // Change button to start next round
             if (btnVoirResultats != null) {
                 btnVoirResultats.setText("▶ MANCHE SUIVANTE");
-                btnVoirResultats.setOnAction(e -> startNextRound());
+                btnVoirResultats.setOnAction(e -> handleNextRoundAction());
                 btnVoirResultats.setVisible(true);
                 btnVoirResultats.setManaged(true);
             }
-
-            addChatMessage("SYSTÈME",
-                    "Manche " + currentRound + " terminée! Prochaine manche dans quelques secondes...", false);
         }
+
+        addChatMessage("SYSTÈME",
+                "Manche " + currentRound + " terminée! Prochaine manche dans quelques secondes...", false);
     }
 
     private boolean isAnswerUnique(String answer, String categoryName, String playerName) {

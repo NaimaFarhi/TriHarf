@@ -14,7 +14,9 @@ public class NetworkMessage {
         CHAT,
         PLAYER_ANSWERS,
         VALIDATE_ANSWERS,
-        ALL_VALIDATED
+        ALL_VALIDATED,
+        NEXT_ROUND,
+        SHOW_RESULTS
     }
 
     private Type type;
@@ -31,6 +33,7 @@ public class NetworkMessage {
     public Type getType() {
         return type;
     }
+
     public void setType(Type type) {
         this.type = type;
     }
@@ -38,6 +41,7 @@ public class NetworkMessage {
     public String getSenderId() {
         return senderId;
     }
+
     public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
@@ -45,6 +49,7 @@ public class NetworkMessage {
     public Object getData() {
         return data;
     }
+
     public void setData(Object data) {
         this.data = data;
     }
