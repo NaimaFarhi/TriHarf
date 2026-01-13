@@ -1,19 +1,23 @@
 package org.example.triharf.controllers;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
+import org.example.triharf.models.Joueur;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Controller for multiplayer results/ranking page
@@ -27,12 +31,21 @@ public class ResultatsMultiController {
     @FXML private Label lblYourRank;
     @FXML private Label lblYourScore;
     @FXML private Button btnRejouer;
+    @FXML private Button btnRevanche;
     @FXML private Button btnMenu;
+
+    // Alternative FXML elements
+    @FXML private HBox podiumContainer;
+    @FXML private Label lblName1, lblScore1;
+    @FXML private Label lblName2, lblScore2;
+    @FXML private Label lblName3, lblScore3;
+    @FXML private HBox listContainer;
 
     private Map<String, Integer> scores;
     private String currentPlayer;
     private Character lettre;
     private List<Map.Entry<String, Integer>> rankedPlayers;
+    private List<Joueur> classementJoueurs;
 
     @FXML
     public void initialize() {
@@ -40,7 +53,7 @@ public class ResultatsMultiController {
     }
 
     /**
-     * Display the ranking of all players
+     * Display the ranking of all players (Map-based version)
      */
     public void displayRanking(Map<String, Integer> playerScores, String currentPlayer, Character lettre) {
         this.scores = playerScores;
@@ -71,6 +84,19 @@ public class ResultatsMultiController {
 
         // Highlight current player's result
         highlightCurrentPlayer();
+    }
+
+    /**
+     * Set classement using Joueur objects
+     */
+    public void setClassement(List<Joueur> joueurs) {
+        // Sort players by score descending
+        this.classementJoueurs = joueurs.stream()
+                .sorted((j1, j2) -> Integer.compare(j2.getScoreTotal(), j1.getScoreTotal()))
+                .collect(Collectors.toList());
+
+        afficherPodium();
+        afficherListeRestante();
     }
 
     private void buildPodium() {
@@ -127,6 +153,38 @@ public class ResultatsMultiController {
         return box;
     }
 
+    private void afficherPodium() {
+        if (classementJoueurs == null || classementJoueurs.isEmpty())
+            return;
+
+        // 1st Place
+        if (classementJoueurs.size() >= 1) {
+            Joueur j1 = classementJoueurs.get(0);
+            if (lblName1 != null) lblName1.setText(j1.getPseudo());
+            if (lblScore1 != null) lblScore1.setText(String.valueOf(j1.getScoreTotal()));
+        }
+
+        // 2nd Place
+        if (classementJoueurs.size() >= 2) {
+            Joueur j2 = classementJoueurs.get(1);
+            if (lblName2 != null) lblName2.setText(j2.getPseudo());
+            if (lblScore2 != null) lblScore2.setText(String.valueOf(j2.getScoreTotal()));
+        } else {
+            if (lblName2 != null) lblName2.setText("-");
+            if (lblScore2 != null) lblScore2.setText("");
+        }
+
+        // 3rd Place
+        if (classementJoueurs.size() >= 3) {
+            Joueur j3 = classementJoueurs.get(2);
+            if (lblName3 != null) lblName3.setText(j3.getPseudo());
+            if (lblScore3 != null) lblScore3.setText(String.valueOf(j3.getScoreTotal()));
+        } else {
+            if (lblName3 != null) lblName3.setText("-");
+            if (lblScore3 != null) lblScore3.setText("");
+        }
+    }
+
     private void buildRankingList() {
         if (vboxRanking == null) return;
         vboxRanking.getChildren().clear();
@@ -146,8 +204,8 @@ public class ResultatsMultiController {
 
         boolean isCurrentPlayer = playerName.equals(currentPlayer);
         String bgColor = isCurrentPlayer ?
-            "-fx-background-color: rgba(155, 89, 182, 0.3); -fx-border-color: #9b59b6;" :
-            "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444;";
+                "-fx-background-color: rgba(155, 89, 182, 0.3); -fx-border-color: #9b59b6;" :
+                "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444;";
         row.setStyle(bgColor + " -fx-border-radius: 8; -fx-background-radius: 8;");
 
         // Rank
@@ -173,138 +231,14 @@ public class ResultatsMultiController {
         return row;
     }
 
-    private void highlightCurrentPlayer() {
-        if (lblYourRank == null || lblYourScore == null) return;
-
-        int rank = 1;
-        int score = 0;
-        for (Map.Entry<String, Integer> entry : rankedPlayers) {
-            if (entry.getKey().equals(currentPlayer)) {
-                score = entry.getValue();
-                break;
-            }
-            rank++;
-        }
-
-        // Display rank with medal if top 3
-        String rankText = switch (rank) {
-            case 1 -> "🥇 #1";
-            case 2 -> "🥈 #2";
-            case 3 -> "🥉 #3";
-            default -> "#" + rank;
-        };
-
-        lblYourRank.setText(rankText);
-        lblYourScore.setText(score + " points");
-
-        // Update style based on rank
-        if (rank == 1) {
-            vboxYourResult.setStyle("-fx-padding: 20; -fx-background-color: rgba(243, 156, 18, 0.2); -fx-border-color: #f39c12; -fx-border-radius: 10; -fx-background-radius: 10;");
-        }
-    }
-
-    @FXML
-    private void handleRejouer() {
-        navigateTo("/fxml/param_partie_multi.fxml", "Configuration Multijoueur");
-    }
-
-    @FXML
-    private void handleMenu() {
-        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
-    }
-
-    private void navigateTo(String fxmlPath, String title) {
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.geometry.Pos;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import org.example.triharf.HelloApplication;
-import org.example.triharf.models.Joueur;
-
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class ResultatsMultiController {
-
-    @FXML
-    private HBox podiumContainer;
-    @FXML
-    private Label lblName1, lblScore1;
-    @FXML
-    private Label lblName2, lblScore2;
-    @FXML
-    private Label lblName3, lblScore3;
-    @FXML
-    private HBox listContainer;
-    @FXML
-    private Button btnRevanche;
-    @FXML
-    private Button btnMenu;
-
-    private List<Joueur> classmentJoueurs;
-
-    @FXML
-    public void initialize() {
-        // Initial setup if needed
-    }
-
-    public void setClassement(List<Joueur> joueurs) {
-        // Sort players by score descending
-        this.classmentJoueurs = joueurs.stream()
-                .sorted((j1, j2) -> Integer.compare(j2.getScoreTotal(), j1.getScoreTotal()))
-                .collect(Collectors.toList());
-
-        afficherPodium();
-        afficherListeRestante();
-    }
-
-    private void afficherPodium() {
-        // Clear default generic text if list is empty or small
-        if (classmentJoueurs.isEmpty())
-            return;
-
-        // 1st Place
-        if (classmentJoueurs.size() >= 1) {
-            Joueur j1 = classmentJoueurs.get(0);
-            lblName1.setText(j1.getPseudo());
-            lblScore1.setText(String.valueOf(j1.getScoreTotal()));
-        }
-
-        // 2nd Place
-        if (classmentJoueurs.size() >= 2) {
-            Joueur j2 = classmentJoueurs.get(1);
-            lblName2.setText(j2.getPseudo());
-            lblScore2.setText(String.valueOf(j2.getScoreTotal()));
-        } else {
-            lblName2.setText("-");
-            lblScore2.setText("");
-        }
-
-        // 3rd Place
-        if (classmentJoueurs.size() >= 3) {
-            Joueur j3 = classmentJoueurs.get(2);
-            lblName3.setText(j3.getPseudo());
-            lblScore3.setText(String.valueOf(j3.getScoreTotal()));
-        } else {
-            lblName3.setText("-");
-            lblScore3.setText("");
-        }
-    }
-
     private void afficherListeRestante() {
+        if (listContainer == null) return;
         listContainer.getChildren().clear();
 
         // Players from rank 4 onwards
-        if (classmentJoueurs.size() > 3) {
-            for (int i = 3; i < classmentJoueurs.size(); i++) {
-                Joueur j = classmentJoueurs.get(i);
+        if (classementJoueurs != null && classementJoueurs.size() > 3) {
+            for (int i = 3; i < classementJoueurs.size(); i++) {
+                Joueur j = classementJoueurs.get(i);
                 VBox card = createPlayerCard(i + 1, j);
                 listContainer.getChildren().add(card);
             }
@@ -339,18 +273,57 @@ public class ResultatsMultiController {
         return card;
     }
 
+    private void highlightCurrentPlayer() {
+        if (lblYourRank == null || lblYourScore == null || rankedPlayers == null) return;
+
+        int rank = 1;
+        int score = 0;
+        for (Map.Entry<String, Integer> entry : rankedPlayers) {
+            if (entry.getKey().equals(currentPlayer)) {
+                score = entry.getValue();
+                break;
+            }
+            rank++;
+        }
+
+        // Display rank with medal if top 3
+        String rankText = switch (rank) {
+            case 1 -> "🥇 #1";
+            case 2 -> "🥈 #2";
+            case 3 -> "🥉 #3";
+            default -> "#" + rank;
+        };
+
+        lblYourRank.setText(rankText);
+        lblYourScore.setText(score + " points");
+
+        // Update style based on rank
+        if (rank == 1 && vboxYourResult != null) {
+            vboxYourResult.setStyle("-fx-padding: 20; -fx-background-color: rgba(243, 156, 18, 0.2); -fx-border-color: #f39c12; -fx-border-radius: 10; -fx-background-radius: 10;");
+        }
+    }
+
+    @FXML
+    private void handleRejouer() {
+        navigateTo("/fxml/param_partie_multi.fxml", "Configuration Multijoueur");
+    }
+
     @FXML
     public void handleRevanche(ActionEvent event) {
-        // Logic to restart multiplayer game setup
-        navigateTo("/fxml/param_partie_multi.fxml");
+        navigateTo("/fxml/param_partie_multi.fxml", "Configuration Multijoueur");
+    }
+
+    @FXML
+    private void handleMenu() {
+        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
     @FXML
     public void handleMenu(ActionEvent event) {
-        navigateTo("/fxml/main_menu.fxml");
+        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
-    private void navigateTo(String fxmlPath) {
+    private void navigateTo(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
@@ -359,9 +332,6 @@ public class ResultatsMultiController {
             stage.setTitle(title);
         } catch (IOException e) {
             System.err.println("Erreur navigation: " + e.getMessage());
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
