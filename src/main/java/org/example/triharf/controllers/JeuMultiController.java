@@ -26,6 +26,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import org.example.triharf.services.GroqValidator.MultiplayerValidationResponse;
 
 public class JeuMultiController {
 
@@ -98,6 +102,7 @@ public class JeuMultiController {
     private List<Categorie> categories;
     private String joueur = "Joueur_Multi";
     private int gameDuration = 180;
+    private final Gson gson = new Gson();
     private int currentRound = 1;
     private int totalRounds = 3;
     private org.example.triharf.enums.Langue langue = org.example.triharf.enums.Langue.FRANCAIS;
@@ -248,6 +253,10 @@ public class JeuMultiController {
                 case PLAYER_ELIMINATED -> {
                     String eliminatedPlayer = (String) message.getData();
                     handlePlayerEliminated(eliminatedPlayer);
+                }
+                case VALIDATION_RESULTS -> {
+                    String json = (String) message.getData();
+                    handleValidationResults(json);
                 }
                 default -> {
                 }
@@ -963,20 +972,27 @@ public class JeuMultiController {
             lblTimer.setStyle("-fx-text-fill: #27ae60;");
         }
 
-        // Update status
-        if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Tous ont validé - Validation avec IA en cours...");
-            lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
-        }
-
         // Clear previous scores
         playerFinalScores.clear();
 
-        // First reveal all answers (display them)
+        // Reveal answers first
         revealAnswersDisplay();
 
-        // Then validate with Groq asynchronously
-        validateWithGroqAsync();
+        // CENTRALIZED VALIDATION LOGIC
+        if (isHost) {
+            // Host performs validation and broadcasts results
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ Validation CENTRALISÉE en cours (Hôte)...");
+                lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+            validateWithGroqAsync();
+        } else {
+            // Clients wait for host
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ En attente de la validation par l'Hôte...");
+                lblValidationStatus.setStyle("-fx-text-fill: #3498db; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+        }
     }
 
     private void revealAnswersDisplay() {
@@ -1043,13 +1059,37 @@ public class JeuMultiController {
             }
         }
 
-        // When all validations complete, update UI
+        // When all validations complete, update UI and BROADCAST if Host
         CompletableFuture.allOf(validationTasks.toArray(new CompletableFuture[0]))
                 .thenRunAsync(() -> {
+                    // Apply locally
                     javafx.application.Platform.runLater(() -> {
                         applyValidationResults(validationResults);
                     });
+
+                    // Broadcast to clients (Host only)
+                    if (isHost && gameClient != null) {
+                        String jsonResults = gson.toJson(validationResults);
+                        gameClient.sendMessage(new NetworkMessage(
+                                NetworkMessage.Type.VALIDATION_RESULTS,
+                                joueur,
+                                jsonResults));
+                        System.out.println("📢 Résultats de validation diffusés aux clients");
+                    }
                 }, validationExecutor);
+    }
+
+    private void handleValidationResults(String jsonResults) {
+        try {
+            Type type = new TypeToken<Map<String, Map<String, MultiplayerValidationResponse>>>() {
+            }.getType();
+            Map<String, Map<String, MultiplayerValidationResponse>> results = gson.fromJson(jsonResults, type);
+            System.out.println("📥 Résultats de validation reçus de l'hôte");
+            applyValidationResults(results);
+        } catch (Exception e) {
+            System.err.println("Erreur décodage résultats: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void applyValidationResults(
