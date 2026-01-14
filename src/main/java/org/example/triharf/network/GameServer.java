@@ -273,5 +273,12 @@ public class GameServer {
                     room.getValidatedAnswers());
             broadcast(roomId, allValidatedMsg);
         }
+
+    public synchronized void handleNextRound(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null) {
+            System.out.println("🔄 Initialisation de la manche suivante pour la salle: " + roomId);
+            room.resetRound();
+        }
     }
 }
