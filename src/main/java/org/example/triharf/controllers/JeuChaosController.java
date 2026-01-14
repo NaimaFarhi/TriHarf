@@ -261,6 +261,17 @@ public class JeuChaosController {
             return;
         }
 
+        // If Host and NOT next round (so it's final results), broadcast
+        if (isHost) {
+            if (gameClient != null) {
+                System.out.println("📢 Host broadcasting SHOW_RESULTS");
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SHOW_RESULTS, joueur, null));
+            }
+        }
+        // Clients do nothing on click, they wait for header message
+    }
+
+    private void navigateToResults() {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/resultats_multi.fxml"));
             Parent root = loader.load();
@@ -302,6 +313,7 @@ public class JeuChaosController {
                 case ALL_VALIDATED -> handleAllValidated((Map<String, Map<String, String>>) message.getData());
                 case VALIDATION_RESULTS -> handleValidationResults((String) message.getData());
                 case CHAOS_EVENT -> handleChaosEvent((Map<String, String>) message.getData());
+                case SHOW_RESULTS -> navigateToResults();
                 case NEXT_ROUND -> {
                     Object data = message.getData();
                     Character forcedLetter = null;
@@ -759,7 +771,7 @@ public class JeuChaosController {
                     btnVoirResultats.setOnAction(e -> handleNextRoundAction());
                 } else {
                     btnVoirResultats.setText("🏆 RÉSULTATS FINAUX");
-                    btnVoirResultats.setOnAction(e -> handleShowResultsAction());
+                    btnVoirResultats.setOnAction(e -> handleVoirResultats());
                 }
             } else if (!isHost && btnVoirResultats != null) {
                 // Client waits for host
@@ -785,12 +797,6 @@ public class JeuChaosController {
                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, nextRoundData));
             }
         }
-    }
-
-    private void handleShowResultsAction() {
-        if (btnVoirResultats == null)
-            return;
-        handleVoirResultats();
     }
 
     private void startNextRound(Character forcedLetter) {
