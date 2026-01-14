@@ -170,6 +170,10 @@ public class JeuChaosController {
         }
 
         public void checkEvents(int remainingTime) {
+            // DEBUG: Trace timer (throttle to every 10s or if match)
+            if (remainingTime % 10 == 0)
+                System.out.println("⏰ Chaos Timer Check: " + remainingTime + "s");
+
             if (!isHost || !eventsScheduled || eventTimestamps.isEmpty())
                 return;
 
@@ -177,6 +181,7 @@ public class JeuChaosController {
             // Since timer ticks every second, exact match is likely.
             // Using a range to be safe.
             if (eventTimestamps.contains(remainingTime)) {
+                System.out.println("⚡ MATCH! Triggering event at " + remainingTime + "s");
                 int stamp = remainingTime;
                 eventTimestamps.remove((Integer) stamp);
                 triggerRandomEvent();
@@ -187,10 +192,16 @@ public class JeuChaosController {
             ChaosEventType[] types = ChaosEventType.values();
             ChaosEventType type = types[random.nextInt(types.length)];
 
+            System.out.println("🎲 Triggering Event Type: " + type);
+
             if (gameClient != null) {
+                System.out.println("📡 Sending CHAOS_EVENT network message...");
                 Map<String, String> data = new HashMap<>();
                 data.put("type", type.name());
                 gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.CHAOS_EVENT, "SERVER", data));
+            } else {
+                System.out.println("⚠️ No GameClient (Offline/Debug). Executing locally.");
+                javafx.application.Platform.runLater(() -> executeChaosEvent(type));
             }
         }
     }
@@ -202,6 +213,17 @@ public class JeuChaosController {
     @FXML
     public void initialize() {
         System.out.println("✅ JeuChaosController initialisé");
+
+        // DEBUG: Check injections
+        if (vboxEventGel == null)
+            System.err.println("❌ ERROR: vboxEventGel is NULL");
+        if (vboxEventTurbo == null)
+            System.err.println("❌ ERROR: vboxEventTurbo is NULL");
+        if (vboxEventSwitch == null)
+            System.err.println("❌ ERROR: vboxEventSwitch is NULL");
+        if (vboxEventPanic == null)
+            System.err.println("❌ ERROR: vboxEventPanic is NULL");
+
         this.gameEngine = new GameEngine();
         this.resultsManager = new ResultsManager(gameDuration);
         this.chaosManager = new ChaosManager();
@@ -365,6 +387,7 @@ public class JeuChaosController {
     // ==========================================
     private void handleChaosEvent(Map<String, String> data) {
         String typeStr = data.get("type");
+        System.out.println("📥 RECEIVED Chaos Event Message: " + typeStr);
         try {
             ChaosEventType type = ChaosEventType.valueOf(typeStr);
             executeChaosEvent(type);
