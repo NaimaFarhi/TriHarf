@@ -1079,8 +1079,7 @@ public class JeuMultiController {
 
         for (String playerName : playerList) {
             Map<String, GroqValidator.MultiplayerValidationResponse> playerResults = validationResults.get(playerName);
-            Map<String, String> answers = allPlayerAnswers.get(playerName);
-            if (playerResults == null || answers == null)
+            if (playerResults == null)
                 continue;
 
             int totalScore = 0;
