@@ -75,6 +75,15 @@ public class JeuChaosController {
     @FXML
     private Label lblTotalRounds;
 
+    @FXML
+    private VBox vboxEventGel;
+    @FXML
+    private VBox vboxEventTurbo;
+    @FXML
+    private VBox vboxEventSwitch;
+    @FXML
+    private VBox vboxEventPanic;
+
     // ===== SERVICES =====
     private GameEngine gameEngine;
     private ResultsManager resultsManager;
@@ -370,6 +379,7 @@ public class JeuChaosController {
 
         switch (type) {
             case GEL -> {
+                blinkNode(vboxEventGel, 5); // Blink for 5s
                 addChatMessage("SYSTEM", "❄️ GEL ! Vous ne pouvez plus écrire pendant 5s !", false);
                 toggleInputs(true);
                 showOverlay("❄️ GELÉ ! ❄️", "#3498db");
@@ -383,6 +393,7 @@ public class JeuChaosController {
                 pause.play();
             }
             case TURBO -> {
+                blinkNode(vboxEventTurbo, 3); // Blink for 3s
                 addChatMessage("SYSTEM", "🔥 TURBO ! +10 secondes pour tout le monde !", false);
                 gameEngine.addTime(10);
                 showFlashAnimation("#f1c40f");
@@ -391,6 +402,7 @@ public class JeuChaosController {
                     lblTimer.setText(gameEngine.formatTime());
             }
             case PANIC -> {
+                blinkNode(vboxEventPanic, 3); // Blink for 3s
                 addChatMessage("SYSTEM", "😱 PANIC ! -5 secondes !", false);
                 gameEngine.removeTime(5);
                 showFlashAnimation("#e74c3c");
@@ -400,10 +412,31 @@ public class JeuChaosController {
             case SWITCH -> {
                 if (categories.size() < 2)
                     return;
+                blinkNode(vboxEventSwitch, 3); // Blink for 3s
                 addChatMessage("SYSTEM", "🔄 SWITCH ! Les colonnes ont bougé !", false);
                 swapColumns();
             }
         }
+    }
+
+    private void blinkNode(javafx.scene.Node node, double durationSeconds) {
+        if (node == null)
+            return;
+
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(Duration.seconds(0.3), node);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.2);
+        fade.setAutoReverse(true);
+
+        // Calculate how many cycles fit in the duration (0.6s per full cycle)
+        int cycleCount = (int) (durationSeconds / 0.6);
+        if (cycleCount < 2)
+            cycleCount = 2; // Minimum 2 blinks
+
+        fade.setCycleCount(cycleCount * 2); // *2 because one cycle is just forward, we want forward+back
+
+        fade.setOnFinished(e -> node.setOpacity(1.0));
+        fade.play();
     }
 
     private void swapColumns() {

@@ -21,7 +21,6 @@ public class GameRoom {
     private int roundDuration = 120;
     private String gameMode = "MULTI";
 
-    private String hostId;
 
     // Validation tracking
     private Set<String> validatedPlayers = new HashSet<>();

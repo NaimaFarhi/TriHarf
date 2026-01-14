@@ -4,6 +4,7 @@ module org.example.triharf {
     requires javafx.web;
     requires javafx.swing;
     requires javafx.media;
+    requires javafx.graphics;
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
