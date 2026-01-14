@@ -17,7 +17,6 @@ public class GameRoom {
 
     private List<String> categories;
     private int totalRounds = 3;
-    private int totalRounds = 3;
     private int roundDuration = 120;
     private String gameMode = "MULTI";
 

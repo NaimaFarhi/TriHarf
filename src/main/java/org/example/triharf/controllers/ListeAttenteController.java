@@ -81,6 +81,15 @@ public class ListeAttenteController {
         // Show start button only for host
         if (btnCommencer != null && isHost) {
             btnCommencer.setVisible(true);
+
+            // Sync Game Mode if already set locally and server is available
+            if (this.gameMode != null && this.gameServer != null && this.roomId != null) {
+                org.example.triharf.network.GameRoom room = this.gameServer.getRoom(this.roomId);
+                if (room != null) {
+                    room.setGameMode(this.gameMode);
+                    System.out.println("✅ GameMode synced in setNetwork: " + this.gameMode);
+                }
+            }
         }
     }
 
