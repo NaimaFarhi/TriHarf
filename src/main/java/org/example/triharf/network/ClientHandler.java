@@ -74,7 +74,7 @@ public class ClientHandler implements Runnable {
                     server.broadcast(currentRoomId, message);
                 }
             }
-            case SHOW_RESULTS, PLAYER_ELIMINATED, VALIDATION_RESULTS -> {
+            case SHOW_RESULTS, PLAYER_ELIMINATED, VALIDATION_RESULTS, CHAOS_EVENT -> {
                 if (currentRoomId != null) {
                     server.broadcast(currentRoomId, message);
                 }
