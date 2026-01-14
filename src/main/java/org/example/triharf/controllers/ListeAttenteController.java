@@ -174,6 +174,16 @@ public class ListeAttenteController {
                         } else {
                             System.out.println("⚠️ totalRounds n'est pas un Number, utilisant défaut: " + totalRounds);
                         }
+                            System.out.println("⚠️ totalRounds n'est pas un Number, utilisant défaut: " + totalRounds);
+                        }
+                        
+                        String mode = (String) data.get("gameMode");
+                        if (mode != null) {
+                            this.gameMode = mode;
+                            System.out.println("✅ Mode de jeu reçu du server: " + mode);
+                        } else {
+                             System.out.println("⚠️ Mode de jeu NON reçu, conservation de: " + this.gameMode);
+                        }
                     }
                     startGame();
                 }
@@ -182,6 +192,7 @@ public class ListeAttenteController {
                 }
             }
         });
+
     }
 
     private void updatePlayerList(List<String> playersStatus) {

@@ -74,6 +74,7 @@ public class GameServer {
             gameData.put("letter", letter.toString());
             gameData.put("duration", room.getRoundDuration());
             gameData.put("totalRounds", room.getTotalRounds());
+            gameData.put("gameMode", room.getGameMode());
             gameData.put("categories", room.getCategories());
             gameData.put("players", playerPseudos);
 

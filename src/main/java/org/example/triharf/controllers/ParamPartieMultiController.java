@@ -319,6 +319,7 @@ public class ParamPartieMultiController {
             if (spinnerMaxPlayers != null) {
                 gameServer.getRoom(roomId).setMaxPlayers(spinnerMaxPlayers.getValue());
             }
+            gameServer.getRoom(roomId).setGameMode(this.gameMode);
 
             System.out.println("   Manches: " + nbRounds + " x " + duration + "s");
         }
