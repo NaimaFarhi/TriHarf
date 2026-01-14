@@ -91,13 +91,19 @@ public class GameServer {
     }
 
     // Create new game room
-    public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue) {
+    public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue, String hostClientId) {
         if (!rooms.containsKey(roomId)) {
             GameRoom room = new GameRoom(roomId, maxPlayers, langue);
+            room.setHostId(hostClientId); // Set the creator as the host
             rooms.put(roomId, room);
             return room;
         }
         return null; // Room exists
+    }
+
+    // Overload for backward compatibility
+    public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue) {
+        return createRoom(roomId, maxPlayers, langue, null);
     }
 
     // Player joins room
@@ -107,8 +113,8 @@ public class GameServer {
             return false;
         }
 
-        // Assign host if first player
-        if (room.getPlayerIds().size() == 1) {
+        // Assign host if first player and no host is set
+        if (room.getHostId() == null && room.getPlayerIds().size() == 1) {
             room.setHostId(clientId);
             System.out.println("👑 Host assigned for room " + roomId + ": " + pseudo);
         }
@@ -217,7 +223,7 @@ public class GameServer {
             if (room.getPlayerIds().contains(clientId)) {
                 String roomId = room.getRoomId();
                 String pseudo = room.getPseudo(clientId);
-                boolean isHost = clientId.equals(room.getHostId());
+                boolean isHost = room.isHost(clientId);
 
                 leaveRoom(clientId, roomId);
 

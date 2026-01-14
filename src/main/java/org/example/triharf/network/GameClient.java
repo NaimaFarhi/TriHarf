@@ -38,13 +38,32 @@ public class GameClient {
                         messageHandler.accept(message);
                     }
                 }
+                // If we exit the loop normally (server closed connection), notify handler
+                if (connected && messageHandler != null) {
+                    System.err.println("Server closed connection");
+                    notifyConnectionLost();
+                }
             } catch (IOException e) {
                 if (connected) {
                     System.err.println("Connection lost: " + e.getMessage());
+                    notifyConnectionLost();
                 }
             }
         });
         listenerThread.start();
+    }
+
+    private void notifyConnectionLost() {
+        connected = false;
+        if (messageHandler != null) {
+            // Send a synthetic HOST_DISCONNECTED message to notify the controller
+            NetworkMessage connectionLostMsg = new NetworkMessage(
+                NetworkMessage.Type.HOST_DISCONNECTED,
+                "CLIENT",
+                "Connection perdue avec le serveur"
+            );
+            messageHandler.accept(connectionLostMsg);
+        }
     }
 
     public void sendMessage(NetworkMessage message) {

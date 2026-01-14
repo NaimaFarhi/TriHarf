@@ -1041,6 +1041,26 @@ public class JeuMultiController {
         }
     }
 
+    private void handleHostDisconnected(String hostName) {
+        // Stop the timer
+        if (gameEngine != null) {
+            gameEngine.stopTimer();
+        }
+
+        // Show notification in chat
+        addChatMessage("SYSTÈME", "L'hôte (" + hostName + ") a quitté. La partie est terminée.", false);
+
+        // Show alert to user
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Partie terminée");
+        alert.setHeaderText("L'hôte a quitté la partie");
+        alert.setContentText("L'hôte (" + hostName + ") s'est déconnecté. La partie est terminée.\nVous allez être redirigé vers le menu principal.");
+        alert.showAndWait();
+
+        // Navigate back to main menu
+        retourMenu();
+    }
+
     private void revealAllAnswers() {
         System.out.println("🎉 Tous les joueurs ont validé - révélation des réponses!");
 
