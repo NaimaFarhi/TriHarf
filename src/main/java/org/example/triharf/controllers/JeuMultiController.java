@@ -1015,7 +1015,8 @@ public class JeuMultiController {
                 }
             }
             // Change row style to indicate disconnected
-            playerRow.setStyle("-fx-background-color: rgba(231, 76, 60, 0.2); -fx-border-color: #e74c3c; -fx-border-radius: 5; -fx-background-radius: 5;");
+            playerRow.setStyle(
+                    "-fx-background-color: rgba(231, 76, 60, 0.2); -fx-border-color: #e74c3c; -fx-border-radius: 5; -fx-background-radius: 5;");
         }
 
         // Remove from player list
@@ -1054,7 +1055,8 @@ public class JeuMultiController {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Partie terminée");
         alert.setHeaderText("L'hôte a quitté la partie");
-        alert.setContentText("L'hôte (" + hostName + ") s'est déconnecté. La partie est terminée.\nVous allez être redirigé vers le menu principal.");
+        alert.setContentText("L'hôte (" + hostName
+                + ") s'est déconnecté. La partie est terminée.\nVous allez être redirigé vers le menu principal.");
         alert.showAndWait();
 
         // Navigate back to main menu
@@ -1290,6 +1292,7 @@ public class JeuMultiController {
             Object controller = loader.getController();
             if (controller instanceof ResultatsMultiController) {
                 ResultatsMultiController rc = (ResultatsMultiController) controller;
+                rc.setGameClient(this.gameClient);
                 rc.displayRanking(playerFinalScores, joueur, lettreActuelle);
             }
 

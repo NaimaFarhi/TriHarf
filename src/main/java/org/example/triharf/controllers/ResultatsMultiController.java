@@ -340,23 +340,44 @@ public class ResultatsMultiController {
         }
     }
 
+    private org.example.triharf.network.GameClient gameClient;
+
+    public void setGameClient(org.example.triharf.network.GameClient gameClient) {
+        this.gameClient = gameClient;
+    }
+
+    private void disconnect() {
+        if (gameClient != null && gameClient.isConnected()) {
+            try {
+                System.out.println("🔌 Disconnecting previous game session...");
+                gameClient.disconnect();
+            } catch (IOException e) {
+                System.err.println("Error disconnecting: " + e.getMessage());
+            }
+        }
+    }
+
     @FXML
     private void handleRejouer() {
+        disconnect();
         navigateTo("/fxml/param_partie_multi.fxml", "Configuration Multijoueur");
     }
 
     @FXML
     public void handleRevanche(ActionEvent event) {
+        disconnect();
         navigateTo("/fxml/param_partie_multi.fxml", "Configuration Multijoueur");
     }
 
     @FXML
     private void handleMenu() {
+        disconnect();
         navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
     @FXML
     public void handleMenu(ActionEvent event) {
+        disconnect();
         navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 

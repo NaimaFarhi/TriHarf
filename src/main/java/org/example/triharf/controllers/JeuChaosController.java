@@ -1082,8 +1082,9 @@ public class JeuChaosController {
 
             Object controller = loader.getController();
             if (controller instanceof ResultatsMultiController) {
-                // ... setup results ...
-                ((ResultatsMultiController) controller).displayRanking(cumulativeScores, joueur, lettreActuelle);
+                ResultatsMultiController rc = (ResultatsMultiController) controller;
+                rc.setGameClient(this.gameClient);
+                rc.displayRanking(cumulativeScores, joueur, lettreActuelle);
             }
 
             Stage stage = (Stage) vboxPlayers.getScene().getWindow();
