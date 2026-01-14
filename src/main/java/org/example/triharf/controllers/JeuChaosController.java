@@ -52,7 +52,9 @@ public class JeuChaosController {
     @FXML
     private Button btnSend;
     @FXML
-    private HBox hboxTableHeader;
+    private HBox hboxCategoryHeaders;
+    @FXML
+    private VBox vboxPlayerRows;
 
     // We may need validation UI elements if they exist in FXML (like btnValider)
     // Looking at FXML there is no validation button?
@@ -408,100 +410,148 @@ public class JeuChaosController {
     // ==========================================
 
     private void creerChampsDynamiquement() {
-        if (vboxPlayers == null)
+        if (vboxPlayerRows == null && vboxPlayers == null)
             return;
 
         textFieldsParCategorie.clear();
+        reponses.clear();
         playerRowMap.clear();
-        playerPointsLabels.clear();
         playerScoreLabels.clear();
-        vboxPlayers.getChildren().clear();
+        playerPointsLabels.clear();
 
-        // Rebuild Headers
-        if (hboxTableHeader != null) {
-            hboxTableHeader.getChildren().clear();
+        // Create header row with category names
+        if (hboxCategoryHeaders != null) {
+            hboxCategoryHeaders.getChildren().clear();
+            hboxCategoryHeaders.setSpacing(5);
+
+            // First column: "Joueur" header
             Label playerHeader = new Label("Joueur");
             playerHeader.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #9b59b6;");
             playerHeader.setMinWidth(PLAYER_NAME_WIDTH);
-            hboxTableHeader.getChildren().add(playerHeader);
+            playerHeader.setPrefWidth(PLAYER_NAME_WIDTH);
+            hboxCategoryHeaders.getChildren().add(playerHeader);
 
+            // Category columns
             for (Categorie categorie : categories) {
                 Label catLabel = new Label(categorie.getNom());
                 catLabel.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #9b59b6;");
                 catLabel.setMinWidth(CATEGORY_WIDTH);
+                catLabel.setPrefWidth(CATEGORY_WIDTH);
                 catLabel.setAlignment(javafx.geometry.Pos.CENTER);
-                hboxTableHeader.getChildren().add(catLabel);
+                hboxCategoryHeaders.getChildren().add(catLabel);
             }
 
+            // Score column header
             Label scoreHeader = new Label("Score");
             scoreHeader.setStyle("-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
             scoreHeader.setMinWidth(SCORE_WIDTH);
-            hboxTableHeader.getChildren().add(scoreHeader);
+            scoreHeader.setPrefWidth(SCORE_WIDTH);
+            scoreHeader.setAlignment(javafx.geometry.Pos.CENTER);
+            hboxCategoryHeaders.getChildren().add(scoreHeader);
         }
 
-        // Build Player Rows
+        // Use vboxPlayerRows if available, otherwise fallback to vboxPlayers
+        VBox targetVBox = vboxPlayerRows != null ? vboxPlayerRows : vboxPlayers;
+        targetVBox.getChildren().clear();
+
+        // Ensure current player is in the list
+        if (!playerList.contains(joueur)) {
+            playerList.add(0, joueur);
+        }
+
+        // Create a row for each player
         for (String playerName : playerList) {
-            HBox row = createPlayerRow(playerName);
-            vboxPlayers.getChildren().add(row);
-            playerRowMap.put(playerName, row);
+            HBox playerRow = createPlayerRow(playerName);
+            targetVBox.getChildren().add(playerRow);
+            playerRowMap.put(playerName, playerRow);
         }
     }
 
     private HBox createPlayerRow(String playerName) {
         boolean isCurrentPlayer = playerName.equals(joueur);
+
         HBox row = new HBox(5);
         row.setPadding(new Insets(8));
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+        // Highlight current player's row
         String bgColor = isCurrentPlayer
-                ? "-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5;"
-                : "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444; -fx-border-radius: 5;";
+                ? "-fx-background-color: rgba(231, 76, 60, 0.1); -fx-border-color: #e74c3c; -fx-border-radius: 5; -fx-background-radius: 5;"
+                : "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444; -fx-border-radius: 5; -fx-background-radius: 5;";
+
         row.setStyle(bgColor);
 
+        // Player name label
         Label nameLabel = new Label(isCurrentPlayer ? "➤ " + playerName : playerName);
         nameLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: "
-                + (isCurrentPlayer ? "#9b59b6" : "white") + ";");
+                + (isCurrentPlayer ? "#e74c3c" : "white") + ";");
         nameLabel.setMinWidth(PLAYER_NAME_WIDTH);
+        nameLabel.setPrefWidth(PLAYER_NAME_WIDTH);
         row.getChildren().add(nameLabel);
 
+        // Initialize points labels map for this player
         playerPointsLabels.putIfAbsent(playerName, new HashMap<>());
 
+        // Create input fields or display labels for each category
         for (Categorie categorie : categories) {
+            // Container for answer + points (split 2/3 + 1/3)
             HBox cellContainer = new HBox(2);
             cellContainer.setMinWidth(CATEGORY_WIDTH);
+            cellContainer.setPrefWidth(CATEGORY_WIDTH);
+            cellContainer.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
             if (isCurrentPlayer) {
+                // Current player gets editable text fields (takes ~80% width)
                 TextField textField = new TextField();
-                textField.setPromptText(categorie.getNom().substring(0, Math.min(3, categorie.getNom().length())));
+                textField.setPromptText(
+                        categorie.getNom().substring(0, Math.min(3, categorie.getNom().length())) + "...");
                 textField.setPrefWidth(CATEGORY_WIDTH * 0.75);
+                textField.setMinWidth(CATEGORY_WIDTH * 0.75);
+                textField.setStyle("-fx-font-size: 10;");
+
                 textFieldsParCategorie.put(categorie.getNom(), textField);
+                reponses.put(categorie, "");
 
-                Label points = new Label("");
-                points.setMinWidth(CATEGORY_WIDTH * 0.25);
-                playerPointsLabels.get(playerName).put(categorie.getNom(), points);
+                // Points label (hidden until validation)
+                Label pointsLabel = new Label("");
+                pointsLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #f39c12; -fx-font-weight: bold;");
+                pointsLabel.setMinWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setPrefWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                playerPointsLabels.get(playerName).put(categorie.getNom(), pointsLabel);
 
-                cellContainer.getChildren().addAll(textField, points);
+                cellContainer.getChildren().addAll(textField, pointsLabel);
             } else {
+                // Other players get read-only labels
                 Label answerLabel = new Label("...");
-                answerLabel.setStyle("-fx-text-fill: #aaa; -fx-font-size: 10;");
+                answerLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #aaa;");
                 answerLabel.setMinWidth(CATEGORY_WIDTH * 0.75);
+                answerLabel.setPrefWidth(CATEGORY_WIDTH * 0.75);
+                answerLabel.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-                Label points = new Label("");
-                points.setMinWidth(CATEGORY_WIDTH * 0.25);
-                playerPointsLabels.get(playerName).put(categorie.getNom(), points);
+                // Points label (hidden until all validate)
+                Label pointsLabel = new Label("");
+                pointsLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #f39c12; -fx-font-weight: bold;");
+                pointsLabel.setMinWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setPrefWidth(CATEGORY_WIDTH * 0.25);
+                pointsLabel.setAlignment(javafx.geometry.Pos.CENTER);
+                playerPointsLabels.get(playerName).put(categorie.getNom(), pointsLabel);
 
-                cellContainer.getChildren().addAll(answerLabel, points);
+                cellContainer.getChildren().addAll(answerLabel, pointsLabel);
             }
+
             row.getChildren().add(cellContainer);
         }
 
-        // Score
-        int s = cumulativeScores.getOrDefault(playerName, 0);
-        Label score = new Label(String.valueOf(s));
-        score.setMinWidth(SCORE_WIDTH);
-        score.setStyle("-fx-text-fill: #f39c12; -fx-font-weight: bold;");
-        playerScoreLabels.put(playerName, score);
-        row.getChildren().add(score);
+        // Score cell at the end
+        int currentScore = cumulativeScores.getOrDefault(playerName, 0);
+        Label scoreLabel = new Label(String.valueOf(currentScore));
+        scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
+        scoreLabel.setMinWidth(SCORE_WIDTH);
+        scoreLabel.setPrefWidth(SCORE_WIDTH);
+        scoreLabel.setAlignment(javafx.geometry.Pos.CENTER);
+        playerScoreLabels.put(playerName, scoreLabel);
+        row.getChildren().add(scoreLabel);
 
         return row;
     }
