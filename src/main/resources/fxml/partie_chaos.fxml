@@ -1,143 +1,140 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.example.triharf.controllers.JeuChaosController"
-            prefWidth="900.0" prefHeight="600.0"
-            styleClass="root-stack"
-            stylesheets="@../css/main.css">
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="900.0" spacing="15.0" styleClass="root-vbox" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.JeuChaosController">
 
-    <!-- En-tête -->
-    <top>
-        <VBox spacing="0">
+    <children>
+
+        <!-- HEADER -->
+        <HBox alignment="CENTER_LEFT" styleClass="header-bar">
             <children>
-                <HBox alignment="CENTER" prefHeight="70.0" styleClass="game-header" spacing="20.0">
-                    <children>
-                        <!-- Bouton flèche -->
-                        <Button fx:id="btnBack" text="←" styleClass="btn-back"/>
-
-                        <!-- TIMER -->
-                        <HBox alignment="CENTER" spacing="10.0" styleClass="info-box">
-                            <children>
-                                <Label text="Temps:" styleClass="info-label"/>
-                                <Label fx:id="lblTimer" text="" styleClass="info-value">
-                                    <font><Font size="18.0"/></font>
-                                </Label>
-                            </children>
+                <Button fx:id="btnBack" styleClass="btn-back" text="←" />
+                <VBox spacing="2">
+                    <Label text="🔥 MODE CHAOS" styleClass="header-title" style="-fx-text-fill: #e74c3c;"/>
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <!-- Timer -->
+                        <HBox spacing="5" alignment="CENTER_LEFT">
+                            <Label text="⏱" style="-fx-font-size: 14px;" textFill="white"/>
+                            <Label fx:id="lblTimer" text="00:00" style="-fx-font-size: 14px; -fx-text-fill: #ffd700; -fx-font-weight: bold;"/>
                         </HBox>
-
-                        <!-- LETTRE À TROUVER (Moved Up) -->
-                        <VBox alignment="CENTER" spacing="2">
-                            <children>
-                                <Label text="Lettre" styleClass="info-label" style="-fx-font-size: 10px;" />
-                                <Label fx:id="lblLettre" text="" style="-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b); -fx-background-radius: 30; -fx-text-fill: white; -fx-padding: 5 15; -fx-font-weight: bold;">
-                                    <font><Font size="28.0"/></font>
-                                </Label>
-                            </children>
-                        </VBox>
-
-                        <Label text="🔥 CHAOS" styleClass="header-title" style="-fx-text-fill: #e74c3c;"/>
-
-                        <!-- JOUEURS -->
-                        <HBox alignment="CENTER" spacing="10.0" styleClass="info-box">
-                            <children>
-                                <Label text="👥" style="-fx-text-fill: white;"/>
-                                <Label fx:id="lblJoueurs" text="" styleClass="info-value"/>
-                            </children>
+                        <!-- Lettre -->
+                        <HBox spacing="5" alignment="CENTER_LEFT">
+                            <Label text="Lettre:" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+                            <Label fx:id="lblLettre" text="?" style="-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b); -fx-background-radius: 15; -fx-text-fill: white; -fx-padding: 2 10; -fx-font-weight: bold; -fx-font-size: 14px;"/>
                         </HBox>
-                    </children>
-                </HBox>
-
-                <!-- Bande avec les CHAOS EVENTS (Moved Down) -->
-                <HBox alignment="CENTER" prefHeight="80.0" style="-fx-background-color: rgba(231, 76, 60, 0.15); -fx-padding: 15;">
-                    <children>
-                        <HBox spacing="20.0" alignment="CENTER">
-                            <children>
-                                <VBox alignment="CENTER" style="-fx-background-color: rgba(52, 152, 219, 0.2); -fx-border-color: #3498db; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10 20;">
-                                    <children>
-                                        <Label text="❄ GEL" style="-fx-text-fill: #3498db; -fx-font-weight: bold; -fx-font-size: 14px;"/>
-                                    </children>
-                                </VBox>
-                                <VBox alignment="CENTER" style="-fx-background-color: rgba(241, 196, 15, 0.2); -fx-border-color: #f1c40f; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10 20;">
-                                    <children>
-                                        <Label text="⚡ TURBO" style="-fx-text-fill: #f1c40f; -fx-font-weight: bold; -fx-font-size: 14px;"/>
-                                    </children>
-                                </VBox>
-                                <VBox alignment="CENTER" style="-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10 20;">
-                                    <children>
-                                        <Label text="� SWITCH" style="-fx-text-fill: #9b59b6; -fx-font-weight: bold; -fx-font-size: 14px;"/>
-                                    </children>
-                                </VBox>
-                                <VBox alignment="CENTER" style="-fx-background-color: rgba(231, 76, 60, 0.2); -fx-border-color: #e74c3c; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10 20;">
-                                    <children>
-                                        <Label text="😱 PANIC !" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 14px;"/>
-                                    </children>
-                                </VBox>
-                            </children>
+                        <!-- Joueurs -->
+                        <HBox spacing="5" alignment="CENTER_LEFT">
+                            <Label text="👥" style="-fx-font-size: 14px;" textFill="white"/>
+                            <Label fx:id="lblJoueurs" text="?" style="-fx-font-size: 14px; -fx-text-fill: #4facfe;"/>
                         </HBox>
-                    </children>
+                    </HBox>
+                    <HBox.margin>
+                        <Insets left="40.0"/>
+                    </HBox.margin>
+                </VBox>
+                
+                <Region HBox.hgrow="ALWAYS"/>
+                
+                <!-- CHAOS EVENTS MINI-BAR (In Header) -->
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                     <VBox alignment="CENTER" style="-fx-background-color: rgba(52, 152, 219, 0.2); -fx-border-color: #3498db; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 5 10;">
+                        <Label text="❄ GEL" style="-fx-text-fill: #3498db; -fx-font-weight: bold; -fx-font-size: 10px;"/>
+                     </VBox>
+                     <VBox alignment="CENTER" style="-fx-background-color: rgba(241, 196, 15, 0.2); -fx-border-color: #f1c40f; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 5 10;">
+                        <Label text="⚡ TURBO" style="-fx-text-fill: #f1c40f; -fx-font-weight: bold; -fx-font-size: 10px;"/>
+                     </VBox>
+                     <VBox alignment="CENTER" style="-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 5 10;">
+                        <Label text="🔄 SWITCH" style="-fx-text-fill: #9b59b6; -fx-font-weight: bold; -fx-font-size: 10px;"/>
+                     </VBox>
+                     <VBox alignment="CENTER" style="-fx-background-color: rgba(231, 76, 60, 0.2); -fx-border-color: #e74c3c; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 5 10;">
+                        <Label text="😱 PANIC" style="-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 10px;"/>
+                     </VBox>
                 </HBox>
             </children>
-        </VBox>
-    </top>
+        </HBox>
 
-    <!-- Contenu principal -->
-    <center>
-        <HBox spacing="15.0" style="-fx-padding: 20;" HBox.hgrow="ALWAYS">
+        <!-- MAIN CONTENT -->
+        <HBox spacing="20.0" VBox.vgrow="ALWAYS" style="-fx-padding: 0 30 30 30;">
             <children>
-                <!-- Tableau des joueurs -->
-                <VBox spacing="0.0" HBox.hgrow="ALWAYS" styleClass="content-panel" style="-fx-padding: 0;">
+                <!-- RESPONSES/PLAYERS PANEL -->
+                <VBox spacing="0" styleClass="glass-panel" HBox.hgrow="ALWAYS" style="-fx-padding: 0;">
                     <children>
-                        <HBox fx:id="hboxTableHeader" spacing="0.0" style="-fx-background-color: rgba(231, 76, 60, 0.1); -fx-padding: 10;" alignment="CENTER_LEFT">
+                        <!-- Panel Header -->
+                        <HBox spacing="10.0" alignment="CENTER_LEFT" styleClass="panel-header">
                             <children>
-                                <Label text="RANG" prefWidth="50.0" alignment="CENTER" styleClass="info-label"/>
-                                <Label text="Joueur" prefWidth="100.0" styleClass="info-label"/>
-                                <Label text="Score" prefWidth="80.0" styleClass="info-label"/>
-                                <Label text="Statut" prefWidth="100.0" styleClass="info-label"/>
+                                <Label text="📝" style="-fx-font-size: 18px;" textFill="white"/>
+                                <Label text="Joueurs &amp; Scores" styleClass="text-sub-header"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="lblValidationStatus" text="" style="-fx-text-fill: #f39c12; -fx-font-size: 11px;"/>
                             </children>
                         </HBox>
 
-                        <Separator styleClass="stats-separator" />
+                        <Separator styleClass="stats-separator"/>
 
-                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                        <!-- Scrollable Content -->
+                        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent;">
                             <content>
-                                <VBox fx:id="vboxPlayers" spacing="5" style="-fx-padding: 5;">
-                                    <!-- Joueurs dynamiques -->
+                                <VBox spacing="0" style="-fx-padding: 0;">
+                                    <!-- Table Header (Existing controller field) -->
+                                    <HBox fx:id="hboxTableHeader" spacing="0.0" style="-fx-background-color: rgba(231, 76, 60, 0.1); -fx-padding: 10;" alignment="CENTER_LEFT">
+                                         <children>
+                                             <Label text="RANG" prefWidth="50.0" alignment="CENTER" styleClass="info-label"/>
+                                             <Label text="Joueur" prefWidth="100.0" styleClass="info-label"/>
+                                             <Label text="Score" prefWidth="80.0" styleClass="info-label"/>
+                                             <Label text="Statut" prefWidth="100.0" styleClass="info-label"/>
+                                         </children>
+                                    </HBox>
+                                    
+                                    <!-- Player rows container -->
+                                    <VBox fx:id="vboxPlayers" spacing="5" style="-fx-padding: 5;"/>
                                 </VBox>
                             </content>
                         </ScrollPane>
+
+                        <!-- Validate Button Area -->
+                        <HBox alignment="CENTER" spacing="15" style="-fx-padding: 15; -fx-background-color: rgba(0,0,0,0.2);">
+                            <children>
+                                <Button fx:id="btnValider" text="✓ SITUATION CONFIRMÉE" 
+                                        styleClass="btn-action" style="-fx-font-size: 13px; -fx-padding: 10 30;"/>
+                            </children>
+                        </HBox>
                     </children>
                 </VBox>
 
-                <!-- Barre de chat -->
-                <VBox spacing="0.0" minWidth="220.0" maxWidth="280.0" styleClass="content-panel" style="-fx-padding: 0;">
+                <!-- CHAT PANEL -->
+                <VBox spacing="0" minWidth="260.0" maxWidth="300.0" styleClass="glass-panel" style="-fx-padding: 0;">
                     <children>
-                        <HBox alignment="CENTER" style="-fx-background-color: rgba(231, 76, 60, 0.1); -fx-padding: 12; -fx-background-radius: 12 12 0 0;">
+                        <!-- Chat Header -->
+                        <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="panel-header">
                             <children>
-                                <Label text="💬 CHAT" styleClass="info-label"/>
+                                <Label text="💬" style="-fx-font-size: 18px;" textFill="white"/>
+                                <Label text="Chat" styleClass="text-sub-header"/>
                             </children>
                         </HBox>
 
-                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane">
+                        <!-- Chat Messages -->
+                        <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane" style="-fx-background: transparent; -fx-background-color: transparent;">
                             <content>
-                                <VBox fx:id="vboxMessages" spacing="10.0" style="-fx-padding: 10;">
-                                    <!-- Messages dynamiques -->
-                                </VBox>
+                                <VBox fx:id="vboxMessages" spacing="8.0" style="-fx-padding: 10;"/>
                             </content>
                         </ScrollPane>
 
-                        <HBox spacing="5.0" style="-fx-padding: 10; -fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 0 0 12 12;" alignment="CENTER">
-                            <TextField fx:id="tfMessage" promptText="Écrivez un message..." HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="btnSend" text="➤" styleClass="btn-secondary"/>
+                        <!-- Chat Input -->
+                        <HBox spacing="8.0" style="-fx-padding: 10; -fx-background-color: rgba(0,0,0,0.2);" alignment="CENTER">
+                            <children>
+                                <TextField fx:id="tfMessage" promptText="Message..." HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="btnSend" text="➤" styleClass="btn-secondary" style="-fx-padding: 5 10;"/>
+                            </children>
                         </HBox>
                     </children>
                 </VBox>
             </children>
         </HBox>
-    </center>
 
-</BorderPane>
+    </children>
+</VBox>
