@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import org.example.triharf.HelloApplication;
 import org.example.triharf.services.StatisticsService;
 import org.example.triharf.network.NetworkDiscovery;
+import org.example.triharf.network.GameServer;
 
 import java.io.IOException;
 import java.util.Random;
