@@ -1028,55 +1028,36 @@ public class JeuMultiController {
     }
 
     private void validateWithGroqAsync() {
-        // Collect all validation tasks
-        List<CompletableFuture<Void>> validationTasks = new ArrayList<>();
-
-        // Map to store validation results: player -> category -> response
-        Map<String, Map<String, GroqValidator.MultiplayerValidationResponse>> validationResults = Collections
-                .synchronizedMap(new HashMap<>());
-
-        for (String playerName : playerList) {
-            Map<String, String> answers = allPlayerAnswers.get(playerName);
-            if (answers == null)
-                continue;
-
-            validationResults.put(playerName, Collections.synchronizedMap(new HashMap<>()));
-
-            for (Categorie cat : categories) {
-                String answer = answers.getOrDefault(cat.getNom(), "");
-                final String pName = playerName;
-                final String catName = cat.getNom();
-
-                CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
-                    GroqValidator.MultiplayerValidationResponse response = groqValidator.validateWordMultiplayer(answer,
-                            catName, lettreActuelle, langue, pName);
-                    validationResults.get(pName).put(catName, response);
-                    System.out.println("✅ Validated " + pName + "/" + catName + ": " + answer +
-                            " → valid=" + response.isValid() + ", score=" + response.getScore());
-                }, validationExecutor);
-
-                validationTasks.add(task);
-            }
+        if (lblValidationStatus != null) {
+            javafx.application.Platform
+                    .runLater(() -> lblValidationStatus.setText("✓ Validation par lot en cours (IA)..."));
         }
 
-        // When all validations complete, update UI and BROADCAST if Host
-        CompletableFuture.allOf(validationTasks.toArray(new CompletableFuture[0]))
-                .thenRunAsync(() -> {
-                    // Apply locally
-                    javafx.application.Platform.runLater(() -> {
-                        applyValidationResults(validationResults);
-                    });
+        // Use a single async task for the batch request
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Perform SINGLE batch request
+                System.out.println("🤖 Envoi de la requête de validation groupée (Batch)...");
+                Map<String, Map<String, MultiplayerValidationResponse>> results = new GroqValidator()
+                        .validateBatch(allPlayerAnswers, lettreActuelle, langue);
 
-                    // Broadcast to clients (Host only)
-                    if (isHost && gameClient != null) {
-                        String jsonResults = gson.toJson(validationResults);
-                        gameClient.sendMessage(new NetworkMessage(
-                                NetworkMessage.Type.VALIDATION_RESULTS,
-                                joueur,
-                                jsonResults));
-                        System.out.println("📢 Résultats de validation diffusés aux clients");
-                    }
-                }, validationExecutor);
+                // Apply locally
+                javafx.application.Platform.runLater(() -> applyValidationResults(results));
+
+                // Broadcast
+                if (isHost && gameClient != null) {
+                    String json = gson.toJson(results);
+                    gameClient.sendMessage(new NetworkMessage(
+                            NetworkMessage.Type.VALIDATION_RESULTS,
+                            joueur,
+                            json));
+                    System.out.println("📢 Résultats BATCH diffusés aux clients");
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur validation batch: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }, validationExecutor);
     }
 
     private void handleValidationResults(String jsonResults) {
@@ -1106,23 +1087,10 @@ public class JeuMultiController {
 
             for (Categorie cat : categories) {
                 GroqValidator.MultiplayerValidationResponse response = playerResults.get(cat.getNom());
-                String answer = answers.getOrDefault(cat.getNom(), "");
 
                 int points = 0;
                 if (response != null) {
-                    if (response.isValid()) {
-                        // Check uniqueness among other players
-                        boolean isUnique = isAnswerUnique(answer, cat.getNom(), playerName);
-
-                        if (isUnique) {
-                            // Valid and unique: 10 + rarity bonus
-                            points = 10 + response.getRarity();
-                        } else {
-                            // Valid but duplicate: 5 points
-                            points = 5;
-                        }
-                    }
-                    // Invalid = 0 points (already set)
+                    points = response.getScore();
                 }
 
                 totalScore += points;
@@ -1163,7 +1131,9 @@ public class JeuMultiController {
         }
 
         // Check if this was the last round
-        if (currentRound >= totalRounds) {
+        if (currentRound >= totalRounds)
+
+        {
             // Final round - show results
             if (lblValidationStatus != null) {
                 lblValidationStatus.setText("✓ Partie terminée! Cliquez pour voir les résultats");
@@ -1204,24 +1174,6 @@ public class JeuMultiController {
 
         addChatMessage("SYSTÈME",
                 "Manche " + currentRound + " terminée! Prochaine manche dans quelques secondes...", false);
-    }
-
-    private boolean isAnswerUnique(String answer, String categoryName, String playerName) {
-        if (answer == null || answer.trim().isEmpty())
-            return false;
-
-        for (String otherPlayer : playerList) {
-            if (!otherPlayer.equals(playerName)) {
-                Map<String, String> otherAnswers = allPlayerAnswers.get(otherPlayer);
-                if (otherAnswers != null) {
-                    String otherAnswer = otherAnswers.get(categoryName);
-                    if (otherAnswer != null && otherAnswer.trim().equalsIgnoreCase(answer.trim())) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
 
     @FXML
