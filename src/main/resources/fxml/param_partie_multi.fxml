@@ -29,46 +29,75 @@
             <content>
                 <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-padding: 10;">
                     <children>
+                        <!-- ROW 1: MAX PLAYERS + NUMBER OF ROUNDS -->
+                        <HBox spacing="15.0" alignment="CENTER">
+                            <!-- MAX PLAYERS -->
+                            <VBox spacing="8.0" styleClass="content-panel" HBox.hgrow="ALWAYS">
+                                <children>
+                                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <Label text="👥" style="-fx-font-size: 18px;" textFill="white"/>
+                                            <Label text="Joueurs max:" styleClass="label-bright"/>
+                                        </children>
+                                    </HBox>
+                                    <Spinner fx:id="spinnerMaxPlayers" prefWidth="100.0" editable="true"/>
+                                </children>
+                            </VBox>
 
-                        <!-- MAX PLAYERS -->
-                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
-                            <children>
-                                <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                    <children>
-                                        <Label text="👥" style="-fx-font-size: 20px;" textFill="white"/>
-                                        <Label text="Nombre maximum de joueurs:" styleClass="label-bright"/>
-                                    </children>
-                                </HBox>
-                                <Spinner fx:id="spinnerMaxPlayers" prefWidth="120.0" editable="true"/>
-                            </children>
-                        </VBox>
+                            <!-- NUMBER OF ROUNDS -->
+                            <VBox spacing="8.0" styleClass="content-panel" HBox.hgrow="ALWAYS">
+                                <children>
+                                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <Label text="🔄" style="-fx-font-size: 18px;" textFill="white"/>
+                                            <Label text="Manches:" styleClass="label-bright"/>
+                                            <Label text="(1-8)" style="-fx-font-size: 10px; -fx-text-fill: #888;"/>
+                                        </children>
+                                    </HBox>
+                                    <Spinner fx:id="spinnerNbRounds" prefWidth="100.0" editable="true"/>
+                                </children>
+                            </VBox>
+                        </HBox>
 
-                        <!-- SERVER INFO -->
-                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
-                            <children>
-                                <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                    <children>
-                                        <Label text="🔗" style="-fx-font-size: 20px;" textFill="white"/>
-                                        <Label text="Informations de connexion:" styleClass="label-bright"/>
-                                    </children>
-                                </HBox>
+                        <!-- ROW 2: ROUND DURATION + SERVER INFO -->
+                        <HBox spacing="15.0" alignment="CENTER">
+                            <!-- ROUND DURATION -->
+                            <VBox spacing="8.0" styleClass="content-panel" HBox.hgrow="ALWAYS">
+                                <children>
+                                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <Label text="⏱" style="-fx-font-size: 18px;" textFill="white"/>
+                                            <Label text="Durée:" styleClass="label-bright"/>
+                                            <Label text="(60-180s)" style="-fx-font-size: 10px; -fx-text-fill: #888;"/>
+                                        </children>
+                                    </HBox>
+                                    <Spinner fx:id="spinnerRoundDuration" prefWidth="100.0" editable="true"/>
+                                </children>
+                            </VBox>
 
-                                <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                    <children>
-                                        <TextField fx:id="txtServerIP" editable="false" prefWidth="400.0"
-                                                   promptText="Initialisation..."/>
-                                        <Button text="📋 Copier" fx:id="btnCopier" onAction="#handleCopier"
-                                                styleClass="btn-secondary"/>
-                                    </children>
-                                </HBox>
+                            <!-- SERVER INFO -->
+                            <VBox spacing="8.0" styleClass="content-panel" HBox.hgrow="ALWAYS">
+                                <children>
+                                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <Label text="🔗" style="-fx-font-size: 18px;" textFill="white"/>
+                                            <Label text="Code Partie:" styleClass="label-bright"/>
+                                        </children>
+                                    </HBox>
+                                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <TextField fx:id="txtServerIP" editable="false" prefWidth="200.0"
+                                                       promptText="Initialisation..." HBox.hgrow="ALWAYS"/>
+                                            <Button text="📋" fx:id="btnCopier" onAction="#handleCopier"
+                                                    styleClass="btn-secondary" style="-fx-padding: 5 10;"/>
+                                        </children>
+                                    </HBox>
+                                </children>
+                            </VBox>
+                        </HBox>
 
-                                <Label text="💡 Partagez ces informations avec les autres joueurs"
-                                       style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
-                            </children>
-                        </VBox>
-
-                        <!-- CATEGORIES -->
-                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                        <!-- ROW 3: CATEGORIES (FULL WIDTH) -->
+                        <VBox spacing="10.0" styleClass="content-panel">
                             <children>
                                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>

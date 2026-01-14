@@ -16,6 +16,11 @@ public class GameRoom {
     private Map<String, String> playerPseudos;
 
     private List<String> categories;
+    private int totalRounds = 3;
+    private int roundDuration = 120;
+    private String gameMode = "MULTI";
+
+    private String hostId;
 
     // Validation tracking
     private Set<String> validatedPlayers = new HashSet<>();
@@ -35,13 +40,23 @@ public class GameRoom {
     public String getRoomId() {
         return roomId;
     }
+
     public void setRoomId(String roomId) {
         this.roomId = roomId;
+    }
+
+    public String getHostId() {
+        return hostId;
+    }
+
+    public void setHostId(String hostId) {
+        this.hostId = hostId;
     }
 
     public List<String> getPlayerIds() {
         return playerIds;
     }
+
     public void setPlayerIds(List<String> playerIds) {
         this.playerIds = playerIds;
     }
@@ -49,6 +64,7 @@ public class GameRoom {
     public Map<String, Map<Categorie, String>> getPlayerAnswers() {
         return playerAnswers;
     }
+
     public void setPlayerAnswers(Map<String, Map<Categorie, String>> playerAnswers) {
         this.playerAnswers = playerAnswers;
     }
@@ -56,6 +72,7 @@ public class GameRoom {
     public Character getCurrentLetter() {
         return currentLetter;
     }
+
     public void setCurrentLetter(Character currentLetter) {
         this.currentLetter = currentLetter;
     }
@@ -63,6 +80,7 @@ public class GameRoom {
     public Langue getLangue() {
         return langue;
     }
+
     public void setLangue(Langue langue) {
         this.langue = langue;
     }
@@ -70,6 +88,7 @@ public class GameRoom {
     public int getMaxPlayers() {
         return maxPlayers;
     }
+
     public void setMaxPlayers(int maxPlayers) {
         this.maxPlayers = maxPlayers;
     }
@@ -77,11 +96,12 @@ public class GameRoom {
     public boolean isGameStarted() {
         return gameStarted;
     }
+
     public void setGameStarted(boolean gameStarted) {
         this.gameStarted = gameStarted;
     }
 
-    public boolean addPlayer(String playerId, String pseudo){
+    public boolean addPlayer(String playerId, String pseudo) {
         if (!playerIds.contains(playerId) && !isFull()) {
             playerIds.add(playerId);
             playerPseudos.put(playerId, pseudo);
@@ -91,7 +111,7 @@ public class GameRoom {
         return false;
     }
 
-    public void removePlayer(String playerId){
+    public void removePlayer(String playerId) {
         this.playerIds.remove(playerId);
         this.playerPseudos.remove(playerId);
         this.readyPlayers.remove(playerId);
@@ -113,12 +133,12 @@ public class GameRoom {
         return playerPseudos.getOrDefault(playerId, playerId);
     }
 
-    public void submitAnswer(String playerId, Categorie cat, String word){
+    public void submitAnswer(String playerId, Categorie cat, String word) {
         playerAnswers.putIfAbsent(playerId, new HashMap<>());
         playerAnswers.get(playerId).put(cat, word);
     }
 
-    public Boolean isFull(){
+    public Boolean isFull() {
         return this.playerIds.size() == maxPlayers;
     }
 
@@ -129,8 +149,39 @@ public class GameRoom {
     public void setCategories(List<String> categories) {
         this.categories = categories;
     }
+
     public List<String> getCategories() {
         return categories;
+    }
+
+    public int getTotalRounds() {
+        return totalRounds;
+    }
+
+    public void setTotalRounds(int totalRounds) {
+        this.totalRounds = totalRounds;
+    }
+
+    public int getRoundDuration() {
+        return roundDuration;
+    }
+
+    public void setRoundDuration(int roundDuration) {
+        this.roundDuration = roundDuration;
+    }
+
+    public void setRoundConfig(int totalRounds, int roundDuration) {
+        this.totalRounds = totalRounds;
+        this.roundDuration = roundDuration;
+
+    }
+
+    public String getGameMode() {
+        return gameMode;
+    }
+
+    public void setGameMode(String gameMode) {
+        this.gameMode = gameMode;
     }
 
     // Validation methods
@@ -162,4 +213,8 @@ public class GameRoom {
         return validatedAnswers;
     }
 
+    public void resetRound() {
+        validatedPlayers.clear();
+        validatedAnswers.clear();
+    }
 }

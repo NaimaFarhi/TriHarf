@@ -23,15 +23,28 @@ import java.util.*;
  */
 public class ParamPartieMultiController {
 
-    @FXML private Button btnRetour;
-    @FXML private Label lblModeTitle;
-    @FXML private Label lblModeDescription;
-    @FXML private Spinner<Integer> spinnerMaxPlayers;
-    @FXML private TextField txtServerIP;
-    @FXML private Button btnCopier;
-    @FXML private VBox containerCategories;
-    @FXML private Button btnCommencer;
-    @FXML private Label lblCategoriesInfo;
+    @FXML
+    private Button btnRetour;
+    @FXML
+    private Label lblModeTitle;
+    @FXML
+    private Label lblModeDescription;
+    @FXML
+    private Spinner<Integer> spinnerMaxPlayers;
+    @FXML
+    private Spinner<Integer> spinnerNbRounds;
+    @FXML
+    private Spinner<Integer> spinnerRoundDuration;
+    @FXML
+    private TextField txtServerIP;
+    @FXML
+    private Button btnCopier;
+    @FXML
+    private VBox containerCategories;
+    @FXML
+    private Button btnCommencer;
+    @FXML
+    private Label lblCategoriesInfo;
 
     private List<String> categoriesSelectionnees = new ArrayList<>();
     private CategorieDAO categorieDAO = new CategorieDAO();
@@ -52,6 +65,8 @@ public class ParamPartieMultiController {
     @FXML
     public void initialize() {
         setupPlayerCountSpinner();
+        setupRoundsSpinner();
+        setupRoundDurationSpinner();
         chargerCategoriesParLangue();
         initialiserReseau();
     }
@@ -64,12 +79,37 @@ public class ParamPartieMultiController {
         int maxPlayers = 10;
         int defaultPlayers = gameMode.equals("BATAILLE_ROYALE") ? 4 : 4;
 
-        SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(minPlayers, maxPlayers, defaultPlayers);
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(minPlayers,
+                maxPlayers, defaultPlayers);
 
         if (spinnerMaxPlayers != null) {
             spinnerMaxPlayers.setValueFactory(valueFactory);
             spinnerMaxPlayers.setEditable(true);
+        }
+    }
+
+    /**
+     * Setup spinner for number of rounds (1-8)
+     */
+    private void setupRoundsSpinner() {
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 8, 3);
+
+        if (spinnerNbRounds != null) {
+            spinnerNbRounds.setValueFactory(valueFactory);
+            spinnerNbRounds.setEditable(true);
+        }
+    }
+
+    /**
+     * Setup spinner for round duration (60-180 seconds)
+     */
+    private void setupRoundDurationSpinner() {
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(60, 180, 120,
+                10);
+
+        if (spinnerRoundDuration != null) {
+            spinnerRoundDuration.setValueFactory(valueFactory);
+            spinnerRoundDuration.setEditable(true);
         }
     }
 
@@ -232,17 +272,15 @@ public class ParamPartieMultiController {
                 int maxPlayers = spinnerMaxPlayers != null ? spinnerMaxPlayers.getValue() : 4;
                 gameServer.createRoom(roomId, maxPlayers, ParametresGenerauxController.langueGlobale);
 
-
                 gameClient.sendMessage(new NetworkMessage(
                         NetworkMessage.Type.JOIN_ROOM,
                         ParametresGenerauxController.pseudoGlobal,
-                        roomId
-                ));
+                        roomId));
 
                 // Update UI
                 javafx.application.Platform.runLater(() -> {
                     if (txtServerIP != null) {
-                        txtServerIP.setText(serverAddress + " | Room: " + roomId);
+                        txtServerIP.setText("Code: " + roomId);
                     }
                     System.out.println("✅ Réseau initialisé | IP: " + serverAddress + " | Room: " + roomId);
                 });
@@ -272,6 +310,18 @@ public class ParamPartieMultiController {
         // UPDATE categories in room BEFORE navigating
         if (gameServer != null && roomId != null) {
             gameServer.getRoom(roomId).setCategories(categoriesSelectionnees);
+            // Set round configuration
+            int nbRounds = spinnerNbRounds != null ? spinnerNbRounds.getValue() : 3;
+            int duration = spinnerRoundDuration != null ? spinnerRoundDuration.getValue() : 120;
+            gameServer.getRoom(roomId).setRoundConfig(nbRounds, duration);
+
+            // CRITICAL FIX: Update max players from spinner value
+            if (spinnerMaxPlayers != null) {
+                gameServer.getRoom(roomId).setMaxPlayers(spinnerMaxPlayers.getValue());
+            }
+            gameServer.getRoom(roomId).setGameMode(this.gameMode);
+
+            System.out.println("   Manches: " + nbRounds + " x " + duration + "s");
         }
 
         System.out.println("✅ Début partie " + gameMode);
@@ -303,7 +353,11 @@ public class ParamPartieMultiController {
                 controller.setGameMode(this.gameMode);
                 controller.setNetwork(gameClient, gameServer, roomId);
                 controller.setMaxPlayers(spinnerMaxPlayers.getValue());
-                controller.setCategories(categoriesSelectionnees); // Add this
+                controller.setCategories(categoriesSelectionnees);
+                // Pass round configuration
+                int nbRounds = spinnerNbRounds != null ? spinnerNbRounds.getValue() : 3;
+                int roundDuration = spinnerRoundDuration != null ? spinnerRoundDuration.getValue() : 120;
+                controller.setRoundConfig(nbRounds, roundDuration);
             }
 
             Stage stage = (Stage) btnRetour.getScene().getWindow();

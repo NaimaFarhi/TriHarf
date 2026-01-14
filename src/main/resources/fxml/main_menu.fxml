@@ -6,121 +6,120 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane prefHeight="600" prefWidth="900" styleClass="root-stack" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.MenuPrincipalController">
+<StackPane prefHeight="550" prefWidth="1100" styleClass="root-stack" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.MenuPrincipalController">
     <children>
         <!-- Canvas/Effect layer could go here if implemented properly in Java, but purely FXML-based CSS background is safer -->
         <Pane styleClass="bg-pane" />
 
-<BorderPane style="-fx-background-color: transparent;" prefWidth="900.0" prefHeight="600.0">
+<BorderPane style="-fx-background-color: transparent;" prefWidth="1100.0" prefHeight="550.0">
 
-            <!-- ===== LOGO SECTION & SETTINGS ===== -->
+            <!-- ===== TOP: LOGO (LEFT) ===== -->
             <top>
-                <AnchorPane styleClass="top-bar">
+                <HBox alignment="CENTER_LEFT" styleClass="top-bar" style="-fx-padding: 50 0 0 50;">
                     <children>
-                        <!-- Settings Button Top-Left -->
-                        <Button fx:id="btnParametres" text="⚙" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0" styleClass="btn-settings" style="-fx-font-size: 24px; -fx-padding: 5 12;"/>
-
-                        <!-- Logo Centered -->
-                        <HBox alignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" pickOnBounds="false">
-                            <children>
-                                <ImageView fitHeight="100" fitWidth="300" preserveRatio="true" pickOnBounds="true">
-                                    <image>
-                                        <Image url="@../images/logo.png" />
-                                    </image>
-                                </ImageView>
-                            </children>
-                        </HBox>
+                        <ImageView fitHeight="70" fitWidth="250" preserveRatio="true" pickOnBounds="true">
+                            <image>
+                                <Image url="@../images/logo.png" />
+                            </image>
+                        </ImageView>
                     </children>
-                </AnchorPane>
+                </HBox>
             </top>
 
-            <!-- ===== CENTER SECTION: MODES & STATS ===== -->
+            <!-- ===== CENTER: GAME MODES & SIDEBAR ===== -->
             <center>
-                <ScrollPane fitToWidth="true" styleClass="scroll-pane" style="-fx-background: transparent; -fx-background-color: transparent;">
-                    <content>
-                        <HBox alignment="CENTER" spacing="40" style="-fx-padding: 20;">
+                <!-- Centered alignment is critical here -->
+                <StackPane>
+                    <HBox alignment="CENTER" spacing="40" style="-fx-padding: 0;">
+                        <children>
+
+                            <!-- ===== LEFT: GAME MODES GRID ===== -->
+                            <GridPane alignment="CENTER" hgap="25" vgap="25">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50" />
+                                    <ColumnConstraints percentWidth="50" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints valignment="CENTER" />
+                                    <RowConstraints valignment="CENTER" />
+                                </rowConstraints>
+                                <children>
+
+                                    <!-- MODE: SOLO -->
+                                    <Button fx:id="btnSolo" prefHeight="130" prefWidth="240" styleClass="mode-button" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                        <graphic>
+                                            <StackPane prefHeight="130" prefWidth="240" styleClass="card-stack, card-solo">
+                                                <children>
+                                                    <ImageView fitHeight="130" fitWidth="240" preserveRatio="false" styleClass="mode-icon">
+                                                        <image>
+                                                            <Image url="@../images/solo.png" />
+                                                        </image>
+                                                    </ImageView>
+                                                </children>
+                                            </StackPane>
+                                        </graphic>
+                                    </Button>
+
+                                    <!-- MODE: MULTIJOUEUR -->
+                                    <Button fx:id="btnMultijoueur" prefHeight="130" prefWidth="240" styleClass="mode-button" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                        <graphic>
+                                            <StackPane prefHeight="130" prefWidth="240" styleClass="card-stack, card-multi">
+                                                <children>
+                                                    <ImageView fitHeight="130" fitWidth="240" preserveRatio="false" styleClass="mode-icon">
+                                                        <image>
+                                                            <Image url="@../images/multijoueurs.png" />
+                                                        </image>
+                                                    </ImageView>
+                                                </children>
+                                            </StackPane>
+                                        </graphic>
+                                    </Button>
+
+                                    <!-- MODE: BATTLE ROYALE -->
+                                    <Button fx:id="btnBattleRoyale" prefHeight="130" prefWidth="240" styleClass="mode-button" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                        <graphic>
+                                            <StackPane prefHeight="130" prefWidth="240" styleClass="card-stack, card-br">
+                                                <children>
+                                                    <ImageView fitHeight="130" fitWidth="240" preserveRatio="false" styleClass="mode-icon">
+                                                        <image>
+                                                            <Image url="@../images/battleroyale.png" />
+                                                        </image>
+                                                    </ImageView>
+                                                </children>
+                                            </StackPane>
+                                        </graphic>
+                                    </Button>
+
+                                    <!-- MODE: CHAOS -->
+                                    <Button fx:id="btnChaos" prefHeight="130" prefWidth="240" styleClass="mode-button" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                        <graphic>
+                                            <StackPane prefHeight="130" prefWidth="240" styleClass="card-stack, card-chaos">
+                                                <children>
+                                                    <ImageView fitHeight="130" fitWidth="240" preserveRatio="false" styleClass="mode-icon">
+                                                        <image>
+                                                            <Image url="@../images/mode_chaos.png" />
+                                                        </image>
+                                                    </ImageView>
+                                                </children>
+                                            </StackPane>
+                                        </graphic>
+                                    </Button>
+
+                                </children>
+                            </GridPane>
+
+                        </children>
+                    </HBox>
+                </StackPane>
+            </center>
+
+            <!-- ===== RIGHT: SIDEBAR (STATS + JOIN) ===== -->
+            <right>
+                <VBox alignment="CENTER_RIGHT" spacing="20" prefWidth="350" style="-fx-padding: 0 30 0 0;">
                     <children>
-
-                        <!-- ===== GAME MODES GRID ===== -->
-                        <GridPane alignment="CENTER" hgap="25" vgap="25">
-                            <columnConstraints>
-                                <ColumnConstraints percentWidth="50" />
-                                <ColumnConstraints percentWidth="50" />
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints valignment="CENTER" />
-                                <RowConstraints valignment="CENTER" />
-                            </rowConstraints>
+                        <!-- STATS PANEL -->
+                        <VBox spacing="15" styleClass="stats-panel" VBox.vgrow="NEVER">
                             <children>
-
-                                <!-- MODE: SOLO -->
-                                <Button fx:id="btnSolo" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                    <graphic>
-                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-solo">
-                                            <children>
-                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
-                                                    <image>
-                                                        <Image url="@../images/solo.png" />
-                                                    </image>
-                                                </ImageView>
-                                            </children>
-                                        </StackPane>
-                                    </graphic>
-                                </Button>
-
-                                <!-- MODE: MULTIJOUEUR -->
-                                <Button fx:id="btnMultijoueur" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                    <graphic>
-                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-multi">
-                                            <children>
-                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
-                                                    <image>
-                                                        <Image url="@../images/multijoueurs.png" />
-                                                    </image>
-                                                </ImageView>
-                                            </children>
-                                        </StackPane>
-                                    </graphic>
-                                </Button>
-
-                                <!-- MODE: BATTLE ROYALE -->
-                                <Button fx:id="btnBattleRoyale" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                                    <graphic>
-                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-br">
-                                            <children>
-                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
-                                                    <image>
-                                                        <Image url="@../images/battleroyale.png" />
-                                                    </image>
-                                                </ImageView>
-                                            </children>
-                                        </StackPane>
-                                    </graphic>
-                                </Button>
-
-                                <!-- MODE: CHAOS -->
-                                <Button fx:id="btnChaos" prefHeight="150" prefWidth="260" styleClass="mode-button" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                    <graphic>
-                                        <StackPane prefHeight="150" prefWidth="260" styleClass="card-stack, card-chaos">
-                                            <children>
-                                                <ImageView fitHeight="150" fitWidth="260" preserveRatio="false" styleClass="mode-icon">
-                                                    <image>
-                                                        <Image url="@../images/mode_chaos.png" />
-                                                    </image>
-                                                </ImageView>
-                                            </children>
-                                        </StackPane>
-                                    </graphic>
-                                </Button>
-
-                            </children>
-                        </GridPane>
-
-                        <!-- ===== STATS PANEL ===== -->
-                        <VBox prefWidth="380" spacing="15" styleClass="stats-panel">
-                            <children>
-
-                                <!-- Header -->
                                 <HBox alignment="CENTER_LEFT" spacing="10">
                                     <children>
                                         <Label styleClass="stats-title" text="STATISTIQUES" />
@@ -129,8 +128,8 @@
 
                                 <Separator styleClass="stats-separator" />
 
-                                <!-- Main Stats -->
-                                <VBox spacing="10" styleClass="stats-sub-panel">
+                                <!-- Condensed Stats -->
+                                <VBox spacing="8" styleClass="stats-sub-panel">
                                     <children>
                                         <HBox alignment="CENTER_LEFT">
                                             <children>
@@ -139,69 +138,64 @@
                                                 <Label fx:id="lblVictoires" styleClass="stats-value" text="" />
                                             </children>
                                         </HBox>
-                                        <Separator opacity="0.5" />
+                                        <Separator opacity="0.3" />
                                         <HBox alignment="CENTER_LEFT">
                                             <children>
-                                                <Label styleClass="stats-label" text="Parties jouées:" />
+                                                <Label styleClass="stats-label" text="Parties:" />
                                                 <Region HBox.hgrow="ALWAYS" />
                                                 <Label fx:id="lblParties" styleClass="stats-value" text="" />
                                             </children>
                                         </HBox>
-                                        <Separator opacity="0.5" />
+                                        <Separator opacity="0.3" />
                                         <HBox alignment="CENTER_LEFT">
                                             <children>
-                                                <Label text="⭐ " style="-fx-font-size: 16px;" />
-                                                <Label styleClass="stats-label" text="Meilleur score:" />
+                                                <Label text="⭐ " style="-fx-font-size: 14px;" />
+                                                <Label styleClass="stats-label" text="Record:" />
                                                 <Region HBox.hgrow="ALWAYS" />
                                                 <Label fx:id="lblBestScore" styleClass="stats-value" text="" />
                                             </children>
                                         </HBox>
                                     </children>
                                 </VBox>
-
-                                <Separator styleClass="stats-separator" />
-
-                                <!-- Records -->
-                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;" text="Records catégorie" />
-
-                                <VBox fx:id="vboxRecords" spacing="8" styleClass="records-panel">
-                                    <!-- Dynamic records will be added here -->
+                                
+                                <!-- Optional: Records List (Keep minimal) -->
+                                <VBox fx:id="vboxRecords" spacing="5" styleClass="records-panel">
+                                    <!-- Dynamic records -->
                                 </VBox>
                             </children>
                         </VBox>
 
-                    </children>
-                </HBox>
-                    </content>
-                </ScrollPane>
-            </center>
-
-            <!-- ===== BOTTOM SECTION: REJOINDRE UNE PARTIE ===== -->
-            <bottom>
-                <!-- Join Game Section (find and replace existing) -->
-                <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
-                    <children>
-                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <!-- JOIN GAME PANEL -->
+                        <VBox spacing="10.0" styleClass="content-panel">
                             <children>
-                                <Label text="🔗" style="-fx-font-size: 20px;" textFill="white"/>
-                                <Label text="Rejoindre une partie:" styleClass="label-bright"/>
-                            </children>
-                        </HBox>
+                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="🔗" style="-fx-font-size: 18px;" textFill="white"/>
+                                        <Label text="Rejoindre" styleClass="label-bright"/>
+                                    </children>
+                                </HBox>
 
-                        <VBox spacing="8.0">
-                            <children>
-                                <Label text="IP du serveur:" style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
-                                <TextField fx:id="tfServerIP" promptText="192.168.91.1:8888" prefWidth="300.0"/>
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <TextField fx:id="tfCodePartie" promptText="Code Partie" />
+                                    </children>
+                                </VBox>
 
-                                <Label text="Code de la partie:" style="-fx-font-size: 12px; -fx-text-fill: #888;"/>
-                                <TextField fx:id="tfCodePartie" promptText="49e61c64" prefWidth="300.0"/>
+                                <Button fx:id="btnRejoindre" text="REJOINDRE" onAction="#handleRejoindre"
+                                        styleClass="btn-secondary" maxWidth="Infinity" style="-fx-padding: 8 15;"/>
                             </children>
                         </VBox>
-
-                        <Button fx:id="btnRejoindre" text="🎮 REJOINDRE" onAction="#handleRejoindre"
-                                styleClass="btn-secondary" prefWidth="200.0"/>
                     </children>
                 </VBox>
+            </right>
+
+            <!-- ===== BOTTOM: SETTINGS (LEFT) ===== -->
+            <bottom>
+                <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 50 50;">
+                    <children>
+                        <Button fx:id="btnParametres" text="⚙" styleClass="btn-settings" style="-fx-font-size: 24px; -fx-padding: 5 15;"/>
+                    </children>
+                </HBox>
             </bottom>
 
         </BorderPane>

@@ -23,10 +23,16 @@ public class GameServer {
         this.running = false;
     }
 
+    private NetworkDiscovery discovery;
+
     public void start() throws IOException {
         serverSocket = new ServerSocket(PORT);
         running = true;
         System.out.println("Server started on port " + PORT);
+
+        // Start UDP Discovery
+        discovery = new NetworkDiscovery();
+        discovery.startBroadcasting(PORT);
 
         while (running) {
             Socket clientSocket = serverSocket.accept();
@@ -40,7 +46,12 @@ public class GameServer {
 
     public void stop() throws IOException {
         running = false;
-        serverSocket.close();
+        if (discovery != null) {
+            discovery.stopBroadcasting();
+        }
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            serverSocket.close();
+        }
         threadPool.shutdown();
     }
 
@@ -48,6 +59,7 @@ public class GameServer {
         GameRoom room = rooms.get(roomId);
         if (room != null && room.canStart()) {
             room.setGameStarted(true);
+            room.resetRound();
 
             Character letter = generateLetter();
             room.setCurrentLetter(letter);
@@ -60,15 +72,16 @@ public class GameServer {
 
             Map<String, Object> gameData = new HashMap<>();
             gameData.put("letter", letter.toString());
-            gameData.put("duration", 180);
+            gameData.put("duration", room.getRoundDuration());
+            gameData.put("totalRounds", room.getTotalRounds());
+            gameData.put("gameMode", room.getGameMode());
             gameData.put("categories", room.getCategories());
             gameData.put("players", playerPseudos);
 
             broadcast(roomId, new NetworkMessage(
                     NetworkMessage.Type.GAME_START,
                     "SERVER",
-                    gameData
-            ));
+                    gameData));
         }
     }
 
@@ -76,7 +89,6 @@ public class GameServer {
         String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         return letters.charAt(new Random().nextInt(letters.length()));
     }
-
 
     // Create new game room
     public synchronized GameRoom createRoom(String roomId, int maxPlayers, Langue langue) {
@@ -95,6 +107,27 @@ public class GameServer {
             return false;
         }
 
+        // Assign host if first player
+        if (room.getPlayerIds().size() == 1) {
+            room.setHostId(clientId);
+            System.out.println("👑 Host assigned for room " + roomId + ": " + pseudo);
+        }
+
+        // Auto-ready the player
+        room.setPlayerReady(clientId, true);
+
+        // Send room info to the joining player (so they know maxPlayers, etc.)
+        ClientHandler newClient = clients.get(clientId);
+        if (newClient != null) {
+            Map<String, Object> roomInfo = new HashMap<>();
+            roomInfo.put("maxPlayers", room.getMaxPlayers());
+            roomInfo.put("roomId", room.getRoomId());
+            newClient.sendMessage(new NetworkMessage(
+                    NetworkMessage.Type.ROOM_INFO,
+                    "SERVER",
+                    roomInfo));
+        }
+
         // Notify all players in room with status list (using pseudos)
         List<String> playerStatusList = new ArrayList<>();
         for (String pid : room.getPlayerIds()) {
@@ -106,8 +139,7 @@ public class GameServer {
         NetworkMessage msg = new NetworkMessage(
                 NetworkMessage.Type.PLAYER_JOINED,
                 "SERVER",
-                playerStatusList
-        );
+                playerStatusList);
         broadcast(roomId, msg);
         return true;
     }
@@ -116,7 +148,7 @@ public class GameServer {
         GameRoom room = rooms.get(roomId);
         if (room != null) {
             room.setPlayerReady(clientId, ready);
-            
+
             // Map player names to status
             List<String> playerStatusList = new ArrayList<>();
             for (String pid : room.getPlayerIds()) {
@@ -128,8 +160,7 @@ public class GameServer {
             NetworkMessage msg = new NetworkMessage(
                     NetworkMessage.Type.PLAYER_JOINED,
                     "SERVER",
-                    playerStatusList
-            );
+                    playerStatusList);
             broadcast(roomId, msg);
         }
     }
@@ -158,7 +189,8 @@ public class GameServer {
         if (room != null) {
             room.getPlayerIds().forEach(playerId -> {
                 ClientHandler client = clients.get(playerId);
-                if (client != null) client.sendMessage(message);
+                if (client != null)
+                    client.sendMessage(message);
             });
         }
     }
@@ -171,7 +203,8 @@ public class GameServer {
                 // Don't send back to the sender
                 if (!playerId.equals(senderClientId)) {
                     ClientHandler client = clients.get(playerId);
-                    if (client != null) client.sendMessage(message);
+                    if (client != null)
+                        client.sendMessage(message);
                 }
             });
         }
@@ -182,26 +215,26 @@ public class GameServer {
         // Find which room this client was in
         for (GameRoom room : rooms.values()) {
             if (room.getPlayerIds().contains(clientId)) {
-                // Get player pseudo BEFORE removing them
-                String playerPseudo = room.getPseudo(clientId);
                 String roomId = room.getRoomId();
+                String pseudo = room.getPseudo(clientId);
+                boolean isHost = clientId.equals(room.getHostId());
 
-                // Remove player from room
                 leaveRoom(clientId, roomId);
 
-                // Send PLAYER_DISCONNECTED notification with player name
-                if (playerPseudo != null && !room.getPlayerIds().isEmpty()) {
-                    NetworkMessage disconnectMsg = new NetworkMessage(
-                        NetworkMessage.Type.PLAYER_DISCONNECTED,
-                        "SERVER",
-                        playerPseudo
-                    );
-                    broadcast(roomId, disconnectMsg);
-                    System.out.println("📤 Broadcasted disconnect: " + playerPseudo);
+                if (isHost && !rooms.containsKey(roomId)) {
+                    // Room was deleted because empty, nothing to do
+                } else if (isHost) {
+                    System.out.println("🚨 Host " + pseudo + " disconnected! Ending game for room " + roomId);
+                    broadcast(roomId, new NetworkMessage(NetworkMessage.Type.GAME_ENDED_HOST_LEFT, "SERVER", null));
+                    rooms.remove(roomId); // Destroy room
+                    return;
+                } else {
+                    // Normal player left
+                    System.out.println("👋 Player " + pseudo + " left room " + roomId);
+                    broadcast(roomId, new NetworkMessage(NetworkMessage.Type.PLAYER_LEFT, "SERVER", pseudo));
+                    // Also send updated player list
+                    broadcastPlayerStatus(roomId);
                 }
-
-                // Also broadcast updated player status
-                broadcastPlayerStatus(roomId);
                 break;
             }
         }
@@ -221,17 +254,17 @@ public class GameServer {
             NetworkMessage msg = new NetworkMessage(
                     NetworkMessage.Type.PLAYER_JOINED,
                     "SERVER",
-                    playerStatusList
-            );
+                    playerStatusList);
             broadcast(roomId, msg);
         }
     }
 
     // Handle player validation
     @SuppressWarnings("unchecked")
-    public void handleValidation(String roomId, String senderClientId, NetworkMessage message) {
+    public synchronized void handleValidation(String roomId, String senderClientId, NetworkMessage message) {
         GameRoom room = rooms.get(roomId);
-        if (room == null) return;
+        if (room == null)
+            return;
 
         Map<String, Object> validationData = (Map<String, Object>) message.getData();
         String playerPseudo = (String) validationData.get("player");
@@ -239,7 +272,8 @@ public class GameServer {
 
         // Store validation in room
         room.validatePlayer(playerPseudo, answers);
-        System.out.println("✅ " + playerPseudo + " a validé ses réponses (" + room.getValidatedPlayers().size() + "/" + room.getPlayerIds().size() + ")");
+        System.out.println("✅ " + playerPseudo + " a validé ses réponses (" + room.getValidatedPlayers().size() + "/"
+                + room.getPlayerIds().size() + ")");
 
         // Broadcast validation to other players (excluding sender)
         room.getPlayerIds().forEach(playerId -> {
@@ -257,11 +291,18 @@ public class GameServer {
 
             // Send ALL_VALIDATED with all answers to everyone
             NetworkMessage allValidatedMsg = new NetworkMessage(
-                NetworkMessage.Type.ALL_VALIDATED,
-                "SERVER",
-                room.getValidatedAnswers()
-            );
+                    NetworkMessage.Type.ALL_VALIDATED,
+                    "SERVER",
+                    room.getValidatedAnswers());
             broadcast(roomId, allValidatedMsg);
+        }
+    }
+
+    public synchronized void handleNextRound(String roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (room != null) {
+            System.out.println("🔄 Initialisation de la manche suivante pour la salle: " + roomId);
+            room.resetRound();
         }
     }
 }

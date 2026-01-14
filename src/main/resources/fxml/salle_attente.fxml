@@ -103,7 +103,6 @@
         <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 20; -fx-background-color: rgba(0,0,0,0.2);">
             <children>
                 <Button fx:id="btnQuitter" text="✕ QUITTER" onAction="#handleQuitter" styleClass="btn-terminate"/>
-                <Button fx:id="btnPret" text="✓ JE SUIS PRÊT" onAction="#handlePret" styleClass="btn-action" style="-fx-min-width: 200;"/>
                 <Button fx:id="btnCommencer" text="🎮 COMMENCER LA PARTIE"
                         onAction="#handleCommencer" styleClass="btn-action"
                         style="-fx-min-width: 250;" visible="false"/>

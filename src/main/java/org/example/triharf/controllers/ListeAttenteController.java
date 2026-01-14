@@ -3,6 +3,8 @@ package org.example.triharf.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -18,31 +20,41 @@ import java.util.List;
 
 public class ListeAttenteController {
 
-    @FXML private Label lblPlayerCount;
-    @FXML private Label lblMaxPlayers;
-    @FXML private VBox vboxPlayers;
-    @FXML private Label lblGameCode;
-    @FXML private Button btnCopyCode;
-    @FXML private Button btnQuitter;
-    @FXML private Button btnPret;
-    @FXML private Button btnCommencer; // Host only button
+    @FXML
+    private Label lblPlayerCount;
+    @FXML
+    private Label lblMaxPlayers;
+    @FXML
+    private VBox vboxPlayers;
+    @FXML
+    private Label lblGameCode;
+    @FXML
+    private Button btnCopyCode;
+    @FXML
+    private Button btnQuitter;
+
+    @FXML
+    private Button btnCommencer; // Host only button
 
     private String gameMode = "MULTI";
     private GameClient gameClient;
     private GameServer gameServer;
     private String roomId;
     private int maxPlayers = 4;
-    private boolean isReady = false;
+
     private boolean isHost = false;
     private List<String> categories = new ArrayList<>();
     private String currentLetter = null;
     private List<String> playerPseudos = new ArrayList<>();
+    private int totalRounds = 3;
+    private int roundDuration = 120;
 
     @FXML
     public void initialize() {
         System.out.println("✅ ListeAttenteController initialisé");
         // Hide start button initially
-        if (btnCommencer != null) btnCommencer.setVisible(false);
+        if (btnCommencer != null)
+            btnCommencer.setVisible(false);
     }
 
     public void setNetwork(GameClient client, GameServer server, String roomId) {
@@ -61,6 +73,11 @@ public class ListeAttenteController {
 
         if (gameClient != null) {
             gameClient.setMessageHandler(this::handleIncomingMessage);
+        }
+
+        // Initialize player count (host is already connected)
+        if (lblPlayerCount != null) {
+            lblPlayerCount.setText("1");
         }
 
         // Show start button only for host
@@ -85,6 +102,12 @@ public class ListeAttenteController {
         System.out.println("Mode de jeu (Attente) : " + mode);
     }
 
+    public void setRoundConfig(int totalRounds, int roundDuration) {
+        this.totalRounds = totalRounds;
+        this.roundDuration = roundDuration;
+        System.out.println("✅ Configuration manches: " + totalRounds + " manches, " + roundDuration + "s chacune");
+    }
+
     private void handleIncomingMessage(NetworkMessage message) {
         javafx.application.Platform.runLater(() -> {
             switch (message.getType()) {
@@ -93,17 +116,27 @@ public class ListeAttenteController {
                     List<String> players = (List<String>) message.getData();
                     updatePlayerList(players);
                 }
-                case PLAYER_DISCONNECTED -> {
-                    // A player has disconnected - show notification
-                    String disconnectedPlayer = (String) message.getData();
-                    System.out.println("🚪 Joueur déconnecté: " + disconnectedPlayer);
-                    showDisconnectNotification(disconnectedPlayer);
+                case ROOM_INFO -> {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> info = (java.util.Map<String, Object>) message.getData();
+                    if (info.containsKey("maxPlayers")) {
+                        Object max = info.get("maxPlayers");
+                        if (max instanceof Number) {
+                            setMaxPlayers(((Number) max).intValue());
+                            System.out.println("ℹ️ Max players updated to: " + max);
+                        }
+                    }
                 }
                 case GAME_START -> {
+                    // Log raw GAME_START data for debugging
+                    System.out.println("🔔 GAME_START reçu (ListeAttenteController)");
+
                     // Extract categories, letter, and players from GAME_START message
                     @SuppressWarnings("unchecked")
                     java.util.Map<String, Object> data = (java.util.Map<String, Object>) message.getData();
                     if (data != null) {
+                        System.out.println("📦 GAME_START data keys: " + data.keySet());
+
                         @SuppressWarnings("unchecked")
                         List<String> cats = (List<String>) data.get("categories");
                         if (cats != null && !cats.isEmpty()) {
@@ -123,12 +156,53 @@ public class ListeAttenteController {
                             this.playerPseudos = new ArrayList<>(players);
                             System.out.println("✅ Joueurs reçus du serveur: " + players);
                         }
+                        // Extract round configuration
+                        Object durationObj = data.get("duration");
+                        Object roundsObj = data.get("totalRounds");
+                        System.out.println("📊 duration raw value: " + durationObj + " (type: "
+                                + (durationObj != null ? durationObj.getClass().getName() : "null") + ")");
+                        System.out.println("📊 totalRounds raw value: " + roundsObj + " (type: "
+                                + (roundsObj != null ? roundsObj.getClass().getName() : "null") + ")");
+
+                        if (durationObj instanceof Number) {
+                            this.roundDuration = ((Number) durationObj).intValue();
+                            System.out.println("✅ Durée manche reçue: " + roundDuration + "s");
+                        } else {
+                            System.out.println("⚠️ duration n'est pas un Number, utilisant défaut: " + roundDuration);
+                        }
+                        if (roundsObj instanceof Number) {
+                            this.totalRounds = ((Number) roundsObj).intValue();
+                            System.out.println("✅ Nombre de manches reçu: " + totalRounds);
+                        } else {
+                            System.out.println("⚠️ totalRounds n'est pas un Number, utilisant défaut: " + totalRounds);
+                        }
+
+                        String mode = (String) data.get("gameMode");
+                        if (mode != null) {
+                            this.gameMode = mode;
+                            System.out.println("✅ Mode de jeu reçu du server: " + mode);
+                        } else {
+                            System.out.println("⚠️ Mode de jeu NON reçu, conservation de: " + this.gameMode);
+                        }
                     }
                     startGame();
                 }
-                default -> {}
+                // Ignore other message types in this context
+                case GAME_ENDED_HOST_LEFT -> {
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Fin de partie");
+                        alert.setHeaderText("L'hôte a quitté la partie");
+                        alert.setContentText("Le salon est fermé. Retour au menu principal.");
+                        alert.showAndWait();
+                        handleQuitter();
+                    });
+                }
+                default -> {
+                }
             }
         });
+
     }
 
     private void showDisconnectNotification(String playerName) {
@@ -165,46 +239,60 @@ public class ListeAttenteController {
 
         // Enable start button when minimum players reached (host only)
         if (btnCommencer != null && isHost) {
-            int minPlayers = gameMode.equals("BATAILLE_ROYALE") ? 4 : 2;
+            int minPlayers = gameMode.equals("BATAILLE_ROYALE") ? 2 : 2;
             btnCommencer.setDisable(playersStatus.size() < minPlayers);
         }
     }
 
     @FXML
-    private void handlePret() {
-        if (gameClient != null) {
-            isReady = !isReady;
-            gameClient.sendMessage(new NetworkMessage(
-                    NetworkMessage.Type.PLAYER_READY,
-                    ParametresGenerauxController.pseudoGlobal,
-                    isReady
-            ));
-
-            if (btnPret != null) {
-                btnPret.setText(isReady ? "❌ PAS PRÊT" : "✓ JE SUIS PRÊT");
-                btnPret.getStyleClass().clear();
-                btnPret.getStyleClass().add(isReady ? "btn-terminate" : "btn-action");
-            }
-        }
-    }
-
-    @FXML
     private void handleCommencer() {
-        if (!isHost) return;
+        if (!isHost)
+            return;
 
         // Broadcast game start
         gameServer.startGame(roomId);
     }
 
     private void startGame() {
-        String targetFxml = switch (gameMode) {
-            case "BATAILLE_ROYALE" -> "/fxml/partie_battle.fxml";
-            case "CHAOS" -> "/fxml/partie_chaos.fxml";
-            default -> "/fxml/partie_multi.fxml";
-        };
-
-        navigateToGame(targetFxml, "Partie - " + gameMode);
+        if ("CHAOS".equals(gameMode) || "MODE_CHAOS".equals(gameMode)) {
+            navigateToChaosGame("/fxml/partie_chaos.fxml", "Partie - CHAOS");
+        } else {
+            navigateToGame("/fxml/partie_multi.fxml", "Partie - " + gameMode);
+        }
     }
+
+    private void navigateToChaosGame(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof JeuChaosController) {
+                JeuChaosController cc = (JeuChaosController) controller;
+                cc.setNetwork(gameClient, roomId);
+                cc.setIsHost(isHost);
+                cc.setCategories(categories);
+                if (currentLetter != null)
+                    cc.setLettre(currentLetter);
+                if (playerPseudos != null)
+                    cc.setPlayerList(playerPseudos);
+                cc.setGameDuration(roundDuration);
+                cc.setTotalRounds(totalRounds);
+
+                System.out.println("🔥 Navigation vers Chaos Mode avec " + categories.size() + " catégories");
+                cc.demarrerPartie();
+            }
+
+            Stage stage = (Stage) btnQuitter.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.setTitle(title);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ... handleQuitter, handleCopyCode ...
 
     @FXML
     private void handleQuitter() {
@@ -221,8 +309,7 @@ public class ListeAttenteController {
             gameClient.sendMessage(new NetworkMessage(
                     NetworkMessage.Type.DISCONNECT,
                     ParametresGenerauxController.pseudoGlobal,
-                    roomId
-            ));
+                    roomId));
         }
 
         navigateTo("/fxml/main_menu.fxml", "Menu Principal");
@@ -247,7 +334,13 @@ public class ListeAttenteController {
             if (controller instanceof JeuMultiController) {
                 JeuMultiController mc = (JeuMultiController) controller;
                 mc.setNetwork(gameClient, roomId);
+                mc.setIsHost(isHost);
                 mc.setCategories(categories);
+                mc.setRoundConfig(totalRounds, roundDuration);
+
+                // Set Game Mode
+                mc.setGameMode(gameMode);
+
                 if (currentLetter != null) {
                     mc.setLettre(currentLetter);
                 }
@@ -257,11 +350,12 @@ public class ListeAttenteController {
                 System.out.println("📋 Catégories passées à JeuMultiController: " + categories);
                 System.out.println("📋 Lettre passée à JeuMultiController: " + currentLetter);
                 System.out.println("📋 Joueurs passés à JeuMultiController: " + playerPseudos);
+                System.out.println("📋 Configuration manches: " + totalRounds + "/" + roundDuration + "s");
                 // Start the game after setting up categories
                 mc.demarrerPartie();
             }
 
-            Stage stage = (Stage) btnPret.getScene().getWindow();
+            Stage stage = (Stage) btnQuitter.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);
 
@@ -274,7 +368,7 @@ public class ListeAttenteController {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Stage stage = (Stage) btnPret.getScene().getWindow();
+            Stage stage = (Stage) btnQuitter.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);
         } catch (IOException e) {

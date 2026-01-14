@@ -26,23 +26,44 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import org.example.triharf.services.GroqValidator.MultiplayerValidationResponse;
 
 public class JeuMultiController {
 
     // ===== UI COMPONENTS (MATCHING FXML) =====
-    @FXML private Button btnBack;
-    @FXML private Label lblTimer;
-    @FXML private Label lblJoueurs;
-    @FXML private Label lblLettre;
-    @FXML private VBox vboxPlayers;
-    @FXML private HBox hboxCategoryHeaders;
-    @FXML private VBox vboxPlayerRows;
-    @FXML private VBox vboxMessages;
-    @FXML private TextField tfMessage;
-    @FXML private Button btnSend;
-    @FXML private Button btnValider;
-    @FXML private Button btnVoirResultats;
-    @FXML private Label lblValidationStatus;
+    @FXML
+    private Button btnBack;
+    @FXML
+    private Label lblTimer;
+    @FXML
+    private Label lblJoueurs;
+    @FXML
+    private Label lblLettre;
+    @FXML
+    private Label lblCurrentRound;
+    @FXML
+    private Label lblTotalRounds;
+    @FXML
+    private VBox vboxPlayers;
+    @FXML
+    private HBox hboxCategoryHeaders;
+    @FXML
+    private VBox vboxPlayerRows;
+    @FXML
+    private VBox vboxMessages;
+    @FXML
+    private TextField tfMessage;
+    @FXML
+    private Button btnSend;
+    @FXML
+    private Button btnValider;
+    @FXML
+    private Button btnVoirResultats;
+    @FXML
+    private Label lblValidationStatus;
 
     // ===== SERVICES =====
     private GameEngine gameEngine;
@@ -73,12 +94,17 @@ public class JeuMultiController {
     private Set<String> validatedPlayers = new HashSet<>();
     private boolean allPlayersValidated = false;
     private Map<String, Integer> playerFinalScores = new HashMap<>(); // Store final scores for results page
+    private Map<String, Integer> cumulativeScores = new HashMap<>(); // Track scores across all rounds
+    private Set<Character> usedLetters = new HashSet<>(); // Track used letters to avoid repeats
 
     // ===== INJECTED DATA =====
     private List<String> categoriesNoms;
     private List<Categorie> categories;
     private String joueur = "Joueur_Multi";
     private int gameDuration = 180;
+    private final Gson gson = new Gson();
+    private int currentRound = 1;
+    private int totalRounds = 3;
     private org.example.triharf.enums.Langue langue = org.example.triharf.enums.Langue.FRANCAIS;
 
     // ===== DAO =====
@@ -91,6 +117,29 @@ public class JeuMultiController {
     // ===== NETWORK =====
     private GameClient gameClient;
     private String roomId;
+    private boolean isHost = false;
+    private String gameMode = "MULTI";
+    private Set<String> eliminatedPlayers = new HashSet<>();
+
+    public void setGameMode(String mode) {
+        this.gameMode = mode;
+        System.out.println("Mode de jeu défini dans JeuMultiController: " + mode);
+        updateUIForMode();
+    }
+
+    private void updateUIForMode() {
+        if ("BATAILLE_ROYALE".equals(gameMode)) {
+            // Apply Red Theme for Battle Royale
+            if (hboxCategoryHeaders != null) {
+                hboxCategoryHeaders.setStyle("-fx-border-color: #c0392b; -fx-border-width: 0 0 2 0;");
+            }
+            // Add other theme adjustments here
+        }
+    }
+
+    public void setIsHost(boolean isHost) {
+        this.isHost = isHost;
+    }
 
     public void setNetwork(GameClient client, String roomId) {
         this.gameClient = client;
@@ -127,6 +176,15 @@ public class JeuMultiController {
                     if (players != null) {
                         this.playerList = new ArrayList<>(players);
                         updatePlayerCount();
+                    }
+
+                    // Get round configuration
+                    Object durationObj = data.get("duration");
+                    Object roundsObj = data.get("totalRounds");
+                    if (durationObj instanceof Number && roundsObj instanceof Number) {
+                        int duration = ((Number) durationObj).intValue();
+                        int rounds = ((Number) roundsObj).intValue();
+                        setRoundConfig(rounds, duration);
                     }
 
                     demarrerPartie();
@@ -186,14 +244,148 @@ public class JeuMultiController {
                     allPlayersValidated = true;
                     revealAllAnswers();
                 }
-                case PLAYER_DISCONNECTED -> {
-                    // A player has disconnected during the game
-                    String disconnectedPlayer = (String) message.getData();
-                    handlePlayerDisconnected(disconnectedPlayer);
+                case NEXT_ROUND -> {
+                    Object data = message.getData();
+                    Character forcedLetter = null;
+                    if (data instanceof Map) {
+                        Map<String, Object> nextRoundData = (Map<String, Object>) data;
+                        String letterStr = (String) nextRoundData.get("letter");
+                        if (letterStr != null && !letterStr.isEmpty()) {
+                            forcedLetter = letterStr.charAt(0);
+                        }
+                    }
+                    startNextRound(forcedLetter);
                 }
-                default -> {}
+                case SHOW_RESULTS -> {
+                    navigateToMultiplayerResults();
+                }
+                case PLAYER_ELIMINATED -> {
+                    String eliminatedPlayer = (String) message.getData();
+                    handlePlayerEliminated(eliminatedPlayer);
+                }
+                case VALIDATION_RESULTS -> {
+                    String json = (String) message.getData();
+                    handleValidationResults(json);
+                }
+                case GAME_ENDED_HOST_LEFT -> {
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Fin de partie");
+                        alert.setHeaderText("L'hôte a quitté la partie");
+                        alert.setContentText("La partie est annulée. Retour au menu principal.");
+                        alert.showAndWait();
+                        handleBack();
+                    });
+                }
+                case PLAYER_LEFT -> {
+                    String leftPlayer = (String) message.getData();
+                    System.out.println("👋 Joueur parti : " + leftPlayer);
+                    playerList.remove(leftPlayer);
+                    // Refresh UI
+                    creerChampsDynamiquement();
+                    if (lblJoueurs != null)
+                        lblJoueurs.setText(String.valueOf(playerList.size()));
+                }
+                default -> {
+                }
             }
         });
+    }
+
+    private void handleNextRoundAction() {
+        if (isHost) {
+            // Battle Royale Logic: Eliminate lowest score before next round
+            if ("BATAILLE_ROYALE".equals(gameMode)) {
+                String playerToEliminate = findLowestScoringPlayer();
+                if (playerToEliminate != null) {
+                    System.out.println("💀 Élimination de: " + playerToEliminate);
+                    if (gameClient != null) {
+                        gameClient.sendMessage(
+                                new NetworkMessage(NetworkMessage.Type.PLAYER_ELIMINATED, joueur, playerToEliminate));
+                    }
+                    // Wait a moment for elimination message to propagate before sending next round?
+                    // For now, send immediately, clients handle ordering usually fine or closely.
+                }
+            }
+
+            if (gameClient != null) {
+                Character nextLetter = generateNewLetter();
+                Map<String, Object> nextRoundData = new HashMap<>();
+                nextRoundData.put("roomId", roomId);
+                nextRoundData.put("letter", nextLetter.toString());
+
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, nextRoundData));
+            }
+        } else {
+            showAlert("Attente de l'hôte", "Seul l'hôte peut lancer la manche suivante.");
+        }
+    }
+
+    private String findLowestScoringPlayer() {
+        String lowestPlayer = null;
+        int minScore = Integer.MAX_VALUE;
+        int activeCount = 0;
+
+        // Count active players first
+        for (String p : playerList) {
+            if (!eliminatedPlayers.contains(p))
+                activeCount++;
+        }
+
+        // Don't eliminate if only 1 (or 0) players left (Winner)
+        if (activeCount <= 1)
+            return null;
+
+        // Ensure we have scores for all active players
+        for (String p : playerList) {
+            if (eliminatedPlayers.contains(p))
+                continue;
+
+            int score = cumulativeScores.getOrDefault(p, 0);
+            if (score < minScore) {
+                minScore = score;
+                lowestPlayer = p;
+            } else if (score == minScore) {
+                // Tie-breaker? For now, random or first found.
+                // Maybe keep the one who joined first? Or random?
+                // Current logic: First found keeps lowest.
+            }
+        }
+        return lowestPlayer;
+    }
+
+    private void handlePlayerEliminated(String pName) {
+        eliminatedPlayers.add(pName);
+        System.out.println("💀 JOUEUR ÉLIMINÉ: " + pName);
+
+        // Show notification
+        addChatMessage("SYSTÈME", "💀 " + pName + " a été éliminé !", false);
+
+        // Update UI
+        HBox row = playerRowMap.get(pName);
+        if (row != null) {
+            row.setDisable(true);
+            row.setStyle("-fx-background-color: rgba(231, 76, 60, 0.3); -fx-opacity: 0.6;");
+            // Add skull icon or label change?
+        }
+
+        // Check if I am eliminated
+        if (pName.equals(joueur)) {
+            showAlert("ÉLIMINÉ", "Vous avez été éliminé du Battle Royale !");
+            disableMyInputs();
+            if (btnValider != null)
+                btnValider.setDisable(true);
+        }
+    }
+
+    private void handleShowResultsAction() {
+        if (isHost) {
+            if (gameClient != null) {
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SHOW_RESULTS, joueur, roomId));
+            }
+        } else {
+            showAlert("Attente de l'hôte", "Seul l'hôte peut afficher les résultats.");
+        }
     }
 
     private void updatePlayersFromStatus(List<String> playersStatus) {
@@ -218,12 +410,12 @@ public class JeuMultiController {
     }
 
     private void addChatMessage(String sender, String message, boolean isLocal) {
-        if (vboxMessages == null) return;
+        if (vboxMessages == null)
+            return;
 
         Label msgLabel = new Label(sender + ": " + message);
-        String style = isLocal ?
-            "-fx-text-fill: #9b59b6; -fx-font-size: 12px; -fx-font-weight: bold;" :
-            "-fx-text-fill: white; -fx-font-size: 12px;";
+        String style = isLocal ? "-fx-text-fill: #9b59b6; -fx-font-size: 12px; -fx-font-weight: bold;"
+                : "-fx-text-fill: white; -fx-font-size: 12px;";
         msgLabel.setStyle(style);
         msgLabel.setWrapText(true);
         msgLabel.setMaxWidth(200);
@@ -237,7 +429,8 @@ public class JeuMultiController {
 
     private void updatePlayerAnswersDisplay(String playerName, Map<String, String> answers) {
         HBox playerRow = playerRowMap.get(playerName);
-        if (playerRow == null || playerName.equals(joueur)) return; // Don't update own row
+        if (playerRow == null || playerName.equals(joueur))
+            return; // Don't update own row
 
         // Update the labels in the player's row (skip first child which is player name)
         int idx = 1;
@@ -253,9 +446,11 @@ public class JeuMultiController {
         }
     }
 
-    /* =======================
-       INJECTION METHODS
-       ======================= */
+    /*
+     * =======================
+     * INJECTION METHODS
+     * =======================
+     */
 
     public void setCategories(List<String> categoriesNoms) {
         if (categoriesNoms == null || categoriesNoms.isEmpty()) {
@@ -301,9 +496,33 @@ public class JeuMultiController {
         }
     }
 
-    /* =======================
-       INITIALIZATION
-       ======================= */
+    public void setRoundConfig(int totalRounds, int roundDuration) {
+        this.totalRounds = totalRounds;
+        this.gameDuration = roundDuration;
+        this.currentRound = 1;
+        System.out.println("✅ Configuration manches: " + totalRounds + " manches, " + roundDuration + "s chacune");
+        updateRoundDisplay();
+    }
+
+    public void setCurrentRound(int round) {
+        this.currentRound = round;
+        updateRoundDisplay();
+    }
+
+    private void updateRoundDisplay() {
+        if (lblCurrentRound != null) {
+            lblCurrentRound.setText(String.valueOf(currentRound));
+        }
+        if (lblTotalRounds != null) {
+            lblTotalRounds.setText(String.valueOf(totalRounds));
+        }
+    }
+
+    /*
+     * =======================
+     * INITIALIZATION
+     * =======================
+     */
 
     @FXML
     public void initialize() {
@@ -314,9 +533,11 @@ public class JeuMultiController {
         this.resultsManager = new ResultsManager(gameDuration);
     }
 
-    /* =======================
-       DÉMARRAGE DE LA PARTIE
-       ======================= */
+    /*
+     * =======================
+     * DÉMARRAGE DE LA PARTIE
+     * =======================
+     */
 
     public void demarrerPartie() {
         if (categories == null || categories.isEmpty()) {
@@ -328,15 +549,26 @@ public class JeuMultiController {
 
         // Set player name with fallback
         String pseudoGlobal = ParametresGenerauxController.pseudoGlobal;
-        this.joueur = (pseudoGlobal != null && !pseudoGlobal.isEmpty()) ? pseudoGlobal : "Joueur_" + System.currentTimeMillis() % 1000;
-        this.langue = ParametresGenerauxController.langueGlobale != null ? ParametresGenerauxController.langueGlobale : org.example.triharf.enums.Langue.FRANCAIS;
+        this.joueur = (pseudoGlobal != null && !pseudoGlobal.isEmpty()) ? pseudoGlobal
+                : "Joueur_" + System.currentTimeMillis() % 1000;
+        this.langue = ParametresGenerauxController.langueGlobale != null ? ParametresGenerauxController.langueGlobale
+                : org.example.triharf.enums.Langue.FRANCAIS;
 
         System.out.println("✅ Démarrage partie multijoueur");
         System.out.println("   Joueur: " + joueur);
         System.out.println("   Langue: " + langue);
         System.out.println("   Catégories: " + categories.size());
+        System.out.println("   Manches: " + currentRound + "/" + totalRounds);
 
         try {
+            // Track the first letter as used
+            if (lettreActuelle != null) {
+                usedLetters.add(lettreActuelle);
+            }
+
+            // Update round display
+            updateRoundDisplay();
+
             // Create category input fields in player list area
             creerChampsDynamiquement();
 
@@ -345,7 +577,7 @@ public class JeuMultiController {
             gameEngine.setOnGameEnd(this::handleTerminerAuto);
             gameEngine.startTimer(gameDuration);
 
-            System.out.println("✅ Partie multijoueur démarrée");
+            System.out.println("✅ Partie multijoueur démarrée - Manche " + currentRound);
 
         } catch (Exception e) {
             System.err.println("❌ Erreur lors du démarrage: " + e.getMessage());
@@ -353,12 +585,103 @@ public class JeuMultiController {
         }
     }
 
-    /* =======================
-       UI DYNAMIQUE
-       ======================= */
+    /**
+     * Start the next round after current round is completed
+     */
+    private void startNextRound(Character forcedLetter) {
+        System.out.println("🔄 Démarrage de la manche " + (currentRound + 1) + "/" + totalRounds);
+
+        // Increment round counter
+        currentRound++;
+        updateRoundDisplay();
+
+        // Use forced letter if provided, otherwise generate (fallback)
+        if (forcedLetter != null) {
+            lettreActuelle = forcedLetter;
+        } else {
+            lettreActuelle = generateNewLetter();
+        }
+
+        usedLetters.add(lettreActuelle);
+        afficherLettre();
+
+        // Reset validation state for new round
+        hasValidated = false;
+        validatedPlayers.clear();
+        allPlayersValidated = false;
+        allPlayerAnswers.clear();
+        reponses.clear();
+
+        // Hide results button
+        if (btnVoirResultats != null) {
+            btnVoirResultats.setVisible(false);
+            btnVoirResultats.setManaged(false);
+            // Reset the action to show results (in case it was changed to startNextRound)
+            btnVoirResultats.setOnAction(e -> handleVoirResultats());
+        }
+
+        // Re-enable validate button only if NOT eliminated
+        if (btnValider != null) {
+            if (eliminatedPlayers.contains(joueur)) {
+                btnValider.setText("💀 ÉLIMINÉ");
+                btnValider.setDisable(true);
+                btnValider.setStyle("-fx-background-color: #c0392b; -fx-font-size: 13px; -fx-padding: 8 25;");
+            } else {
+                btnValider.setText("✓ VALIDER MES RÉPONSES");
+                btnValider.setDisable(false);
+                btnValider.setStyle("-fx-font-size: 13px; -fx-padding: 8 25;");
+            }
+        }
+
+        // Clear status
+        if (lblValidationStatus != null) {
+            lblValidationStatus.setText("");
+        }
+
+        // Rebuild the player rows to clear answers
+        creerChampsDynamiquement();
+
+        // Start new timer
+        gameEngine.setOnTimerUpdate(this::afficherTimer);
+        gameEngine.setOnGameEnd(this::handleTerminerAuto);
+        gameEngine.startTimer(gameDuration);
+
+        addChatMessage("SYSTÈME", "🔄 Manche " + currentRound + " commencée! Nouvelle lettre: " + lettreActuelle,
+                false);
+        System.out.println("✅ Manche " + currentRound + " démarrée avec lettre " + lettreActuelle);
+    }
+
+    /**
+     * Generate a new random letter that hasn't been used yet
+     */
+    private Character generateNewLetter() {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        List<Character> availableLetters = new ArrayList<>();
+
+        for (char c : alphabet.toCharArray()) {
+            if (!usedLetters.contains(c)) {
+                availableLetters.add(c);
+            }
+        }
+
+        if (availableLetters.isEmpty()) {
+            // All letters used, reset and pick random
+            usedLetters.clear();
+            return alphabet.charAt(new Random().nextInt(alphabet.length()));
+        }
+
+        return availableLetters.get(new Random().nextInt(availableLetters.size()));
+    }
+
+    /*
+     * =======================
+     * UI DYNAMIQUE
+     * =======================
+     */
 
     private void creerChampsDynamiquement() {
-        if (vboxPlayerRows == null && vboxPlayers == null) return;
+        if (vboxPlayerRows == null && vboxPlayers == null)
+            return;
 
         textFieldsParCategorie.clear();
         reponses.clear();
@@ -424,14 +747,22 @@ public class JeuMultiController {
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         // Highlight current player's row
-        String bgColor = isCurrentPlayer ?
-            "-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5; -fx-background-radius: 5;" :
-            "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444; -fx-border-radius: 5; -fx-background-radius: 5;";
+        String bgColor = isCurrentPlayer
+                ? "-fx-background-color: rgba(155, 89, 182, 0.2); -fx-border-color: #9b59b6; -fx-border-radius: 5; -fx-background-radius: 5;"
+                : "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444; -fx-border-radius: 5; -fx-background-radius: 5;";
+
+        // Apply eliminated style if applicable
+        if (eliminatedPlayers.contains(playerName)) {
+            bgColor = "-fx-background-color: rgba(231, 76, 60, 0.3); -fx-border-color: #c0392b; -fx-border-radius: 5; -fx-opacity: 0.6;";
+            row.setDisable(true);
+        }
+
         row.setStyle(bgColor);
 
         // Player name label
         Label nameLabel = new Label(isCurrentPlayer ? "➤ " + playerName : playerName);
-        nameLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: " + (isCurrentPlayer ? "#9b59b6" : "white") + ";");
+        nameLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: "
+                + (isCurrentPlayer ? "#9b59b6" : "white") + ";");
         nameLabel.setMinWidth(PLAYER_NAME_WIDTH);
         nameLabel.setPrefWidth(PLAYER_NAME_WIDTH);
         row.getChildren().add(nameLabel);
@@ -450,7 +781,8 @@ public class JeuMultiController {
             if (isCurrentPlayer) {
                 // Current player gets editable text fields (takes ~80% width)
                 TextField textField = new TextField();
-                textField.setPromptText(categorie.getNom().substring(0, Math.min(3, categorie.getNom().length())) + "...");
+                textField.setPromptText(
+                        categorie.getNom().substring(0, Math.min(3, categorie.getNom().length())) + "...");
                 textField.setPrefWidth(CATEGORY_WIDTH * 0.75);
                 textField.setMinWidth(CATEGORY_WIDTH * 0.75);
                 textField.setStyle("-fx-font-size: 10;");
@@ -490,7 +822,8 @@ public class JeuMultiController {
         }
 
         // Score cell at the end
-        Label scoreLabel = new Label("-");
+        int currentScore = cumulativeScores.getOrDefault(playerName, 0);
+        Label scoreLabel = new Label(String.valueOf(currentScore));
         scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
         scoreLabel.setMinWidth(SCORE_WIDTH);
         scoreLabel.setPrefWidth(SCORE_WIDTH);
@@ -501,9 +834,11 @@ public class JeuMultiController {
         return row;
     }
 
-    /* =======================
-       AFFICHAGE
-       ======================= */
+    /*
+     * =======================
+     * AFFICHAGE
+     * =======================
+     */
 
     private void afficherLettre() {
         if (lblLettre != null) {
@@ -532,16 +867,20 @@ public class JeuMultiController {
         retourMenu();
     }
 
-    /* =======================
-       CHAT
-       ======================= */
+    /*
+     * =======================
+     * CHAT
+     * =======================
+     */
 
     @FXML
     private void handleSendMessage() {
-        if (tfMessage == null || vboxMessages == null) return;
+        if (tfMessage == null || vboxMessages == null)
+            return;
 
         String message = tfMessage.getText().trim();
-        if (message.isEmpty()) return;
+        if (message.isEmpty())
+            return;
 
         // Add to local chat (highlighted as own message)
         addChatMessage(joueur, message, true);
@@ -555,21 +894,23 @@ public class JeuMultiController {
             chatData.put("roomId", roomId);
 
             gameClient.sendMessage(new NetworkMessage(
-                NetworkMessage.Type.CHAT,
-                joueur,
-                chatData
-            ));
+                    NetworkMessage.Type.CHAT,
+                    joueur,
+                    chatData));
             System.out.println("📤 Chat envoyé: " + message);
         }
     }
 
-    /* =======================
-       VALIDATION DES RÉPONSES
-       ======================= */
+    /*
+     * =======================
+     * VALIDATION DES RÉPONSES
+     * =======================
+     */
 
     @FXML
     private void handleValider() {
-        if (hasValidated) return; // Already validated
+        if (hasValidated)
+            return; // Already validated
 
         hasValidated = true;
         validatedPlayers.add(joueur);
@@ -608,10 +949,9 @@ public class JeuMultiController {
             validationData.put("roomId", roomId);
 
             gameClient.sendMessage(new NetworkMessage(
-                NetworkMessage.Type.VALIDATE_ANSWERS,
-                joueur,
-                validationData
-            ));
+                    NetworkMessage.Type.VALIDATE_ANSWERS,
+                    joueur,
+                    validationData));
             System.out.println("✅ Réponses validées et envoyées");
         }
     }
@@ -637,7 +977,8 @@ public class JeuMultiController {
 
     private void markPlayerAsValidated(String playerName) {
         HBox playerRow = playerRowMap.get(playerName);
-        if (playerRow == null) return;
+        if (playerRow == null)
+            return;
 
         // Update the player name label to show validated status
         if (!playerRow.getChildren().isEmpty()) {
@@ -652,7 +993,8 @@ public class JeuMultiController {
         }
 
         // Change row style to indicate validated
-        playerRow.setStyle("-fx-background-color: rgba(39, 174, 96, 0.2); -fx-border-color: #27ae60; -fx-border-radius: 5; -fx-background-radius: 5;");
+        playerRow.setStyle(
+                "-fx-background-color: rgba(39, 174, 96, 0.2); -fx-border-color: #27ae60; -fx-border-radius: 5; -fx-background-radius: 5;");
     }
 
     private void handlePlayerDisconnected(String playerName) {
@@ -711,27 +1053,35 @@ public class JeuMultiController {
             lblTimer.setStyle("-fx-text-fill: #27ae60;");
         }
 
-        // Update status
-        if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Tous ont validé - Validation avec IA en cours...");
-            lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
-        }
-
         // Clear previous scores
         playerFinalScores.clear();
 
-        // First reveal all answers (display them)
+        // Reveal answers first
         revealAnswersDisplay();
 
-        // Then validate with Groq asynchronously
-        validateWithGroqAsync();
+        // CENTRALIZED VALIDATION LOGIC
+        if (isHost) {
+            // Host performs validation and broadcasts results
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ Validation CENTRALISÉE en cours (Hôte)...");
+                lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+            validateWithGroqAsync();
+        } else {
+            // Clients wait for host
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ En attente de la validation par l'Hôte...");
+                lblValidationStatus.setStyle("-fx-text-fill: #3498db; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+        }
     }
 
     private void revealAnswersDisplay() {
         // Display all answers first (before validation)
         for (String playerName : playerList) {
             Map<String, String> answers = allPlayerAnswers.get(playerName);
-            if (answers == null) continue;
+            if (answers == null)
+                continue;
 
             HBox playerRow = playerRowMap.get(playerName);
             boolean isCurrentPlayer = playerName.equals(joueur);
@@ -759,74 +1109,69 @@ public class JeuMultiController {
     }
 
     private void validateWithGroqAsync() {
-        // Collect all validation tasks
-        List<CompletableFuture<Void>> validationTasks = new ArrayList<>();
-
-        // Map to store validation results: player -> category -> response
-        Map<String, Map<String, GroqValidator.MultiplayerValidationResponse>> validationResults =
-            Collections.synchronizedMap(new HashMap<>());
-
-        for (String playerName : playerList) {
-            Map<String, String> answers = allPlayerAnswers.get(playerName);
-            if (answers == null) continue;
-
-            validationResults.put(playerName, Collections.synchronizedMap(new HashMap<>()));
-
-            for (Categorie cat : categories) {
-                String answer = answers.getOrDefault(cat.getNom(), "");
-                final String pName = playerName;
-                final String catName = cat.getNom();
-
-                CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
-                    GroqValidator.MultiplayerValidationResponse response =
-                        groqValidator.validateWordMultiplayer(answer, catName, lettreActuelle, langue, pName);
-                    validationResults.get(pName).put(catName, response);
-                    System.out.println("✅ Validated " + pName + "/" + catName + ": " + answer +
-                        " → valid=" + response.isValid() + ", score=" + response.getScore());
-                }, validationExecutor);
-
-                validationTasks.add(task);
-            }
+        if (lblValidationStatus != null) {
+            javafx.application.Platform
+                    .runLater(() -> lblValidationStatus.setText("✓ Validation par lot en cours (IA)..."));
         }
 
-        // When all validations complete, update UI
-        CompletableFuture.allOf(validationTasks.toArray(new CompletableFuture[0]))
-            .thenRunAsync(() -> {
-                javafx.application.Platform.runLater(() -> {
-                    applyValidationResults(validationResults);
-                });
-            }, validationExecutor);
+        // Use a single async task for the batch request
+        CompletableFuture.runAsync(() -> {
+            try {
+                // Perform SINGLE batch request
+                System.out.println("🤖 Envoi de la requête de validation groupée (Batch)...");
+                Map<String, Map<String, MultiplayerValidationResponse>> results = new GroqValidator()
+                        .validateBatch(allPlayerAnswers, lettreActuelle, langue);
+
+                // Apply locally - REMOVED to avoid double counting (Host receives broadcast
+                // too)
+                // javafx.application.Platform.runLater(() -> applyValidationResults(results));
+
+                // Broadcast
+                if (isHost && gameClient != null) {
+                    String json = gson.toJson(results);
+                    gameClient.sendMessage(new NetworkMessage(
+                            NetworkMessage.Type.VALIDATION_RESULTS,
+                            joueur,
+                            json));
+                    System.out.println("📢 Résultats BATCH diffusés aux clients");
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur validation batch: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }, validationExecutor);
     }
 
-    private void applyValidationResults(Map<String, Map<String, GroqValidator.MultiplayerValidationResponse>> validationResults) {
+    private void handleValidationResults(String jsonResults) {
+        try {
+            Type type = new TypeToken<Map<String, Map<String, MultiplayerValidationResponse>>>() {
+            }.getType();
+            Map<String, Map<String, MultiplayerValidationResponse>> results = gson.fromJson(jsonResults, type);
+            System.out.println("📥 Résultats de validation reçus de l'hôte");
+            applyValidationResults(results);
+        } catch (Exception e) {
+            System.err.println("Erreur décodage résultats: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void applyValidationResults(
+            Map<String, Map<String, GroqValidator.MultiplayerValidationResponse>> validationResults) {
         System.out.println("📊 Applying validation results...");
 
         for (String playerName : playerList) {
             Map<String, GroqValidator.MultiplayerValidationResponse> playerResults = validationResults.get(playerName);
-            Map<String, String> answers = allPlayerAnswers.get(playerName);
-            if (playerResults == null || answers == null) continue;
+            if (playerResults == null)
+                continue;
 
             int totalScore = 0;
 
             for (Categorie cat : categories) {
                 GroqValidator.MultiplayerValidationResponse response = playerResults.get(cat.getNom());
-                String answer = answers.getOrDefault(cat.getNom(), "");
 
                 int points = 0;
                 if (response != null) {
-                    if (response.isValid()) {
-                        // Check uniqueness among other players
-                        boolean isUnique = isAnswerUnique(answer, cat.getNom(), playerName);
-
-                        if (isUnique) {
-                            // Valid and unique: 10 + rarity bonus
-                            points = 10 + response.getRarity();
-                        } else {
-                            // Valid but duplicate: 5 points
-                            points = 5;
-                        }
-                    }
-                    // Invalid = 0 points (already set)
+                    points = response.getScore();
                 }
 
                 totalScore += points;
@@ -847,50 +1192,69 @@ public class JeuMultiController {
                 }
             }
 
-            // Store final score for results page
+            // Add round score to cumulative total
+            int previousCumulative = cumulativeScores.getOrDefault(playerName, 0);
+            cumulativeScores.put(playerName, previousCumulative + totalScore);
+
+            // Store current round score for display
             playerFinalScores.put(playerName, totalScore);
 
-            // Update total score label
+            // Update total score label (show cumulative)
             Label scoreLabel = playerScoreLabels.get(playerName);
             if (scoreLabel != null) {
-                scoreLabel.setText(String.valueOf(totalScore));
+                int cumulativeTotal = cumulativeScores.get(playerName);
+                scoreLabel.setText(String.valueOf(cumulativeTotal));
                 scoreLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f39c12;");
             }
 
-            System.out.println("📊 Score de " + playerName + ": " + totalScore);
+            System.out.println("📊 Score manche " + currentRound + " de " + playerName + ": " + totalScore +
+                    " (Total: " + cumulativeScores.get(playerName) + ")");
         }
 
-        // Update status
-        if (lblValidationStatus != null) {
-            lblValidationStatus.setText("✓ Scores calculés! Cliquez pour voir les résultats");
-            lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
-        }
+        // Check if this was the last round
+        if (currentRound >= totalRounds)
 
-        // Show the results button
-        if (btnVoirResultats != null) {
-            btnVoirResultats.setVisible(true);
-            btnVoirResultats.setManaged(true);
-        }
+        {
+            // Final round - show results
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ Partie terminée! Cliquez pour voir les résultats");
+                lblValidationStatus.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
 
-        // Add system message to chat
-        addChatMessage("SYSTÈME", "Partie terminée! Cliquez sur 'VOIR LES RÉSULTATS' pour le classement.", false);
-    }
+            // Show the results button
+            if (btnVoirResultats != null) {
+                btnVoirResultats.setText("🏆 VOIR LES RÉSULTATS FINAUX");
+                btnVoirResultats.setVisible(true);
+                btnVoirResultats.setManaged(true);
+                btnVoirResultats.setOnAction(e -> handleShowResultsAction());
+            }
 
-    private boolean isAnswerUnique(String answer, String categoryName, String playerName) {
-        if (answer == null || answer.trim().isEmpty()) return false;
+            // Copy cumulative scores to final scores for results page
+            playerFinalScores.clear();
+            playerFinalScores.putAll(cumulativeScores);
 
-        for (String otherPlayer : playerList) {
-            if (!otherPlayer.equals(playerName)) {
-                Map<String, String> otherAnswers = allPlayerAnswers.get(otherPlayer);
-                if (otherAnswers != null) {
-                    String otherAnswer = otherAnswers.get(categoryName);
-                    if (otherAnswer != null && otherAnswer.trim().equalsIgnoreCase(answer.trim())) {
-                        return false;
-                    }
-                }
+            // Add system message to chat
+            addChatMessage("SYSTÈME",
+                    "Partie terminée après " + totalRounds + " manches! Cliquez pour voir le classement final.", false);
+        } else {
+            // More rounds to play - show next round button
+            if (lblValidationStatus != null) {
+                lblValidationStatus.setText("✓ Manche " + currentRound + "/" + totalRounds
+                        + " terminée! Préparez-vous pour la suivante...");
+                lblValidationStatus.setStyle("-fx-text-fill: #f39c12; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+
+            // Change button to start next round
+            if (btnVoirResultats != null) {
+                btnVoirResultats.setText("▶ MANCHE SUIVANTE");
+                btnVoirResultats.setOnAction(e -> handleNextRoundAction());
+                btnVoirResultats.setVisible(true);
+                btnVoirResultats.setManaged(true);
             }
         }
-        return true;
+
+        addChatMessage("SYSTÈME",
+                "Manche " + currentRound + " terminée! Prochaine manche dans quelques secondes...", false);
     }
 
     @FXML
@@ -921,57 +1285,39 @@ public class JeuMultiController {
         }
     }
 
-    /* =======================
-       FIN DE PARTIE
-       ======================= */
+    /*
+     * =======================
+     * FIN DE PARTIE
+     * =======================
+     */
 
     @FXML
     private void handleTerminer() {
-        terminerPartie();
+        // This is usually the "Surrender" or "Finish early" debug button
+        // In multiplayer, it should just validate what we have
+        handleValider();
     }
 
     private void handleTerminerAuto() {
-        terminerPartie();
+        System.out.println("⏰ Temps écoulé ! Validation automatique...");
+
+        javafx.application.Platform.runLater(() -> {
+            if (!hasValidated) {
+                handleValider();
+            }
+        });
     }
 
     private void terminerPartie() {
-        try {
-            gameEngine.stopTimer();
-            recupererReponses();
-
-            System.out.println("🏁 Partie multijoueur terminée");
-
-            // Validate words
-            resultsManager.validerMots(reponses, lettreActuelle, langue);
-
-            // Get results
-            int scoreTotal = resultsManager.getScoreTotal();
-
-            System.out.println("✅ Validation complète");
-            System.out.println("   Score total: " + scoreTotal);
-
-            // Store score for multiplayer results
-            playerFinalScores.put(joueur, scoreTotal);
-
-            // Send to server
-            if (gameClient != null) {
-                Map<String, String> data = new HashMap<>();
-                data.put("score", String.valueOf(scoreTotal));
-                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.SUBMIT_ANSWER, joueur, data));
-            }
-
-            // Navigate to multiplayer results
-            navigateToMultiplayerResults();
-
-        } catch (Exception e) {
-            System.err.println("❌ Erreur: " + e.getMessage());
-            e.printStackTrace();
-        }
+        // Deprecated method - redirecting to handleValider
+        handleValider();
     }
 
-    /* =======================
-       NAVIGATION
-       ======================= */
+    /*
+     * =======================
+     * NAVIGATION
+     * =======================
+     */
 
     private void retourMenu() {
         if (timeline != null) {
@@ -980,8 +1326,7 @@ public class JeuMultiController {
 
         try {
             FXMLLoader loader = new FXMLLoader(
-                    HelloApplication.class.getResource("/fxml/main_menu.fxml")
-            );
+                    HelloApplication.class.getResource("/fxml/main_menu.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) btnBack.getScene().getWindow();
