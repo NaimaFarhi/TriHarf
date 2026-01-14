@@ -182,10 +182,26 @@ public class GameServer {
         // Find which room this client was in
         for (GameRoom room : rooms.values()) {
             if (room.getPlayerIds().contains(clientId)) {
-                leaveRoom(clientId, room.getRoomId());
+                // Get player pseudo BEFORE removing them
+                String playerPseudo = room.getPseudo(clientId);
+                String roomId = room.getRoomId();
 
-                // Notify remaining players
-                broadcastPlayerStatus(room.getRoomId());
+                // Remove player from room
+                leaveRoom(clientId, roomId);
+
+                // Send PLAYER_DISCONNECTED notification with player name
+                if (playerPseudo != null && !room.getPlayerIds().isEmpty()) {
+                    NetworkMessage disconnectMsg = new NetworkMessage(
+                        NetworkMessage.Type.PLAYER_DISCONNECTED,
+                        "SERVER",
+                        playerPseudo
+                    );
+                    broadcast(roomId, disconnectMsg);
+                    System.out.println("📤 Broadcasted disconnect: " + playerPseudo);
+                }
+
+                // Also broadcast updated player status
+                broadcastPlayerStatus(roomId);
                 break;
             }
         }

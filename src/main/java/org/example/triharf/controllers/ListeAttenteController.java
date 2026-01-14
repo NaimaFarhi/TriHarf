@@ -93,6 +93,12 @@ public class ListeAttenteController {
                     List<String> players = (List<String>) message.getData();
                     updatePlayerList(players);
                 }
+                case PLAYER_DISCONNECTED -> {
+                    // A player has disconnected - show notification
+                    String disconnectedPlayer = (String) message.getData();
+                    System.out.println("🚪 Joueur déconnecté: " + disconnectedPlayer);
+                    showDisconnectNotification(disconnectedPlayer);
+                }
                 case GAME_START -> {
                     // Extract categories, letter, and players from GAME_START message
                     @SuppressWarnings("unchecked")
@@ -120,8 +126,23 @@ public class ListeAttenteController {
                     }
                     startGame();
                 }
+                default -> {}
             }
         });
+    }
+
+    private void showDisconnectNotification(String playerName) {
+        // Add a temporary notification label to vboxPlayers
+        if (vboxPlayers != null) {
+            Label notifLabel = new Label("🚪 " + playerName + " a quitté la partie");
+            notifLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 14px; -fx-font-style: italic;");
+            vboxPlayers.getChildren().add(notifLabel);
+
+            // Remove the notification after 3 seconds
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+            pause.setOnFinished(e -> vboxPlayers.getChildren().remove(notifLabel));
+            pause.play();
+        }
     }
 
     private void updatePlayerList(List<String> playersStatus) {
