@@ -303,6 +303,8 @@ public class JeuChaosController {
     }
 
     private void navigateToResults() {
+        if (gameEngine != null)
+            gameEngine.stopTimer(); // Ensure timer is stopped
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/resultats_multi.fxml"));
             Parent root = loader.load();
@@ -818,6 +820,7 @@ public class JeuChaosController {
         }
 
         if (isHost) {
+            gameEngine.stopTimer(); // Stop Chaos events immediately
             validateWithGroqAsync();
         }
     }
