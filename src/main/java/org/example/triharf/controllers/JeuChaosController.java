@@ -472,10 +472,19 @@ public class JeuChaosController {
         gameEngine.setOnTimerUpdate(this::afficherTimer);
         gameEngine.setOnGameEnd(this::handleTerminerAuto);
         gameEngine.startTimer(gameDuration);
+        afficherTimer();
+        updateRoundLabels();
 
         if (isHost) {
             chaosManager.scheduleEvents(gameDuration);
         }
+    }
+
+    private void updateRoundLabels() {
+        if (lblCurrentRound != null)
+            lblCurrentRound.setText(String.valueOf(currentRound));
+        if (lblTotalRounds != null)
+            lblTotalRounds.setText(String.valueOf(totalRounds));
     }
 
     private void afficherTimer() {
@@ -844,8 +853,11 @@ public class JeuChaosController {
         gameEngine.setOnTimerUpdate(this::afficherTimer);
         gameEngine.setOnGameEnd(this::handleTerminerAuto);
         gameEngine.startTimer(gameDuration);
+        afficherTimer(); // Show initial time immediately
 
         addChatMessage("SYSTEM", "🔄 Manche " + currentRound + " ! Lettre : " + lettreActuelle, false);
+
+        updateRoundLabels();
     }
 
     private Character generateNewLetter() {
