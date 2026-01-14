@@ -314,6 +314,12 @@ public class ParamPartieMultiController {
             int nbRounds = spinnerNbRounds != null ? spinnerNbRounds.getValue() : 3;
             int duration = spinnerRoundDuration != null ? spinnerRoundDuration.getValue() : 120;
             gameServer.getRoom(roomId).setRoundConfig(nbRounds, duration);
+
+            // CRITICAL FIX: Update max players from spinner value
+            if (spinnerMaxPlayers != null) {
+                gameServer.getRoom(roomId).setMaxPlayers(spinnerMaxPlayers.getValue());
+            }
+
             System.out.println("   Manches: " + nbRounds + " x " + duration + "s");
         }
 
