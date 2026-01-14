@@ -303,8 +303,6 @@ public class JeuChaosController {
     }
 
     private void navigateToResults() {
-        if (gameEngine != null)
-            gameEngine.stopTimer(); // Ensure timer is stopped
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/resultats_multi.fxml"));
             Parent root = loader.load();
@@ -820,7 +818,6 @@ public class JeuChaosController {
         }
 
         if (isHost) {
-            gameEngine.stopTimer(); // Stop Chaos events immediately
             validateWithGroqAsync();
         }
     }
@@ -1056,7 +1053,11 @@ public class JeuChaosController {
     private void toggleInputs(boolean disable) {
         for (TextField tf : textFieldsParCategorie.values()) {
             tf.setDisable(disable);
-            tf.setStyle(disable ? "-fx-background-color: #bdc3c7;" : "-fx-background-color: white;");
+            if (disable) {
+                tf.setStyle("-fx-background-color: #bdc3c7; -fx-font-size: 10;");
+            } else {
+                tf.setStyle("-fx-font-size: 10;"); // Restore original style
+            }
         }
     }
 
