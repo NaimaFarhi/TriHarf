@@ -283,8 +283,8 @@ public class JeuMultiController {
                     playerList.remove(leftPlayer);
                     // Refresh UI
                     creerChampsDynamiquement();
-                    if (lblPlayerCount != null)
-                        lblPlayerCount.setText(String.valueOf(playerList.size()));
+                    if (lblJoueurs != null)
+                        lblJoueurs.setText(String.valueOf(playerList.size()));
                 }
                 default -> {
                 }

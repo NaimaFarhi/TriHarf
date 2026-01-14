@@ -3,6 +3,8 @@ package org.example.triharf.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -186,6 +188,16 @@ public class ListeAttenteController {
                     startGame();
                 }
                 // Ignore other message types in this context
+                case GAME_ENDED_HOST_LEFT -> {
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Fin de partie");
+                        alert.setHeaderText("L'hôte a quitté la partie");
+                        alert.setContentText("Le salon est fermé. Retour au menu principal.");
+                        alert.showAndWait();
+                        handleQuitter();
+                    });
+                }
                 default -> {
                 }
             }
