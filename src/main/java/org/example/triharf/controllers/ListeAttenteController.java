@@ -127,6 +127,12 @@ public class ListeAttenteController {
                         }
                     }
                 }
+                case HOST_DISCONNECTED -> {
+                    // Host has disconnected - end game and go back to menu
+                    String hostName = (String) message.getData();
+                    System.out.println("🚨 Hôte déconnecté: " + hostName);
+                    handleHostDisconnected(hostName);
+                }
                 case GAME_START -> {
                     // Log raw GAME_START data for debugging
                     System.out.println("🔔 GAME_START reçu (ListeAttenteController)");
@@ -217,6 +223,18 @@ public class ListeAttenteController {
             pause.setOnFinished(e -> vboxPlayers.getChildren().remove(notifLabel));
             pause.play();
         }
+    }
+
+    private void handleHostDisconnected(String hostName) {
+        // Show alert to user
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+        alert.setTitle("Partie terminée");
+        alert.setHeaderText("L'hôte a quitté la partie");
+        alert.setContentText("L'hôte (" + hostName + ") s'est déconnecté. La partie est terminée.");
+        alert.showAndWait();
+
+        // Navigate back to main menu
+        navigateTo("/fxml/main_menu.fxml", "Menu Principal");
     }
 
     private void updatePlayerList(List<String> playersStatus) {

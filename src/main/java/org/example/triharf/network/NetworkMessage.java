@@ -12,6 +12,7 @@ public class NetworkMessage {
         GAME_END,
         DISCONNECT,
         PLAYER_DISCONNECTED,
+        HOST_DISCONNECTED,
         CHAT,
         PLAYER_ANSWERS,
         VALIDATE_ANSWERS,

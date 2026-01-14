@@ -6,6 +6,7 @@ import java.util.*;
 
 public class GameRoom {
     private String roomId;
+    private String hostId; // Track who created/hosts the room
     private List<String> playerIds;
     private Map<String, Map<Categorie, String>> playerAnswers;
     private Character currentLetter;
@@ -51,6 +52,10 @@ public class GameRoom {
 
     public void setHostId(String hostId) {
         this.hostId = hostId;
+    }
+
+    public boolean isHost(String playerId) {
+        return playerId != null && playerId.equals(hostId);
     }
 
     public List<String> getPlayerIds() {
