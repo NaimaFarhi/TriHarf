@@ -59,6 +59,7 @@ public class GameServer {
         GameRoom room = rooms.get(roomId);
         if (room != null && room.canStart()) {
             room.setGameStarted(true);
+            room.resetRound();
 
             Character letter = generateLetter();
             room.setCurrentLetter(letter);
@@ -237,7 +238,7 @@ public class GameServer {
 
     // Handle player validation
     @SuppressWarnings("unchecked")
-    public void handleValidation(String roomId, String senderClientId, NetworkMessage message) {
+    public synchronized void handleValidation(String roomId, String senderClientId, NetworkMessage message) {
         GameRoom room = rooms.get(roomId);
         if (room == null)
             return;

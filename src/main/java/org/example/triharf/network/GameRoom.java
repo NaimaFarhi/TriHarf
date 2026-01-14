@@ -193,4 +193,8 @@ public class GameRoom {
         return validatedAnswers;
     }
 
+    public void resetRound() {
+        validatedPlayers.clear();
+        validatedAnswers.clear();
+    }
 }
