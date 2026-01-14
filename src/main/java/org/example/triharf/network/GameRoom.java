@@ -18,7 +18,6 @@ public class GameRoom {
     private List<String> categories;
     private int totalRounds = 3;
     private int roundDuration = 120;
-    private String gameMode = "MULTI";
 
     // Validation tracking
     private Set<String> validatedPlayers = new HashSet<>();
@@ -163,14 +162,6 @@ public class GameRoom {
     public void setRoundConfig(int totalRounds, int roundDuration) {
         this.totalRounds = totalRounds;
         this.roundDuration = roundDuration;
-    }
-
-    public String getGameMode() {
-        return gameMode;
-    }
-
-    public void setGameMode(String gameMode) {
-        this.gameMode = gameMode;
     }
 
     // Validation methods
