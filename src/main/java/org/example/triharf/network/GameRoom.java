@@ -163,7 +163,7 @@ public class GameRoom {
     public void setRoundConfig(int totalRounds, int roundDuration) {
         this.totalRounds = totalRounds;
         this.roundDuration = roundDuration;
-        this.roundDuration = roundDuration;
+
     }
 
     public String getGameMode() {

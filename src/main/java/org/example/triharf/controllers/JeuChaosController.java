@@ -447,12 +447,34 @@ public class JeuChaosController {
 
         Object durationObj = data.get("duration");
         Object roundsObj = data.get("totalRounds");
-        if (durationObj instanceof Number && roundsObj instanceof Number) {
-            this.gameDuration = ((Number) durationObj).intValue();
-            this.totalRounds = ((Number) roundsObj).intValue();
-        } else if (durationObj instanceof Number) {
-            this.gameDuration = ((Number) durationObj).intValue();
+
+        System.out.println("🔍 RECU GameStart: duration=" + durationObj + " ("
+                + (durationObj == null ? "null" : durationObj.getClass().getSimpleName()) + ")");
+        System.out.println("🔍 RECU GameStart: totalRounds=" + roundsObj + " ("
+                + (roundsObj == null ? "null" : roundsObj.getClass().getSimpleName()) + ")");
+
+        try {
+            if (durationObj != null) {
+                if (durationObj instanceof Number) {
+                    this.gameDuration = ((Number) durationObj).intValue();
+                } else {
+                    this.gameDuration = Integer.parseInt(durationObj.toString());
+                }
+            }
+
+            if (roundsObj != null) {
+                if (roundsObj instanceof Number) {
+                    this.totalRounds = ((Number) roundsObj).intValue();
+                } else {
+                    this.totalRounds = Integer.parseInt(roundsObj.toString());
+                }
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("❌ Erreur parsing duration/rounds: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        System.out.println("✅ Parsed Config: Duration=" + gameDuration + ", Rounds=" + totalRounds);
 
         demarrerPartie();
     }
