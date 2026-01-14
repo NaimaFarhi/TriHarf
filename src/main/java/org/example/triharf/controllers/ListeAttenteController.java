@@ -219,10 +219,41 @@ public class ListeAttenteController {
     }
 
     private void startGame() {
-        // Use standard multiplayer view for everything, adjusting internally based on
-        // mode
-        String targetFxml = "/fxml/partie_multi.fxml";
-        navigateToGame(targetFxml, "Partie - " + gameMode);
+        if ("CHAOS".equals(gameMode) || "MODE_CHAOS".equals(gameMode)) {
+            navigateToChaosGame("/fxml/partie_chaos.fxml", "Partie - CHAOS");
+        } else {
+            navigateToGame("/fxml/partie_multi.fxml", "Partie - " + gameMode);
+        }
+    }
+
+    private void navigateToChaosGame(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof JeuChaosController) {
+                JeuChaosController cc = (JeuChaosController) controller;
+                cc.setNetwork(gameClient, roomId);
+                cc.setIsHost(isHost);
+                cc.setCategories(categories);
+                if (currentLetter != null)
+                    cc.setLettre(currentLetter);
+                if (playerPseudos != null)
+                    cc.setPlayerList(playerPseudos);
+                cc.setGameDuration(roundDuration);
+
+                System.out.println("🔥 Navigation vers Chaos Mode avec " + categories.size() + " catégories");
+                cc.demarrerPartie();
+            }
+
+            Stage stage = (Stage) btnQuitter.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.setTitle(title);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // ... handleQuitter, handleCopyCode ...

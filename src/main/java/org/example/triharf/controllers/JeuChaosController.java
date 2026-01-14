@@ -655,7 +655,7 @@ public class JeuChaosController {
         vboxMessages.getChildren().add(lb);
     }
 
-    private void setCategories(List<String> names) {
+    public void setCategories(List<String> names) {
         this.categoriesNoms = names;
         this.categories = new ArrayList<>();
         for (String n : names) {
@@ -664,6 +664,28 @@ public class JeuChaosController {
                 c = new Categorie(n);
             categories.add(c);
         }
+    }
+
+    public void setLettre(String letter) {
+        if (letter != null && !letter.isEmpty()) {
+            this.lettreActuelle = letter.charAt(0);
+            if (lblLettre != null)
+                lblLettre.setText(lettreActuelle.toString());
+        }
+    }
+
+    public void setPlayerList(List<String> players) {
+        if (players != null) {
+            this.playerList = new ArrayList<>(players);
+            this.nbJoueurs = players.size();
+            if (lblJoueurs != null)
+                lblJoueurs.setText(String.valueOf(nbJoueurs));
+            creerChampsDynamiquement();
+        }
+    }
+
+    public void setGameDuration(int duration) {
+        this.gameDuration = duration;
     }
 
     private void updatePlayersFromStatus(List<String> statusList) {
