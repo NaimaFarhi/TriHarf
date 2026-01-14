@@ -210,6 +210,67 @@ public class JeuChaosController {
             btnVoirResultats.setOnAction(e -> handleVoirResultats());
     }
 
+    @FXML
+    private void handleBack() {
+        try {
+            if (gameClient != null) {
+                gameClient.disconnect();
+            }
+            if (validationExecutor != null) {
+                validationExecutor.shutdownNow();
+            }
+            if (gameEngine != null) {
+                gameEngine.stopTimer();
+            }
+
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/main_menu.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) btnBack.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleSendMessage() {
+        if (tfMessage == null || tfMessage.getText().trim().isEmpty())
+            return;
+
+        String msg = tfMessage.getText().trim();
+        tfMessage.clear();
+        addChatMessage("MOI", msg, true);
+
+        if (gameClient != null) {
+            Map<String, String> data = new HashMap<>();
+            data.put("message", msg);
+            gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.CHAT, joueur, data));
+        }
+    }
+
+    @FXML
+    private void handleVoirResultats() {
+        if (isHost && "➤ MANCHE SUIVANTE".equals(btnVoirResultats.getText())) {
+            handleNextRoundAction();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/resultats_multi.fxml"));
+            Parent root = loader.load();
+
+            org.example.triharf.controllers.ResultatsMultiController controller = loader.getController();
+            if (controller != null) {
+                controller.setScores(cumulativeScores, joueur);
+            }
+
+            Stage stage = (Stage) btnVoirResultats.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // ==========================================
     // NETWORK HANDLING
     // ==========================================
@@ -716,13 +777,9 @@ public class JeuChaosController {
     }
 
     private void handleShowResultsAction() {
-        // Logic to go to results (already implemented in auto-nav potentially, but
-        // explicit here)
-        navigateToMultiplayerResults();
-    }
-
-    private void handleVoirResultats() {
-        // Fallback
+        if (btnVoirResultats == null)
+            return;
+        handleVoirResultats();
     }
 
     private void startNextRound(Character forcedLetter) {
@@ -791,37 +848,6 @@ public class JeuChaosController {
     // ==========================================
     // NAVIGATION & UTILS
     // ==========================================
-
-    private void handleBack() {
-        gameEngine.stopTimer();
-        try {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/main_menu.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) btnBack.getScene().getWindow();
-            stage.setTitle("Menu Principal");
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleSendMessage() {
-        if (tfMessage == null)
-            return;
-        String msg = tfMessage.getText();
-        if (msg.isEmpty())
-            return;
-
-        addChatMessage(joueur, msg, true);
-        tfMessage.clear();
-
-        if (gameClient != null) {
-            Map<String, String> data = new HashMap<>();
-            data.put("sender", joueur);
-            data.put("message", msg);
-            gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.CHAT, joueur, data));
-        }
-    }
 
     private void handleChat(Map<String, String> data) {
         addChatMessage(data.get("sender"), data.get("message"), false);

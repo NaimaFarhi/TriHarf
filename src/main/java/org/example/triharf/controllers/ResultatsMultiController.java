@@ -24,22 +24,36 @@ import java.util.stream.Collectors;
  */
 public class ResultatsMultiController {
 
-    @FXML private Label lblLettre;
-    @FXML private HBox hboxPodium;
-    @FXML private VBox vboxRanking;
-    @FXML private VBox vboxYourResult;
-    @FXML private Label lblYourRank;
-    @FXML private Label lblYourScore;
-    @FXML private Button btnRejouer;
-    @FXML private Button btnRevanche;
-    @FXML private Button btnMenu;
+    @FXML
+    private Label lblLettre;
+    @FXML
+    private HBox hboxPodium;
+    @FXML
+    private VBox vboxRanking;
+    @FXML
+    private VBox vboxYourResult;
+    @FXML
+    private Label lblYourRank;
+    @FXML
+    private Label lblYourScore;
+    @FXML
+    private Button btnRejouer;
+    @FXML
+    private Button btnRevanche;
+    @FXML
+    private Button btnMenu;
 
     // Alternative FXML elements
-    @FXML private HBox podiumContainer;
-    @FXML private Label lblName1, lblScore1;
-    @FXML private Label lblName2, lblScore2;
-    @FXML private Label lblName3, lblScore3;
-    @FXML private HBox listContainer;
+    @FXML
+    private HBox podiumContainer;
+    @FXML
+    private Label lblName1, lblScore1;
+    @FXML
+    private Label lblName2, lblScore2;
+    @FXML
+    private Label lblName3, lblScore3;
+    @FXML
+    private HBox listContainer;
 
     private Map<String, Integer> scores;
     private String currentPlayer;
@@ -89,6 +103,13 @@ public class ResultatsMultiController {
     /**
      * Set classement using Joueur objects
      */
+    /**
+     * Wrapper for displayRanking to match method call from JeuChaosController
+     */
+    public void setScores(Map<String, Integer> playerScores, String currentPlayer) {
+        displayRanking(playerScores, currentPlayer, '?'); // Pass a default or null for letter currently
+    }
+
     public void setClassement(List<Joueur> joueurs) {
         // Sort players by score descending
         this.classementJoueurs = joueurs.stream()
@@ -100,20 +121,22 @@ public class ResultatsMultiController {
     }
 
     private void buildPodium() {
-        if (hboxPodium == null) return;
+        if (hboxPodium == null)
+            return;
         hboxPodium.getChildren().clear();
 
-        String[] medals = {"🥇", "🥈", "🥉"};
-        String[] colors = {"#f39c12", "#95a5a6", "#cd6133"};
-        int[] heights = {140, 110, 90};
+        String[] medals = { "🥇", "🥈", "🥉" };
+        String[] colors = { "#f39c12", "#95a5a6", "#cd6133" };
+        int[] heights = { 140, 110, 90 };
 
         // For podium display: 2nd, 1st, 3rd
-        int[] podiumOrder = {1, 0, 2};
+        int[] podiumOrder = { 1, 0, 2 };
 
         for (int pos : podiumOrder) {
             if (pos < rankedPlayers.size()) {
                 Map.Entry<String, Integer> entry = rankedPlayers.get(pos);
-                VBox podiumBox = createPodiumBox(entry.getKey(), entry.getValue(), medals[pos], colors[pos], heights[pos]);
+                VBox podiumBox = createPodiumBox(entry.getKey(), entry.getValue(), medals[pos], colors[pos],
+                        heights[pos]);
                 hboxPodium.getChildren().add(podiumBox);
             }
         }
@@ -160,33 +183,44 @@ public class ResultatsMultiController {
         // 1st Place
         if (classementJoueurs.size() >= 1) {
             Joueur j1 = classementJoueurs.get(0);
-            if (lblName1 != null) lblName1.setText(j1.getPseudo());
-            if (lblScore1 != null) lblScore1.setText(String.valueOf(j1.getScoreTotal()));
+            if (lblName1 != null)
+                lblName1.setText(j1.getPseudo());
+            if (lblScore1 != null)
+                lblScore1.setText(String.valueOf(j1.getScoreTotal()));
         }
 
         // 2nd Place
         if (classementJoueurs.size() >= 2) {
             Joueur j2 = classementJoueurs.get(1);
-            if (lblName2 != null) lblName2.setText(j2.getPseudo());
-            if (lblScore2 != null) lblScore2.setText(String.valueOf(j2.getScoreTotal()));
+            if (lblName2 != null)
+                lblName2.setText(j2.getPseudo());
+            if (lblScore2 != null)
+                lblScore2.setText(String.valueOf(j2.getScoreTotal()));
         } else {
-            if (lblName2 != null) lblName2.setText("-");
-            if (lblScore2 != null) lblScore2.setText("");
+            if (lblName2 != null)
+                lblName2.setText("-");
+            if (lblScore2 != null)
+                lblScore2.setText("");
         }
 
         // 3rd Place
         if (classementJoueurs.size() >= 3) {
             Joueur j3 = classementJoueurs.get(2);
-            if (lblName3 != null) lblName3.setText(j3.getPseudo());
-            if (lblScore3 != null) lblScore3.setText(String.valueOf(j3.getScoreTotal()));
+            if (lblName3 != null)
+                lblName3.setText(j3.getPseudo());
+            if (lblScore3 != null)
+                lblScore3.setText(String.valueOf(j3.getScoreTotal()));
         } else {
-            if (lblName3 != null) lblName3.setText("-");
-            if (lblScore3 != null) lblScore3.setText("");
+            if (lblName3 != null)
+                lblName3.setText("-");
+            if (lblScore3 != null)
+                lblScore3.setText("");
         }
     }
 
     private void buildRankingList() {
-        if (vboxRanking == null) return;
+        if (vboxRanking == null)
+            return;
         vboxRanking.getChildren().clear();
 
         int rank = 1;
@@ -203,9 +237,8 @@ public class ResultatsMultiController {
         row.setPadding(new Insets(10, 20, 10, 20));
 
         boolean isCurrentPlayer = playerName.equals(currentPlayer);
-        String bgColor = isCurrentPlayer ?
-                "-fx-background-color: rgba(155, 89, 182, 0.3); -fx-border-color: #9b59b6;" :
-                "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444;";
+        String bgColor = isCurrentPlayer ? "-fx-background-color: rgba(155, 89, 182, 0.3); -fx-border-color: #9b59b6;"
+                : "-fx-background-color: rgba(255,255,255,0.05); -fx-border-color: #444;";
         row.setStyle(bgColor + " -fx-border-radius: 8; -fx-background-radius: 8;");
 
         // Rank
@@ -220,7 +253,8 @@ public class ResultatsMultiController {
 
         // Player name
         Label nameLabel = new Label(playerName + (isCurrentPlayer ? " (vous)" : ""));
-        nameLabel.setStyle("-fx-text-fill: " + (isCurrentPlayer ? "#9b59b6" : "white") + "; -fx-font-size: 16px; -fx-font-weight: bold;");
+        nameLabel.setStyle("-fx-text-fill: " + (isCurrentPlayer ? "#9b59b6" : "white")
+                + "; -fx-font-size: 16px; -fx-font-weight: bold;");
         nameLabel.setPrefWidth(200);
 
         // Score
@@ -232,7 +266,8 @@ public class ResultatsMultiController {
     }
 
     private void afficherListeRestante() {
-        if (listContainer == null) return;
+        if (listContainer == null)
+            return;
         listContainer.getChildren().clear();
 
         // Players from rank 4 onwards
@@ -274,7 +309,8 @@ public class ResultatsMultiController {
     }
 
     private void highlightCurrentPlayer() {
-        if (lblYourRank == null || lblYourScore == null || rankedPlayers == null) return;
+        if (lblYourRank == null || lblYourScore == null || rankedPlayers == null)
+            return;
 
         int rank = 1;
         int score = 0;
@@ -299,7 +335,8 @@ public class ResultatsMultiController {
 
         // Update style based on rank
         if (rank == 1 && vboxYourResult != null) {
-            vboxYourResult.setStyle("-fx-padding: 20; -fx-background-color: rgba(243, 156, 18, 0.2); -fx-border-color: #f39c12; -fx-border-radius: 10; -fx-background-radius: 10;");
+            vboxYourResult.setStyle(
+                    "-fx-padding: 20; -fx-background-color: rgba(243, 156, 18, 0.2); -fx-border-color: #f39c12; -fx-border-radius: 10; -fx-background-radius: 10;");
         }
     }
 
