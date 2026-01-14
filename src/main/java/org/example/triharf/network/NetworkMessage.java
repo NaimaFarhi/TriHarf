@@ -19,7 +19,8 @@ public class NetworkMessage {
         SHOW_RESULTS,
         PLAYER_ELIMINATED,
         VALIDATION_RESULTS,
-        ROOM_INFO
+        ROOM_INFO,
+        CHAOS_EVENT
     }
 
     private Type type;

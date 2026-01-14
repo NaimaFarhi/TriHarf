@@ -28,7 +28,7 @@ public class GameEngine {
         this.state = GameState.NOT_STARTED;
     }
 
-    //use streams to generate a letter
+    // use streams to generate a letter
     public Character generateRandomLetter() {
         return LETTERS.chars()
                 .mapToObj(c -> (char) c)
@@ -49,7 +49,7 @@ public class GameEngine {
                 endGame();
             }
         }));
-        timer.setCycleCount(durationSeconds);
+        timer.setCycleCount(Timeline.INDEFINITE);
         timer.play();
     }
 
@@ -77,8 +77,27 @@ public class GameEngine {
         }
     }
 
+    public void addTime(int seconds) {
+        this.remainingTime += seconds;
+        if (onTimerUpdate != null)
+            onTimerUpdate.run();
+    }
+
+    public void removeTime(int seconds) {
+        this.remainingTime -= seconds;
+        if (this.remainingTime < 0)
+            this.remainingTime = 0;
+        if (onTimerUpdate != null)
+            onTimerUpdate.run();
+
+        if (this.remainingTime <= 0) {
+            endGame();
+        }
+    }
+
     private void endGame() {
-        if (state == GameState.FINISHED) return; // Already finished
+        if (state == GameState.FINISHED)
+            return; // Already finished
         state = GameState.FINISHED;
         if (onGameEnd != null) {
             onGameEnd.run();
@@ -86,13 +105,29 @@ public class GameEngine {
     }
 
     // Getters & Setters
-    public Character getCurrentLetter() { return currentLetter; }
-    public int getRemainingTime() { return remainingTime; }
-    public void setRemainingTime(int remainingTime) { this.remainingTime = remainingTime; }
-    public GameState getState() { return state; }
+    public Character getCurrentLetter() {
+        return currentLetter;
+    }
 
-    public void setOnTimerUpdate(Runnable callback) { this.onTimerUpdate = callback; }
-    public void setOnGameEnd(Runnable callback) { this.onGameEnd = callback; }
+    public int getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(int remainingTime) {
+        this.remainingTime = remainingTime;
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setOnTimerUpdate(Runnable callback) {
+        this.onTimerUpdate = callback;
+    }
+
+    public void setOnGameEnd(Runnable callback) {
+        this.onGameEnd = callback;
+    }
 
     public String formatTime() {
         int minutes = remainingTime / 60;
