@@ -18,7 +18,8 @@ public class NetworkMessage {
         NEXT_ROUND,
         SHOW_RESULTS,
         PLAYER_ELIMINATED,
-        VALIDATION_RESULTS
+        VALIDATION_RESULTS,
+        ROOM_INFO
     }
 
     private Type type;

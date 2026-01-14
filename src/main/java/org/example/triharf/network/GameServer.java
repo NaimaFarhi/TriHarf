@@ -105,6 +105,21 @@ public class GameServer {
             return false;
         }
 
+        // Auto-ready the player
+        room.setPlayerReady(clientId, true);
+
+        // Send room info to the joining player (so they know maxPlayers, etc.)
+        ClientHandler newClient = clients.get(clientId);
+        if (newClient != null) {
+            Map<String, Object> roomInfo = new HashMap<>();
+            roomInfo.put("maxPlayers", room.getMaxPlayers());
+            roomInfo.put("roomId", room.getRoomId());
+            newClient.sendMessage(new NetworkMessage(
+                    NetworkMessage.Type.ROOM_INFO,
+                    "SERVER",
+                    roomInfo));
+        }
+
         // Notify all players in room with status list (using pseudos)
         List<String> playerStatusList = new ArrayList<>();
         for (String pid : room.getPlayerIds()) {

@@ -30,8 +30,7 @@ public class ListeAttenteController {
     private Button btnCopyCode;
     @FXML
     private Button btnQuitter;
-    @FXML
-    private Button btnPret;
+
     @FXML
     private Button btnCommencer; // Host only button
 
@@ -40,7 +39,7 @@ public class ListeAttenteController {
     private GameServer gameServer;
     private String roomId;
     private int maxPlayers = 4;
-    private boolean isReady = false;
+
     private boolean isHost = false;
     private List<String> categories = new ArrayList<>();
     private String currentLetter = null;
@@ -114,6 +113,17 @@ public class ListeAttenteController {
                     @SuppressWarnings("unchecked")
                     List<String> players = (List<String>) message.getData();
                     updatePlayerList(players);
+                }
+                case ROOM_INFO -> {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> info = (java.util.Map<String, Object>) message.getData();
+                    if (info.containsKey("maxPlayers")) {
+                        Object max = info.get("maxPlayers");
+                        if (max instanceof Number) {
+                            setMaxPlayers(((Number) max).intValue());
+                            System.out.println("ℹ️ Max players updated to: " + max);
+                        }
+                    }
                 }
                 case GAME_START -> {
                     // Log raw GAME_START data for debugging
@@ -200,23 +210,6 @@ public class ListeAttenteController {
     }
 
     @FXML
-    private void handlePret() {
-        if (gameClient != null) {
-            isReady = !isReady;
-            gameClient.sendMessage(new NetworkMessage(
-                    NetworkMessage.Type.PLAYER_READY,
-                    ParametresGenerauxController.pseudoGlobal,
-                    isReady));
-
-            if (btnPret != null) {
-                btnPret.setText(isReady ? "❌ PAS PRÊT" : "✓ JE SUIS PRÊT");
-                btnPret.getStyleClass().clear();
-                btnPret.getStyleClass().add(isReady ? "btn-terminate" : "btn-action");
-            }
-        }
-    }
-
-    @FXML
     private void handleCommencer() {
         if (!isHost)
             return;
@@ -295,7 +288,7 @@ public class ListeAttenteController {
                 mc.demarrerPartie();
             }
 
-            Stage stage = (Stage) btnPret.getScene().getWindow();
+            Stage stage = (Stage) btnQuitter.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);
 
@@ -308,7 +301,7 @@ public class ListeAttenteController {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Stage stage = (Stage) btnPret.getScene().getWindow();
+            Stage stage = (Stage) btnQuitter.getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.setTitle(title);
         } catch (IOException e) {
