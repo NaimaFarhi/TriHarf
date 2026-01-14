@@ -75,6 +75,7 @@ public class GameServer {
             gameData.put("totalRounds", room.getTotalRounds());
             gameData.put("categories", room.getCategories());
             gameData.put("players", playerPseudos);
+            gameData.put("gameMode", room.getGameMode());
 
             broadcast(roomId, new NetworkMessage(
                     NetworkMessage.Type.GAME_START,

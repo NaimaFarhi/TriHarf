@@ -98,6 +98,13 @@ public class ListeAttenteController {
     public void setGameMode(String mode) {
         this.gameMode = mode;
         System.out.println("Mode de jeu (Attente) : " + mode);
+        if (isHost && gameServer != null && roomId != null) {
+            org.example.triharf.network.GameRoom room = gameServer.getRoom(roomId);
+            if (room != null) {
+                room.setGameMode(mode);
+                System.out.println("✅ GameMode updated in GameRoom: " + mode);
+            }
+        }
     }
 
     public void setRoundConfig(int totalRounds, int roundDuration) {
@@ -173,6 +180,12 @@ public class ListeAttenteController {
                             System.out.println("✅ Nombre de manches reçu: " + totalRounds);
                         } else {
                             System.out.println("⚠️ totalRounds n'est pas un Number, utilisant défaut: " + totalRounds);
+                        }
+
+                        String mode = (String) data.get("gameMode");
+                        if (mode != null) {
+                            this.gameMode = mode;
+                            System.out.println("✅ Mode de jeu reçu du serveur: " + mode);
                         }
                     }
                     startGame();
