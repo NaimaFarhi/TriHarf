@@ -205,6 +205,20 @@ public class ListeAttenteController {
 
     }
 
+    private void showDisconnectNotification(String playerName) {
+        // Add a temporary notification label to vboxPlayers
+        if (vboxPlayers != null) {
+            Label notifLabel = new Label("🚪 " + playerName + " a quitté la partie");
+            notifLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 14px; -fx-font-style: italic;");
+            vboxPlayers.getChildren().add(notifLabel);
+
+            // Remove the notification after 3 seconds
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+            pause.setOnFinished(e -> vboxPlayers.getChildren().remove(notifLabel));
+            pause.play();
+        }
+    }
+
     private void updatePlayerList(List<String> playersStatus) {
         if (vboxPlayers != null) {
             vboxPlayers.getChildren().clear();

@@ -11,6 +11,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private PrintWriter out;
     private String currentRoomId;
+    private boolean disconnectHandled = false;
 
     public ClientHandler(Socket socket, String clientId, GameServer server) throws IOException {
         this.socket = socket;
@@ -49,8 +50,10 @@ public class ClientHandler implements Runnable {
             }
             case SUBMIT_ANSWER -> handleSubmitAnswer(message);
             case DISCONNECT -> {
-                if (currentRoomId != null) {
-                    server.leaveRoom(clientId, currentRoomId);
+                // Use handleClientDisconnect to properly notify other players
+                if (!disconnectHandled) {
+                    disconnectHandled = true;
+                    server.handleClientDisconnect(clientId);
                 }
             }
             case CHAT -> {

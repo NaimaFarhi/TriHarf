@@ -997,6 +997,50 @@ public class JeuMultiController {
                 "-fx-background-color: rgba(39, 174, 96, 0.2); -fx-border-color: #27ae60; -fx-border-radius: 5; -fx-background-radius: 5;");
     }
 
+    private void handlePlayerDisconnected(String playerName) {
+        System.out.println("🚪 Joueur déconnecté: " + playerName);
+
+        // Show disconnection in chat
+        addChatMessage("SYSTÈME", playerName + " a quitté la partie", false);
+
+        // Mark their row as disconnected
+        HBox playerRow = playerRowMap.get(playerName);
+        if (playerRow != null) {
+            // Update player name label to show disconnected
+            if (!playerRow.getChildren().isEmpty()) {
+                javafx.scene.Node firstNode = playerRow.getChildren().get(0);
+                if (firstNode instanceof Label nameLabel) {
+                    nameLabel.setText("❌ " + playerName + " (déconnecté)");
+                    nameLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+                }
+            }
+            // Change row style to indicate disconnected
+            playerRow.setStyle("-fx-background-color: rgba(231, 76, 60, 0.2); -fx-border-color: #e74c3c; -fx-border-radius: 5; -fx-background-radius: 5;");
+        }
+
+        // Remove from player list
+        playerList.remove(playerName);
+        updatePlayerCount();
+
+        // If they haven't validated yet, auto-validate them with empty answers
+        // This prevents the game from getting stuck waiting for their validation
+        if (!validatedPlayers.contains(playerName)) {
+            validatedPlayers.add(playerName);
+            // Store empty answers for the disconnected player
+            Map<String, String> emptyAnswers = new HashMap<>();
+            for (Categorie cat : categories) {
+                emptyAnswers.put(cat.getNom(), "");
+            }
+            allPlayerAnswers.put(playerName, emptyAnswers);
+            updateValidationStatus();
+        }
+
+        // Update validation status label
+        if (lblValidationStatus != null) {
+            lblValidationStatus.setText(validatedPlayers.size() + "/" + playerList.size() + " joueurs ont validé");
+        }
+    }
+
     private void revealAllAnswers() {
         System.out.println("🎉 Tous les joueurs ont validé - révélation des réponses!");
 
