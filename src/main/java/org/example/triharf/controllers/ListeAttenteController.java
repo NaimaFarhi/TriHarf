@@ -251,6 +251,7 @@ public class ListeAttenteController {
                 if (playerPseudos != null)
                     cc.setPlayerList(playerPseudos);
                 cc.setGameDuration(roundDuration);
+                cc.setTotalRounds(totalRounds);
 
                 System.out.println("🔥 Navigation vers Chaos Mode avec " + categories.size() + " catégories");
                 cc.demarrerPartie();

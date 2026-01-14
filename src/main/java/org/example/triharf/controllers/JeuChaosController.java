@@ -946,6 +946,11 @@ public class JeuChaosController {
         this.gameDuration = duration;
     }
 
+    public void setTotalRounds(int totalRounds) {
+        this.totalRounds = totalRounds;
+        updateRoundLabels(); // Update UI immediately
+    }
+
     private void updatePlayersFromStatus(List<String> statusList) {
         List<String> names = new ArrayList<>();
         for (String s : statusList)
