@@ -1041,8 +1041,9 @@ public class JeuMultiController {
                 Map<String, Map<String, MultiplayerValidationResponse>> results = new GroqValidator()
                         .validateBatch(allPlayerAnswers, lettreActuelle, langue);
 
-                // Apply locally
-                javafx.application.Platform.runLater(() -> applyValidationResults(results));
+                // Apply locally - REMOVED to avoid double counting (Host receives broadcast
+                // too)
+                // javafx.application.Platform.runLater(() -> applyValidationResults(results));
 
                 // Broadcast
                 if (isHost && gameClient != null) {
