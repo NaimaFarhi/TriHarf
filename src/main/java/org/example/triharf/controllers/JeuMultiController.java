@@ -245,7 +245,16 @@ public class JeuMultiController {
                     revealAllAnswers();
                 }
                 case NEXT_ROUND -> {
-                    startNextRound();
+                    Object data = message.getData();
+                    Character forcedLetter = null;
+                    if (data instanceof Map) {
+                        Map<String, Object> nextRoundData = (Map<String, Object>) data;
+                        String letterStr = (String) nextRoundData.get("letter");
+                        if (letterStr != null && !letterStr.isEmpty()) {
+                            forcedLetter = letterStr.charAt(0);
+                        }
+                    }
+                    startNextRound(forcedLetter);
                 }
                 case SHOW_RESULTS -> {
                     navigateToMultiplayerResults();
@@ -281,7 +290,12 @@ public class JeuMultiController {
             }
 
             if (gameClient != null) {
-                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, roomId));
+                Character nextLetter = generateNewLetter();
+                Map<String, Object> nextRoundData = new HashMap<>();
+                nextRoundData.put("roomId", roomId);
+                nextRoundData.put("letter", nextLetter.toString());
+
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, nextRoundData));
             }
         } else {
             showAlert("Attente de l'hôte", "Seul l'hôte peut lancer la manche suivante.");
@@ -555,17 +569,21 @@ public class JeuMultiController {
     /**
      * Start the next round after current round is completed
      */
-    private void startNextRound() {
+    private void startNextRound(Character forcedLetter) {
         System.out.println("🔄 Démarrage de la manche " + (currentRound + 1) + "/" + totalRounds);
 
         // Increment round counter
         currentRound++;
         updateRoundDisplay();
 
-        // Generate new letter (avoiding already used ones)
-        Character newLetter = generateNewLetter();
-        usedLetters.add(newLetter);
-        lettreActuelle = newLetter;
+        // Use forced letter if provided, otherwise generate (fallback)
+        if (forcedLetter != null) {
+            lettreActuelle = forcedLetter;
+        } else {
+            lettreActuelle = generateNewLetter();
+        }
+
+        usedLetters.add(lettreActuelle);
         afficherLettre();
 
         // Reset validation state for new round
