@@ -20,8 +20,9 @@ public class NetworkMessage {
         PLAYER_ELIMINATED,
         VALIDATION_RESULTS,
         ROOM_INFO,
+
         CHAOS_EVENT,
-        GAME_OVER,
+        GAME_ENDED_HOST_LEFT,
         PLAYER_LEFT
     }
 

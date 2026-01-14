@@ -267,6 +267,25 @@ public class JeuMultiController {
                     String json = (String) message.getData();
                     handleValidationResults(json);
                 }
+                case GAME_ENDED_HOST_LEFT -> {
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Fin de partie");
+                        alert.setHeaderText("L'hôte a quitté la partie");
+                        alert.setContentText("La partie est annulée. Retour au menu principal.");
+                        alert.showAndWait();
+                        handleBack();
+                    });
+                }
+                case PLAYER_LEFT -> {
+                    String leftPlayer = (String) message.getData();
+                    System.out.println("👋 Joueur parti : " + leftPlayer);
+                    playerList.remove(leftPlayer);
+                    // Refresh UI
+                    creerChampsDynamiquement();
+                    if (lblPlayerCount != null)
+                        lblPlayerCount.setText(String.valueOf(playerList.size()));
+                }
                 default -> {
                 }
             }

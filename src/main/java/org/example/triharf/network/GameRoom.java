@@ -20,6 +20,8 @@ public class GameRoom {
     private int roundDuration = 120;
     private String gameMode = "MULTI";
 
+    private String hostId;
+
     // Validation tracking
     private Set<String> validatedPlayers = new HashSet<>();
     private Map<String, Map<String, String>> validatedAnswers = new HashMap<>();
@@ -41,6 +43,14 @@ public class GameRoom {
 
     public void setRoomId(String roomId) {
         this.roomId = roomId;
+    }
+
+    public String getHostId() {
+        return hostId;
+    }
+
+    public void setHostId(String hostId) {
+        this.hostId = hostId;
     }
 
     public List<String> getPlayerIds() {

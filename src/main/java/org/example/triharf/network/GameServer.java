@@ -107,6 +107,12 @@ public class GameServer {
             return false;
         }
 
+        // Assign host if first player
+        if (room.getPlayerIds().size() == 1) {
+            room.setHostId(clientId);
+            System.out.println("👑 Host assigned for room " + roomId + ": " + pseudo);
+        }
+
         // Auto-ready the player
         room.setPlayerReady(clientId, true);
 
@@ -209,27 +215,25 @@ public class GameServer {
         // Find which room this client was in
         for (GameRoom room : rooms.values()) {
             if (room.getPlayerIds().contains(clientId)) {
+                String roomId = room.getRoomId();
                 String pseudo = room.getPseudo(clientId);
-                boolean isHost = !room.getPlayerIds().isEmpty() && room.getPlayerIds().get(0).equals(clientId);
+                boolean isHost = clientId.equals(room.getHostId());
 
-                leaveRoom(clientId, room.getRoomId());
+                leaveRoom(clientId, roomId);
 
-                if (isHost) {
-                    System.out.println("🚨 HOST " + pseudo + " left room " + room.getRoomId());
-                    broadcast(room.getRoomId(),
-                            new NetworkMessage(NetworkMessage.Type.GAME_OVER, "SERVER", "Host left"));
-                    rooms.remove(room.getRoomId()); // Close room
+                if (isHost && !rooms.containsKey(roomId)) {
+                    // Room was deleted because empty, nothing to do
+                } else if (isHost) {
+                    System.out.println("🚨 Host " + pseudo + " disconnected! Ending game for room " + roomId);
+                    broadcast(roomId, new NetworkMessage(NetworkMessage.Type.GAME_ENDED_HOST_LEFT, "SERVER", null));
+                    rooms.remove(roomId); // Destroy room
+                    return;
                 } else {
-                    System.out.println("⚠️ Player " + pseudo + " left room " + room.getRoomId());
-
-                    // 1. Notify remaining players locally in lobby (PLAYER_JOINED acts as list
-                    // refresh)
-                    broadcastPlayerStatus(room.getRoomId());
-
-                    // 2. Broadcast explicit PLAYER_LEFT event for Game Controllers
-                    Map<String, String> data = new HashMap<>();
-                    data.put("pseudo", pseudo);
-                    broadcast(room.getRoomId(), new NetworkMessage(NetworkMessage.Type.PLAYER_LEFT, "SERVER", data));
+                    // Normal player left
+                    System.out.println("👋 Player " + pseudo + " left room " + roomId);
+                    broadcast(roomId, new NetworkMessage(NetworkMessage.Type.PLAYER_LEFT, "SERVER", pseudo));
+                    // Also send updated player list
+                    broadcastPlayerStatus(roomId);
                 }
                 break;
             }
