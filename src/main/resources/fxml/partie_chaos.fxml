@@ -101,6 +101,9 @@
                             <children>
                                 <Button fx:id="btnValider" text="✓ SITUATION CONFIRMÉE" 
                                         styleClass="btn-action" style="-fx-font-size: 13px; -fx-padding: 10 30;"/>
+                                <Button fx:id="btnVoirResultats" text="🏆 VOIR LES RÉSULTATS"
+                                        styleClass="btn-action" style="-fx-font-size: 13px; -fx-padding: 10 30; -fx-background-color: #f39c12;"
+                                        visible="false" managed="false"/>
                             </children>
                         </HBox>
                     </children>

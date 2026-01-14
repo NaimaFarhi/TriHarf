@@ -66,6 +66,12 @@ public class JeuChaosController {
     private Button btnValider;
     @FXML
     private Label lblValidationStatus;
+    @FXML
+    private Button btnVoirResultats;
+    @FXML
+    private Label lblCurrentRound;
+    @FXML
+    private Label lblTotalRounds;
 
     // ===== SERVICES =====
     private GameEngine gameEngine;
@@ -76,7 +82,10 @@ public class JeuChaosController {
 
     // ===== STATE =====
     private Character lettreActuelle;
+
     private int nbJoueurs = 1;
+    private int currentRound = 1;
+    private int totalRounds = 3;
     private final Map<String, TextField> textFieldsParCategorie = new HashMap<>(); // Key is Category Name
     private final Map<Categorie, String> reponses = new HashMap<>();
     private List<String> playerList = new ArrayList<>();
@@ -96,7 +105,9 @@ public class JeuChaosController {
     private List<String> categoriesNoms;
     private List<Categorie> categories;
     private String joueur = "Joueur_Chaos";
+
     private int gameDuration = 180;
+    private Set<Character> usedLetters = new HashSet<>();
     private final Gson gson = new Gson();
     private org.example.triharf.enums.Langue langue = org.example.triharf.enums.Langue.FRANCAIS;
 
@@ -191,6 +202,10 @@ public class JeuChaosController {
             btnSend.setOnAction(e -> handleSendMessage());
         if (btnValider != null)
             btnValider.setOnAction(e -> handleValider());
+        if (btnValider != null)
+            btnValider.setOnAction(e -> handleValider());
+        if (btnVoirResultats != null)
+            btnVoirResultats.setOnAction(e -> handleVoirResultats());
     }
 
     // ==========================================
@@ -218,6 +233,18 @@ public class JeuChaosController {
                 case ALL_VALIDATED -> handleAllValidated((Map<String, Map<String, String>>) message.getData());
                 case VALIDATION_RESULTS -> handleValidationResults((String) message.getData());
                 case CHAOS_EVENT -> handleChaosEvent((Map<String, String>) message.getData());
+                case NEXT_ROUND -> {
+                    Object data = message.getData();
+                    Character forcedLetter = null;
+                    if (data instanceof Map) {
+                        Map<String, Object> nextRoundData = (Map<String, Object>) data;
+                        String letterStr = (String) nextRoundData.get("letter");
+                        if (letterStr != null && !letterStr.isEmpty()) {
+                            forcedLetter = letterStr.charAt(0);
+                        }
+                    }
+                    startNextRound(forcedLetter);
+                }
                 default -> {
                 }
             }
@@ -338,7 +365,11 @@ public class JeuChaosController {
         }
 
         Object durationObj = data.get("duration");
-        if (durationObj instanceof Number) {
+        Object roundsObj = data.get("totalRounds");
+        if (durationObj instanceof Number && roundsObj instanceof Number) {
+            this.gameDuration = ((Number) durationObj).intValue();
+            this.totalRounds = ((Number) roundsObj).intValue();
+        } else if (durationObj instanceof Number) {
             this.gameDuration = ((Number) durationObj).intValue();
         }
 
@@ -597,14 +628,114 @@ public class JeuChaosController {
                 }
             }
 
-            // End of Game - go to results
-            PauseTransition pt = new PauseTransition(Duration.seconds(3));
-            pt.setOnFinished(e -> navigateToMultiplayerResults());
-            pt.play();
+            // Enable "Next Round" or "Show Results" button for Host/All
+            if (isHost && btnVoirResultats != null) {
+                btnVoirResultats.setVisible(true);
+                btnVoirResultats.setManaged(true);
+                if (currentRound < totalRounds) {
+                    btnVoirResultats.setText("➤ MANCHE SUIVANTE");
+                    btnVoirResultats.setOnAction(e -> handleNextRoundAction());
+                } else {
+                    btnVoirResultats.setText("🏆 RÉSULTATS FINAUX");
+                    btnVoirResultats.setOnAction(e -> handleShowResultsAction());
+                }
+            } else if (!isHost && btnVoirResultats != null) {
+                // Client waits for host
+                btnVoirResultats.setVisible(true);
+                btnVoirResultats.setManaged(true);
+                btnVoirResultats.setText("En attente de l'hôte...");
+                btnVoirResultats.setDisable(true);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void handleNextRoundAction() {
+        if (isHost) {
+            if (gameClient != null) {
+                Character nextLetter = generateNewLetter();
+                Map<String, Object> nextRoundData = new HashMap<>();
+                nextRoundData.put("roomId", roomId);
+                nextRoundData.put("letter", nextLetter.toString());
+
+                gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.NEXT_ROUND, joueur, nextRoundData));
+            }
+        }
+    }
+
+    private void handleShowResultsAction() {
+        // Logic to go to results (already implemented in auto-nav potentially, but
+        // explicit here)
+        navigateToMultiplayerResults();
+    }
+
+    private void handleVoirResultats() {
+        // Fallback
+    }
+
+    private void startNextRound(Character forcedLetter) {
+        System.out.println("🔄 Démarrage de la manche " + (currentRound + 1) + "/" + totalRounds);
+
+        currentRound++;
+        // Update labels if they existed (add fields if necessary or assume user will
+        // add FXML labels later)
+
+        if (forcedLetter != null) {
+            lettreActuelle = forcedLetter;
+        } else {
+            lettreActuelle = generateNewLetter();
+        }
+        usedLetters.add(lettreActuelle);
+        if (lblLettre != null)
+            lblLettre.setText(lettreActuelle.toString());
+
+        // RESET STATE
+        hasValidated = false;
+        validatedPlayers.clear();
+        allPlayersValidated = false;
+        allPlayerAnswers.clear();
+        reponses.clear();
+
+        // Reset Inputs
+        creerChampsDynamiquement();
+
+        // Reset Buttons
+        if (btnVoirResultats != null) {
+            btnVoirResultats.setVisible(false);
+            btnVoirResultats.setManaged(false);
+            btnVoirResultats.setDisable(false);
+        }
+        if (btnValider != null) {
+            btnValider.setDisable(false);
+            btnValider.setText("✓ VALIDER");
+            btnValider.setStyle(""); // Reset style
+        }
+
+        // Scheduler NEW events for this round
+        chaosManager.scheduleEvents(gameDuration);
+
+        // Start Timer
+        gameEngine.setOnTimerUpdate(this::afficherTimer);
+        gameEngine.setOnGameEnd(this::handleTerminerAuto);
+        gameEngine.startTimer(gameDuration);
+
+        addChatMessage("SYSTEM", "🔄 Manche " + currentRound + " ! Lettre : " + lettreActuelle, false);
+    }
+
+    private Character generateNewLetter() {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        List<Character> availableLetters = new ArrayList<>();
+        for (char c : alphabet.toCharArray()) {
+            if (!usedLetters.contains(c))
+                availableLetters.add(c);
+        }
+        if (availableLetters.isEmpty()) {
+            usedLetters.clear();
+            return alphabet.charAt(new Random().nextInt(alphabet.length()));
+        }
+        return availableLetters.get(new Random().nextInt(availableLetters.size()));
     }
 
     // ==========================================
