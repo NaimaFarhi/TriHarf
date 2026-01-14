@@ -273,6 +273,7 @@ public class GameServer {
                     room.getValidatedAnswers());
             broadcast(roomId, allValidatedMsg);
         }
+    }
 
     public synchronized void handleNextRound(String roomId) {
         GameRoom room = rooms.get(roomId);
