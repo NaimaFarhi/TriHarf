@@ -676,6 +676,11 @@ public class JeuChaosController {
                 continue;
 
             Map<String, String> answers = allPlayerAnswers.get(p);
+            if (answers == null) {
+                // If answers not found (e.g. disconnected or error), skip updating this row
+                continue;
+            }
+
             int idx = 1;
             for (Categorie cat : categories) {
                 if (idx < row.getChildren().size() - 1) {
