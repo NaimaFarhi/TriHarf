@@ -106,7 +106,7 @@ public class JeuChaosController {
     // ===== INJECTED =====
     private List<String> categoriesNoms;
     private List<Categorie> categories;
-    private String joueur = "Joueur_Chaos";
+    private String joueur;
 
     private int gameDuration = 180;
     private Set<Character> usedLetters = new HashSet<>();
@@ -198,6 +198,11 @@ public class JeuChaosController {
         this.chaosManager = new ChaosManager();
         this.validationService = new ValidationService();
 
+        // Initialize player name immediately
+        String pseudoGlobal = org.example.triharf.controllers.ParametresGenerauxController.pseudoGlobal;
+        this.joueur = (pseudoGlobal != null && !pseudoGlobal.isEmpty()) ? pseudoGlobal
+                : "Joueur_" + System.currentTimeMillis() % 1000;
+
         if (btnBack != null)
             btnBack.setOnAction(e -> handleBack());
         if (btnSend != null)
@@ -243,6 +248,7 @@ public class JeuChaosController {
 
         if (gameClient != null) {
             Map<String, String> data = new HashMap<>();
+            data.put("sender", joueur);
             data.put("message", msg);
             gameClient.sendMessage(new NetworkMessage(NetworkMessage.Type.CHAT, joueur, data));
         }
