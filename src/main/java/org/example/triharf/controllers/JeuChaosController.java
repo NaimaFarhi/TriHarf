@@ -314,6 +314,8 @@ public class JeuChaosController {
                 case VALIDATION_RESULTS -> handleValidationResults((String) message.getData());
                 case CHAOS_EVENT -> handleChaosEvent((Map<String, String>) message.getData());
                 case SHOW_RESULTS -> navigateToResults();
+                case PLAYER_LEFT -> handlePlayerLeft((Map<String, String>) message.getData());
+                case GAME_OVER -> handleGameOver((String) message.getData());
                 case NEXT_ROUND -> {
                     Object data = message.getData();
                     Character forcedLetter = null;
@@ -931,6 +933,71 @@ public class JeuChaosController {
                 lblLettre.setText(lettreActuelle.toString());
         }
     }
+
+    private void handlePlayerLeft(Map<String, String> data) {
+        String pseudo = data.get("pseudo");
+        if (pseudo == null)
+            return;
+
+        addChatMessage("SYSTEM", "🚫 " + pseudo + " a quitté la partie.", false);
+
+        // Grey out player row
+        if (playerRowMap.containsKey(pseudo)) {
+            HBox row = playerRowMap.get(pseudo);
+            row.setOpacity(0.5);
+            // Optionally add " (OFFLINE)" to label
+            if (!row.getChildren().isEmpty() && row.getChildren().get(0) instanceof Label) {
+                Label nameLbl = (Label) row.getChildren().get(0);
+                if (!nameLbl.getText().contains("(OFFLINE)"))
+                    nameLbl.setText(nameLbl.getText() + " (OFFLINE)");
+            }
+        }
+
+        // Logic update
+        if (playerList.contains(pseudo)) {
+            playerList.remove(pseudo);
+            nbJoueurs--;
+            if (lblJoueurs != null)
+                lblJoueurs.setText(String.valueOf(nbJoueurs));
+        }
+
+        // Remove from pending validation if they haven't validated
+        // If they HAVE validated, their result stands for this round.
+        // Re-check "All Validated" condition in case we were waiting only for them.
+        if (hasValidated) { // Check global validation status if *I* have validated
+            // We need to re-trigger validation checks.
+            // Simplest way: simulate a "validation update" or check manually.
+            // We can just check strictly:
+            if (validatedPlayers.containsAll(playerList)) {
+                // Trigger all validated logic?
+                // We don't have the answers here to pass to handleAllValidated.
+                // Ideally the SERVER detects this and sends ALL_VALIDATED.
+                // But for immediate feedback:
+            }
+        }
+    }
+
+    private void handleGameOver(String reason) {
+        javafx.application.Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Fin de partie");
+            alert.setHeaderText("La partie est terminée");
+            alert.setContentText("Raison: " + reason);
+            alert.showAndWait();
+
+            try {
+                FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("/fxml/main_menu.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) (btnBack != null ? btnBack.getScene().getWindow()
+                        : vboxPlayers.getScene().getWindow());
+                stage.getScene().setRoot(root);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    // NAVIGATION & UTILS
 
     public void setPlayerList(List<String> players) {
         if (players != null) {

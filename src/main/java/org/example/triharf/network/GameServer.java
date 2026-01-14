@@ -209,10 +209,28 @@ public class GameServer {
         // Find which room this client was in
         for (GameRoom room : rooms.values()) {
             if (room.getPlayerIds().contains(clientId)) {
+                String pseudo = room.getPseudo(clientId);
+                boolean isHost = !room.getPlayerIds().isEmpty() && room.getPlayerIds().get(0).equals(clientId);
+
                 leaveRoom(clientId, room.getRoomId());
 
-                // Notify remaining players
-                broadcastPlayerStatus(room.getRoomId());
+                if (isHost) {
+                    System.out.println("🚨 HOST " + pseudo + " left room " + room.getRoomId());
+                    broadcast(room.getRoomId(),
+                            new NetworkMessage(NetworkMessage.Type.GAME_OVER, "SERVER", "Host left"));
+                    rooms.remove(room.getRoomId()); // Close room
+                } else {
+                    System.out.println("⚠️ Player " + pseudo + " left room " + room.getRoomId());
+
+                    // 1. Notify remaining players locally in lobby (PLAYER_JOINED acts as list
+                    // refresh)
+                    broadcastPlayerStatus(room.getRoomId());
+
+                    // 2. Broadcast explicit PLAYER_LEFT event for Game Controllers
+                    Map<String, String> data = new HashMap<>();
+                    data.put("pseudo", pseudo);
+                    broadcast(room.getRoomId(), new NetworkMessage(NetworkMessage.Type.PLAYER_LEFT, "SERVER", data));
+                }
                 break;
             }
         }
