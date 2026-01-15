@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class
 
-HelloApplication extends Application {
+ HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Initialize database if needed
