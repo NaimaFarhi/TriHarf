@@ -28,5 +28,6 @@
         <mapping class="org.example.triharf.models.Mot"/>
         <mapping class="org.example.triharf.models.Joueur"/>
         <mapping class="org.example.triharf.models.Partie"/>
+        <mapping class="org.example.triharf.models.ResultatPartie"/>
     </session-factory>
 </hibernate-configuration>

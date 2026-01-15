@@ -1,6 +1,8 @@
 package org.example.triharf.models;
 
 import jakarta.persistence.*;
+import org.example.triharf.enums.Langue;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,6 +25,10 @@ public class Partie {
 
     @Column(nullable = false, length = 50)
     private String mode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "langue_code", length = 20)
+    private Langue langue;
 
     @Column(name = "duree_seconde")
     private Integer dureeSeconde;
@@ -59,6 +65,9 @@ public class Partie {
 
     public String getMode() { return mode; }
     public void setMode(String mode) { this.mode = mode; }
+
+    public Langue getLangue() { return langue; }
+    public void setLangue(Langue langue) { this.langue = langue; }
 
     public Integer getDureeSeconde() { return dureeSeconde; }
     public void setDureeSeconde(Integer dureeSeconde) { this.dureeSeconde = dureeSeconde; }

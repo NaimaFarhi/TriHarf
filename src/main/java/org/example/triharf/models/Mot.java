@@ -1,6 +1,8 @@
 package org.example.triharf.models;
 
 import jakarta.persistence.*;
+import org.example.triharf.enums.Langue;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +24,10 @@ public class Mot {
     @Column(nullable = false, length = 1)
     private Character lettre;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "langue_code", length = 20)
+    private Langue langue;
+
     @Column(nullable = false)
     private Boolean valide = true;
 
@@ -39,10 +45,11 @@ public class Mot {
     // Constructeurs
     public Mot() {}
 
-    public Mot(String texte, Categorie categorie, Character lettre) {
+    public Mot(String texte, Categorie categorie, Character lettre, Langue langue) {
         this.texte = texte;
         this.categorie = categorie;
         this.lettre = lettre;
+        this.langue = langue;
     }
 
     // Getters et Setters

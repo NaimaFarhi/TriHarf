@@ -4,6 +4,7 @@ module org.example.triharf {
     requires javafx.web;
     requires javafx.swing;
     requires javafx.media;
+    requires javafx.graphics;
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
@@ -22,9 +23,15 @@ module org.example.triharf {
 
     opens org.example.triharf to javafx.fxml;
     opens org.example.triharf.models to org.hibernate.orm.core;
-    //opens org.example.triharf.controllers to javafx.fxml;
+    opens org.example.triharf.controllers to javafx.fxml;
+    opens org.example.triharf.utils to javafx.fxml;
+    opens org.example.triharf.network to com.google.gson;
+    opens org.example.triharf.services to com.google.gson;
 
     exports org.example.triharf;
-    //exports org.example.triharf.controllers;
+    exports org.example.triharf.controllers;
     exports org.example.triharf.models;
+    exports org.example.triharf.utils;
+    exports org.example.triharf.network;
+
 }

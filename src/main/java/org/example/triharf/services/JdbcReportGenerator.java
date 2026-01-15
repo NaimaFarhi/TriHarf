@@ -1,8 +1,13 @@
 package org.example.triharf.services;
 
+import org.example.triharf.models.Categorie;
+
 import java.sql.*;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JdbcReportGenerator {
     private static final String URL = "jdbc:mysql://localhost:3306/baccalaureat_db";
@@ -47,5 +52,14 @@ public class JdbcReportGenerator {
             e.printStackTrace();
         }
         return 5; // Score par défaut
+    }
+
+    public List<String> getTopCategories(int limit){
+        return getMotsParCategorie().entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(limit)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }

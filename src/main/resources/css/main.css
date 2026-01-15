@@ -1,0 +1,686 @@
+/* BACKGROUND */
+.root-stack {
+    -fx-background-color: #000000;
+}
+
+.bg-pane {
+    -fx-background-color: transparent;
+}
+
+/* TOP LOGO AREA */
+.top-bar {
+    -fx-padding: 10 0 10 0;
+}
+
+/* CARDS / BUTTONS */
+.mode-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+}
+
+/* Base card style */
+.card-stack {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    /* Very subtle fill */
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 20, 0, 0, 10);
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+/* Hover effect */
+.mode-button:hover .card-stack {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-effect: dropshadow(three-pass-box, rgba(79, 172, 254, 0.6), 25, 0.5, 0, 0);
+    /* Glow effect */
+}
+
+.mode-icon {
+    -fx-opacity: 0.9;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}
+
+.mode-button:hover .mode-icon {
+    -fx-opacity: 1.0;
+}
+
+/* STATS PANEL - Dark Glassmorphism */
+.stats-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    /* Darker semi-transparent */
+    -fx-background-radius: 25;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 25;
+    -fx-border-width: 1;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 20, 0, 0, 5);
+}
+
+.stats-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0, 0, 1);
+}
+
+.stats-separator {
+    -fx-background-color: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    -fx-pref-height: 2;
+}
+
+.stats-sub-panel {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 15;
+}
+
+.stats-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #cccccc;
+    -fx-font-weight: normal;
+}
+
+.stats-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffd700;
+    /* Gold */
+}
+
+.records-panel {
+    -fx-background-color: rgba(255, 215, 0, 0.1);
+    /* Gold tint */
+    -fx-background-radius: 15;
+    -fx-padding: 15;
+    -fx-border-color: rgba(255, 215, 0, 0.2);
+    -fx-border-radius: 15;
+}
+
+.record-time {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffecb3;
+    -fx-min-width: 60;
+}
+
+/* BOTTOM BAR */
+.bottom-bar {
+    -fx-padding: 20 35 30 35;
+}
+
+.btn-settings {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 30;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-radius: 30;
+    -fx-border-width: 1.5;
+    -fx-cursor: hand;
+    -fx-padding: 12 30;
+}
+
+.btn-settings:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-border-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 10, 0, 0, 0);
+}
+
+/* =========================================
+   GLOBAL GLASSMORPHISM & DARK THEME STYLES
+   ========================================= */
+
+/* Use this for root VBoxes in configuration pages */
+.root-vbox {
+    -fx-background-color: #0a0a0a;
+    -fx-padding: 20;
+    -fx-alignment: TOP-CENTER;
+}
+
+/* Header bars (Back button + Title) */
+.header-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 15;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
+}
+
+.header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, black, 2, 0.5, 0, 0);
+}
+
+
+/* Generic transparent back button */
+.btn-back {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-font-size: 24px;
+    -fx-cursor: hand;
+    -fx-padding: 0 10 0 0;
+    -fx-transition: all 0.2s;
+}
+
+.btn-back:hover {
+    -fx-text-fill: #ffd700;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* Content panels (replacing white VBoxes) */
+.content-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 15;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 5);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 15;
+}
+
+/* Labels in content panels */
+.label-bright {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+.label-dim {
+    -fx-text-fill: #aaaaaa;
+    -fx-font-size: 14px;
+}
+
+/* Form Controls */
+.text-field {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #888;
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 20;
+    -fx-padding: 10 15;
+}
+
+.text-field:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-border-color: #4facfe;
+    -fx-effect: dropshadow(gaussian, rgba(79, 172, 254, 0.4), 10, 0, 0, 0);
+}
+
+/* Spinner Controls */
+.spinner {
+    -fx-background-color: transparent;
+}
+
+.spinner .text-field {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-text-fill: white;
+    -fx-background-radius: 10 0 0 10;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-radius: 10 0 0 10;
+    -fx-padding: 8 12;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-cursor: hand;
+}
+
+.spinner .increment-arrow-button:hover,
+.spinner .decrement-arrow-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.spinner .increment-arrow-button .increment-arrow,
+.spinner .decrement-arrow-button .decrement-arrow {
+    -fx-background-color: white;
+}
+
+.radio-button {
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.radio-button .radio {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-radius: 10px;
+}
+
+.radio-button:selected .radio .dot {
+    -fx-background-color: #ffd700;
+    -fx-background-insets: 0;
+}
+
+.check-box {
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.check-box .box {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-radius: 3px;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+    -fx-shape: "M0,4 L3,7 L9,1 L8,0 L3,5 L1,3 Z";
+}
+
+.slider .track {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 5;
+}
+
+.slider .thumb {
+    -fx-background-color: #ffd700;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0, 0, 1);
+}
+
+/* Big Action Buttons (Play/Start) */
+.btn-action {
+    -fx-background-color: linear-gradient(to right, #4facfe, #00f2fe);
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 30;
+    -fx-padding: 12 30;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(79, 172, 254, 0.4), 10, 0.3, 0, 0);
+}
+
+.btn-action:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(79, 172, 254, 0.6), 15, 0.5, 0, 0);
+}
+
+/* Secondary Action Buttons (Copy, etc.) */
+.btn-secondary {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 20;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-border-color: white;
+}
+
+
+/* =========================================
+   GAME SCREEN STYLES
+   ========================================= */
+
+.game-header {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-padding: 15;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 0 0 1 0;
+}
+
+.info-box {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 25;
+    -fx-padding: 8 15;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 25;
+}
+
+.info-label {
+    -fx-text-fill: #e1e1e1;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.info-value {
+    -fx-text-fill: #ffd700;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.letter-circle {
+    -fx-background-color: linear-gradient(to bottom right, #8e44ad, #9b59b6);
+    -fx-background-radius: 50;
+    -fx-padding: 15 25;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 32px;
+    -fx-effect: dropshadow(gaussian, rgba(142, 68, 173, 0.6), 20, 0.5, 0, 0);
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-radius: 50;
+    -fx-border-width: 2;
+}
+
+.scroll-pane {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.btn-terminate {
+    -fx-background-color: linear-gradient(to right, #cb2d3e, #ef473a);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+    -fx-padding: 10 20;
+    -fx-effect: dropshadow(gaussian, rgba(239, 71, 58, 0.4), 10, 0.3, 0, 0);
+}
+
+.btn-terminate:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* Game Category Rows */
+.game-category-row {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 1);
+}
+
+.game-category-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #222;
+}
+
+.game-input-field {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-prompt-text-fill: #aaa;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+}
+
+.game-input-field:focused {
+    -fx-border-color: #8e44ad;
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(gaussian, rgba(142, 68, 173, 0.2), 5, 0, 0, 0);
+}
+
+/* NEW BOX LAYOUT STYLES */
+.game-category-box {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    /* Darker glass for boxes */
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 15;
+    -fx-transition: all 0.2s;
+}
+
+.game-category-box:hover {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+.game-category-label {
+    /* If reused here, override text color for dark theme box */
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+/* =========================================
+   RESULTS SCREEN STYLES
+   ========================================= */
+
+/* Victory Header */
+.results-header-victory {
+    -fx-background-color: linear-gradient(to bottom, rgba(155, 89, 182, 0.3), transparent);
+}
+
+/* Defeat Header */
+.results-header-defeat {
+    -fx-background-color: linear-gradient(to bottom, rgba(231, 76, 60, 0.3), transparent);
+}
+
+.results-title {
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 10, 0, 0, 0);
+}
+
+/* Main Score Card */
+.score-card {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-background-radius: 30;
+    -fx-border-color: rgba(255, 215, 0, 0.3);
+    -fx-border-radius: 30;
+    -fx-border-width: 2;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 25, 0, 0, 10);
+}
+
+.score-value {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 80px;
+    -fx-font-weight: 900;
+    -fx-effect: dropshadow(gaussian, rgba(255, 215, 0, 0.6), 20, 0.4, 0, 0);
+}
+
+.result-message {
+    -fx-text-fill: #eeeeee;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* Details Container */
+.details-container {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 20;
+    -fx-padding: 25;
+}
+
+/* Bottom Action Bar */
+.bottom-action-bar {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-padding: 20;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Retry Button */
+.btn-retry {
+    -fx-background-color: linear-gradient(to right, #4facfe, #00f2fe);
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 30;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(79, 172, 254, 0.5), 15, 0.3, 0, 0);
+}
+
+.btn-retry:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* Menu Button */
+.btn-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 30;
+    -fx-border-color: rgba(255, 255, 255, 0.4);
+    -fx-border-radius: 30;
+    -fx-border-width: 2;
+    -fx-cursor: hand;
+}
+
+.btn-menu:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: white;
+}
+
+/* Difficulty/Chips */
+.difficulty-toggle {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-padding: 15 25;
+    -fx-cursor: hand;
+    -fx-min-width: 140;
+    -fx-pref-height: 80;
+    -fx-alignment: CENTER;
+    -fx-transition: all 0.2s;
+}
+
+.difficulty-toggle:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.category-chip {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 25;
+    -fx-border-radius: 25;
+    -fx-border-width: 1;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-text-fill: #ccc;
+    -fx-transition: all 0.2s;
+}
+
+.category-chip:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-text-fill: white;
+}
+
+.category-chip:selected {
+    -fx-background-color: linear-gradient(to right, #8e44ad, #9b59b6);
+    -fx-border-color: #9b59b6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(155, 89, 182, 0.6), 15, 0.4, 0, 0);
+}
+
+/* Difficulty Toggle Buttons */
+.difficulty-toggle {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 15;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 15;
+    -fx-border-width: 2;
+    -fx-padding: 15 25;
+    -fx-cursor: hand;
+    -fx-min-width: 120;
+    -fx-min-height: 90;
+}
+
+.difficulty-toggle:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+}
+
+.difficulty-toggle:selected {
+    -fx-background-color: rgba(255, 215, 0, 0.15);
+    -fx-border-color: #ffd700;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(255, 215, 0, 0.5), 20, 0.4, 0, 0);
+}
+
+.difficulty-facile:selected {
+    -fx-background-color: rgba(46, 204, 113, 0.2);
+    -fx-border-color: #2ecc71;
+    -fx-effect: dropshadow(gaussian, rgba(46, 204, 113, 0.5), 20, 0.4, 0, 0);
+}
+
+.difficulty-moyen:selected {
+    -fx-background-color: rgba(241, 196, 15, 0.2);
+    -fx-border-color: #f1c40f;
+    -fx-effect: dropshadow(gaussian, rgba(241, 196, 15, 0.5), 20, 0.4, 0, 0);
+}
+
+.difficulty-difficile:selected {
+    -fx-background-color: rgba(231, 76, 60, 0.2);
+    -fx-border-color: #e74c3c;
+    -fx-effect: dropshadow(gaussian, rgba(231, 76, 60, 0.5), 20, 0.4, 0, 0);
+}
+
+.difficulty-icon {
+    -fx-font-size: 28px;
+}
+
+.difficulty-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Podium */
+.podium-name {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 2, 1, 0, 0);
+}
+
+.podium-rank {
+    -fx-text-fill: rgba(255, 255, 255, 0.2);
+    /* Integrated rank number */
+    -fx-font-size: 40px;
+    -fx-font-weight: 900;
+}
+
+/* Glass Panel (Alternative to content-panel with less padding) */
+.glass-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 15;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 5);
+}
+
+.panel-header {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-padding: 12;
+    -fx-background-radius: 12 12 0 0;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 0 0 1 0;
+}
+
+.text-sub-header {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}

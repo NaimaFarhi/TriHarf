@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" spacing="0.0"
+      styleClass="root-vbox"
+      stylesheets="@../css/main.css"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.triharf.controllers.ListeAttenteController">
+
+    <children>
+        <!-- HEADER -->
+        <HBox alignment="CENTER" prefHeight="80.0" styleClass="game-header" spacing="20.0">
+            <children>
+                <Label text="⏳ SALLE D'ATTENTE" styleClass="header-title" style="-fx-font-size: 28px;"/>
+            </children>
+        </HBox>
+
+        <!-- SCROLLABLE MAIN CONTENT -->
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS" 
+                    style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <VBox alignment="CENTER" spacing="30.0" style="-fx-padding: 40;">
+                    <children>
+                        
+                        <!-- Animated waiting indicator -->
+                        <VBox alignment="CENTER" spacing="15.0">
+                            <children>
+                                <Label text="🎮" style="-fx-font-size: 64px;"/>
+                                <Label text="En attente des autres joueurs..." 
+                                       style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+                                <Label text="La partie commencera automatiquement quand tout le monde sera prêt" 
+                                       style="-fx-text-fill: #888; -fx-font-size: 14px;"/>
+                            </children>
+                        </VBox>
+
+                        <!-- Player count panel -->
+                        <VBox alignment="CENTER" spacing="15.0" styleClass="content-panel" 
+                              style="-fx-padding: 30; -fx-min-width: 400; -fx-max-width: 500;">
+                            <children>
+                                <Label text="Joueurs connectés" styleClass="label-bright" style="-fx-font-size: 18px;"/>
+                                
+                                <HBox alignment="CENTER" spacing="20.0">
+                                    <children>
+                                        <VBox alignment="CENTER" styleClass="score-display" style="-fx-padding: 15 30;">
+                                            <children>
+                                                <!-- Dynamic: player count -->
+                                                <Label fx:id="lblPlayerCount" text="" 
+                                                       style="-fx-text-fill: #9b59b6; -fx-font-size: 48px; -fx-font-weight: bold;"/>
+                                            </children>
+                                        </VBox>
+                                        <Label text="/" style="-fx-text-fill: #666; -fx-font-size: 36px;"/>
+                                        <!-- Dynamic: max players -->
+                                        <Label fx:id="lblMaxPlayers" text="" 
+                                               style="-fx-text-fill: #666; -fx-font-size: 36px;"/>
+                                    </children>
+                                </HBox>
+
+                                <!-- Dynamic: player list container -->
+                                <VBox fx:id="vboxPlayers" spacing="8.0" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                                    <!-- Players will be added dynamically -->
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <!-- Game code section -->
+                        <VBox alignment="CENTER" spacing="10.0" styleClass="content-panel" 
+                              style="-fx-padding: 20; -fx-min-width: 400; -fx-max-width: 500;">
+                            <children>
+                                <Label text="Code de la partie" styleClass="label-dim" style="-fx-font-size: 14px;"/>
+                                <HBox alignment="CENTER" spacing="10.0">
+                                    <children>
+                                        <!-- Dynamic: game code -->
+                                        <Label fx:id="lblGameCode" text="" 
+                                               style="-fx-text-fill: #f1c40f; -fx-font-size: 32px; -fx-font-weight: bold; -fx-letter-spacing: 5;"/>
+                                        <Button fx:id="btnCopyCode" text="📋" onAction="#handleCopyCode" styleClass="btn-secondary" 
+                                                style="-fx-font-size: 16px;"/>
+                                    </children>
+                                </HBox>
+                                <Label text="Partagez ce code avec vos amis !" 
+                                       style="-fx-text-fill: #888; -fx-font-size: 12px;"/>
+                            </children>
+                        </VBox>
+
+                        <!-- Loading animation dots -->
+                        <HBox alignment="CENTER" spacing="8.0">
+                            <children>
+                                <Label text="●" style="-fx-text-fill: #9b59b6; -fx-font-size: 12px;"/>
+                                <Label text="●" style="-fx-text-fill: #8e44ad; -fx-font-size: 12px;"/>
+                                <Label text="●" style="-fx-text-fill: #9b59b6; -fx-font-size: 12px;"/>
+                            </children>
+                        </HBox>
+
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+        <!-- BOTTOM BUTTONS -->
+        <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 20; -fx-background-color: rgba(0,0,0,0.2);">
+            <children>
+                <Button fx:id="btnQuitter" text="✕ QUITTER" onAction="#handleQuitter" styleClass="btn-terminate"/>
+                <Button fx:id="btnCommencer" text="🎮 COMMENCER LA PARTIE"
+                        onAction="#handleCommencer" styleClass="btn-action"
+                        style="-fx-min-width: 250;" visible="false"/>
+            </children>
+        </HBox>
+
+    </children>
+</VBox>

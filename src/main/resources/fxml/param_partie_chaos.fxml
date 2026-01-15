@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="900.0" spacing="15.0" styleClass="root-vbox" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.triharf.controllers.ParamPartieChaosController">
+
+    <children>
+
+        <!-- HEADER -->
+        <HBox alignment="CENTER_LEFT" prefWidth="560.0" styleClass="header-bar">
+            <children>
+                <Button fx:id="btnRetour" onAction="#handleRetour" styleClass="btn-back" text="←" />
+                <Label text="🔥 Configuration Mode Chaos" styleClass="header-title" style="-fx-text-fill: #e74c3c;">
+                    <HBox.margin>
+                        <Insets left="40.0"/>
+                    </HBox.margin>
+                </Label>
+            </children>
+        </HBox>
+
+        <!-- SCROLLABLE CONTENT -->
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-padding: 10;">
+                    <children>
+                        <!-- LIEN DE LA PARTIE -->
+                        <VBox prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                            <children>
+                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="🔗" style="-fx-font-size: 20px;" textFill="white"/>
+                                        <Label text="Lien de la partie:" styleClass="label-bright"/>
+                                    </children>
+                                </HBox>
+
+                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <TextField fx:id="txtLien" editable="false" prefWidth="420.0" text="https://baccalaureat.game/chaos/XYZ999"/>
+                                        <Button text=" Copier" fx:id="btnCopier" onAction="#handleCopier" styleClass="btn-secondary"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <!-- CATÉGORIES -->
+                        <VBox prefHeight="200.0" prefWidth="560.0" spacing="10.0" styleClass="content-panel">
+                            <children>
+                                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="📚" style="-fx-font-size: 20px;" textFill="white"/>
+                                        <Label text="Catégories:" styleClass="label-bright"/>
+                                    </children>
+                                </HBox>
+
+                                <VBox fx:id="containerCategories" spacing="8.0">
+                                    <VBox.margin>
+                                        <Insets left="10.0"/>
+                                    </VBox.margin>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+        <!-- COMMENCER -->
+        <Button text="▶ COMMENCER LE CHAOS" fx:id="btnCommencer" onAction="#handleCommencer" styleClass="btn-action" style="-fx-background-color: #e74c3c;"/>
+
+    </children>
+</VBox>
